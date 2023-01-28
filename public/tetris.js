@@ -1470,8 +1470,22 @@
              document.cookie = name + "=; expires=Thu, 01-Jan-70 00:00:01 GMT";
          };
      }
- }
- 
+    
+    // Create WebSocket connection.
+    const socket = new WebSocket('ws://localhost:3001/');
+    
+    // Connection opened (lo que envia el tetris)
+    socket.addEventListener('open', (event) => {
+        socket.send('Soy el tetris.js');
+    });
+
+    // Listen for messages (lo que recibe del servidor)
+    socket.addEventListener('message', (event) => {
+        console.log('Message from server ', event.data);
+    });
+
+ }  
+
  if (!String.prototype.trim) {
      String.prototype.trim = function() {
          return this.replace(/^\s*|\s*$/g, "");
