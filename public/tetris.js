@@ -119,7 +119,7 @@
  * document.getElementById("tetris-nextpuzzle") cache ?
  *
  */
- function Tetris()
+export function Tetris()
  {
      var self = this;
  
@@ -327,7 +327,7 @@
      // keyboard
      var keyboard = new Keyboard();
      keyboard.set(keyboard.n, this.start);
-     //keyboard.set(keyboard.r, this.reset);
+     keyboard.set(keyboard.r, this.reset);
      keyboard.set(keyboard.p, this.pause);
      keyboard.set(keyboard.up, this.up);
      keyboard.set(keyboard.down, this.down);

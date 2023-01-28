@@ -7,8 +7,10 @@
     <title>Admin</title>
 </head>
 <body>
-    <button>Mover derecha</button>
-    <button>Mover izquierda</button>
+    <button onclick="moveRight()">Mover derecha</button>
+    <button onclick="moveLeft()">Mover izquierda</button>
+    <button onclick="start()">Start</button>
+    <button onclick="pause()">Pause</button>
 </body>
 <script>
 // Create WebSocket connection.
@@ -16,18 +18,29 @@ const socket = new WebSocket('ws://localhost:3001');
 
 // Connection opened
 socket.addEventListener('open', (event) => {
-    $var = 1;
-    socket.send('Hola servidor, soy el admin.html');
-    if ($var == 0){
-        socket.send('var == 0');
-    } else {
-        socket.send('var != 0');
-    }
+
+    console.log('Message from server ', event.data);
 });
 
 // Listen for messages
 socket.addEventListener('message', (event) => {
-    console.log('Message from server ', event.data);
+    socket.send('Hola servidor, soy el admin.html');
 });
+
+function moveRight() {
+    socket.send('mr');
+}
+
+function moveLeft() {
+    socket.send('ml');
+}
+
+function start() {
+    socket.send('start');
+}
+
+function pause() {
+    socket.send('pause');
+}
 </script>
 </html>
