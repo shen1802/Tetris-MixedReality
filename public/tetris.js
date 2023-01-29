@@ -119,7 +119,7 @@
  * document.getElementById("tetris-nextpuzzle") cache ?
  *
  */
-export function Tetris()
+function Tetris()
  {
      var self = this;
  

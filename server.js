@@ -1,4 +1,4 @@
-import {Tetris} from './public/tetris.js'
+//import {Tetris} from './public/tetris.js'
 
 const express = require("express");
 const app = express();
@@ -11,14 +11,13 @@ const wss = new WebSocket.Server({port:3001});
 // establecer la conexión
 wss.on('connection', function connection(ws) {
   
-  let tetris = Tetris();
   console.log("Se ha conectado un nuevo usuario");
   ws.on('message', function message(data) {
     console.log('Server received: %s', data);
     if (data == 'mr') {
       
     } else if(data == 'start') {
-      tetris.start();
+      
     }
   });
   ws.send('Bienvenido al servidor del tetris');
