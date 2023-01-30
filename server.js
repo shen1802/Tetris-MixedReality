@@ -14,11 +14,11 @@ io.on('connection', (socket) => {
     console.log('user disconnected');
   });
 
-  socket.on('mensaje', function(mensaje){
-    console.log('mensaje: ' + mensaje);
-    io.emit('mensaje', mensaje);
+  socket.on('message', function(message){
+    console.log('message: ' + message);
+    io.emit('message', message);
 
-});
+  });
 });
 
 //express

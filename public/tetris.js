@@ -291,6 +291,18 @@ function Tetris()
              self.puzzle.forceMoveDown();
          }
      };
+
+      //socket.io
+
+      var socket = io();
+
+      socket.on('message', function(message){
+    
+            if (message == 'start'){
+                console.log('[Tetris] ' + message);
+                this.start;
+            }
+      });
  
      // windows
      var helpwindow = new Window("tetris-help");
@@ -1469,7 +1481,9 @@ function Tetris()
          {
              document.cookie = name + "=; expires=Thu, 01-Jan-70 00:00:01 GMT";
          };
+
      }
+
  }  
 
  if (!String.prototype.trim) {
