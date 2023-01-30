@@ -7,40 +7,30 @@
     <title>Admin</title>
 </head>
 <body>
-    <button onclick="moveRight()">Mover derecha</button>
-    <button onclick="moveLeft()">Mover izquierda</button>
-    <button onclick="start()">Start</button>
-    <button onclick="pause()">Pause</button>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+
+        function moveRight() {
+            socket.emit('menssage', 'mr');
+        }
+
+        function moveLeft() {
+            socket.emit('message', 'ml');
+        }
+
+        function start() {
+            socket.emit('message', 'start');
+        }
+
+        function pause() {
+            socket.emit('message', 'pause');
+        }
+
+    </script>
+    <button id="right" onclick="moveRight()">Mover derecha</button>
+    <button id="left" onclick="moveLeft()">Mover izquierda</button>
+    <button id="start" onclick="start()">Start</button>
+    <button id="pause" onclick="pause()">Pause</button>
 </body>
-<script>
-// Create WebSocket connection.
-const socket = new WebSocket('ws://localhost:3001');
-
-// Connection opened
-socket.addEventListener('open', (event) => {
-
-    console.log('Message from server ', event.data);
-});
-
-// Listen for messages
-socket.addEventListener('message', (event) => {
-    socket.send('Hola servidor, soy el admin.html');
-});
-
-function moveRight() {
-    socket.send('mr');
-}
-
-function moveLeft() {
-    socket.send('ml');
-}
-
-function start() {
-    socket.send('start');
-}
-
-function pause() {
-    socket.send('pause');
-}
-</script>
 </html>
