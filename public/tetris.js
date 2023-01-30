@@ -300,9 +300,25 @@ function Tetris()
     
             if (message == 'start'){
                 console.log('[Tetris] ' + message);
-                this.start;
+                self.start();
+            } else if (message == 'pause'){
+                self.pause();
+            } else if (message == 'ml'){
+                self.left();
+            } else if (message == 'mr'){
+                self.right();
+            } else if (message == 'reset'){
+                self.reset();
+            } else if (message == 'up'){
+                self.up();
+            } else if (message == 'down'){
+                self.down();
+            } else {
+                self.space();
             }
       });
+
+
  
      // windows
      var helpwindow = new Window("tetris-help");

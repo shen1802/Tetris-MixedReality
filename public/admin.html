@@ -27,14 +27,34 @@
             socket.emit('message', 'pause');
         }
 
+        function reset() {
+            socket.emit('message', 'reset');
+        }
+
+        function up() {
+            socket.emit('message', 'up');
+        }
+
+        function down() {
+            socket.emit('message', 'down');
+        }
+
+        function space() {
+            socket.emit('message', 'space');
+        }
+
         socket.on('message', function(message){
             console.log('Admin: ' + message);
         });
 
     </script>
-    <button id="right" onclick="moveRight()">Mover derecha</button>
-    <button id="left" onclick="moveLeft()">Mover izquierda</button>
-    <button id="start" onclick="start()">Start</button>
-    <button id="pause" onclick="pause()">Pause</button>
+    <button id="right" onclick="moveRight()">RIGHT</button>
+    <button id="left" onclick="moveLeft()">LEFT</button>
+    <button id="start" onclick="start()">START</button>
+    <button id="pause" onclick="pause()">PAUSE</button>
+    <button id="reset" onclick="reset()">RESET</button>
+    <button id="up" onclick="up()">UP</button>
+    <button id="down" onclick="down()">DOWN</button>
+    <button id="space" onclick="space()">SPACE</button>
 </body>
 </html>
