@@ -299,7 +299,6 @@ function Tetris()
       socket.on('message', function(message){
     
             if (message == 'start'){
-                console.log('[Tetris] ' + message);
                 self.start();
             } else if (message == 'pause'){
                 self.pause();
@@ -313,7 +312,7 @@ function Tetris()
                 self.up();
             } else if (message == 'down'){
                 self.down();
-            } else {
+            } else if (message == 'space') {
                 self.space();
             }
       });
