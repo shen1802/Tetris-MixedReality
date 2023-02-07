@@ -8,7 +8,7 @@ const mqtt = require('mqtt');
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
 
-const client = mqtt.connect('mqtt://test.mosquitto.org');
+const client = mqtt.connect('mqtt://public.mqtthq.com');
 
 let liveData = [];
 let predictionDone = false;
@@ -38,12 +38,12 @@ client.on('message', (topic, message) => {
     if(dataAvailable && !started){
       console.log('ready')
     }
-    /*const accelerometerX = tf.tensor1d(sensorData.accelerometer.x);
-    const accelerometerY = tf.tensor1d(sensorData.accelerometer.y);
-    const accelerometerZ = tf.tensor1d(sensorData.accelerometer.z);
-    const gyroscopeX = tf.tensor1d(sensorData.gyroscope.x);
-    const gyroscopeY = tf.tensor1d(sensorData.gyroscope.y);
-    const gyroscopeZ = tf.tensor1d(sensorData.gyroscope.z);*/
+    const accelerometerX = sensorData.accelerometer.x;
+    const accelerometerY = sensorData.accelerometer.y;
+    const accelerometerZ = sensorData.accelerometer.z;
+    const gyroscopeX = sensorData.gyroscope.x;
+    const gyroscopeY = sensorData.gyroscope.y;
+    const gyroscopeZ = sensorData.gyroscope.z;
 
     let data = {xAcc: sensorData.accelerometer.x,
       yAcc: sensorData.accelerometer.y,
@@ -70,14 +70,14 @@ const processSensorData = (accelerometerX, accelerometerY, accelerometerZ, gyros
   // to extract relevant information for the Tetris game
     if(!predictionDone && liveData.length){
         predictionDone = true;
-        predict(model, liveData, socket);
+        predict(model, liveData);
         liveData = []; //vaciar el array para el nuevo gesto
     }
 
 }
 
-
-const predict = (model, newSampleData, socket) => {
+const predict = (model, newSampleData) => {
+  console.log('Dentro de predict');
   tf.tidy(() => {
       const inputData = newSampleData;
 
@@ -89,21 +89,27 @@ const predict = (model, newSampleData, socket) => {
       // Update the state of the Tetris game using the processed data
       switch(winner){
           case 'izquierda':
-              socket.emit('ml', winner)
+              io.emit('message', winner);
+              console.log('izquierda');
               break;
           case 'derecha':
-              socket.emit('mr', winner)
+              io.emit('message', winner);
+              console.log('derecha');
               break;
           case 'abajo':
-              socket.emit('down', winner)
+              io.emit('message', winner);
+              console.log('abajo');
               break;
           case 'espacio':
-              socket.emit('space', winner)
+              io.emit('message', winner);
+              console.log('espacio');
               break;
           case 'rotar':
-              socket.emit('up', winner)
+              io.emit('message', winner);
+              console.log('rotar');
               break;
           default:
+              console.log('default');
               break;
       }
   });

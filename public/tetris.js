@@ -297,22 +297,22 @@ function Tetris()
       var socket = io();
 
       socket.on('message', function(message){
-    
+            console.log('[Tetris]' + message);
             if (message == 'start'){
                 self.start();
             } else if (message == 'pause'){
                 self.pause();
-            } else if (message == 'ml'){
+            } else if (message == 'izquierda'){
                 self.left();
-            } else if (message == 'mr'){
+            } else if (message == 'derecha'){
                 self.right();
             } else if (message == 'reset'){
                 self.reset();
-            } else if (message == 'up'){
+            } else if (message == 'rotar'){
                 self.up();
-            } else if (message == 'down'){
+            } else if (message == 'abajo'){
                 self.down();
-            } else if (message == 'space') {
+            } else if (message == 'espacio') {
                 self.space();
             }
       });

@@ -12,11 +12,11 @@
         var socket = io();
 
         function moveRight() {
-            socket.emit('message', 'mr');
+            socket.emit('message', 'derecha');
         }
 
         function moveLeft() {
-            socket.emit('message', 'ml');
+            socket.emit('message', 'izquierda');
         }
 
         function start() {
@@ -32,15 +32,15 @@
         }
 
         function up() {
-            socket.emit('message', 'up');
+            socket.emit('message', 'rotar');
         }
 
         function down() {
-            socket.emit('message', 'down');
+            socket.emit('message', 'abajo');
         }
 
         function space() {
-            socket.emit('message', 'space');
+            socket.emit('message', 'espacio');
         }
 
         socket.on('message', function(message){
