@@ -293,31 +293,42 @@ function Tetris()
      };
 
       //socket.io
-
+    
       var socket = io();
+      var id = 0;
 
-      socket.on('message', function(message){
-            console.log('[Tetris]' + message);
-            if (message == 'start'){
+      socket.on('message', function(obj){
+        
+        //if (obj.id == id) {
+
+            console.log('[Tetris]' + obj.action);
+            if (obj.action == 'start'){
                 self.start();
-            } else if (message == 'pause'){
+            } else if (obj.action == 'pause'){
                 self.pause();
-            } else if (message == 'izquierda'){
+            } else if (obj.action == 'left'){
                 self.left();
-            } else if (message == 'derecha'){
+            } else if (obj.action == 'right'){
                 self.right();
-            } else if (message == 'reset'){
+            } else if (obj.action == 'reset'){
                 self.reset();
-            } else if (message == 'rotar'){
+            } else if (obj.action == 'up'){
                 self.up();
-            } else if (message == 'abajo'){
+            } else if (obj.action == 'down'){
                 self.down();
-            } else if (message == 'espacio') {
+            } else if (obj.action == 'space') {
                 self.space();
             }
+       // }
       });
 
-
+       //asignación de id en la primera conexion
+       socket.on('user_join', function(serverId){
+        if (id == 0){
+            id = serverId;
+        }
+        console.log('El id del tetris es: ' + id);
+        });
  
      // windows
      var helpwindow = new Window("tetris-help");

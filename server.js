@@ -25,7 +25,6 @@ const init = async () => {
   model = await tf.loadLayersModel('file://model/model.json');
 }
 
-
 client.on('connect', () => {
   client.subscribe('sensorData');
 });
@@ -58,26 +57,27 @@ client.on('message', (topic, message) => {
         liveData.push(data.xAcc, data.yAcc, data.zAcc, data.xGyro, data.yGyro, data.zGyro)
     }
     else{
-        processSensorData(accelerometerX, accelerometerY, accelerometerZ, gyroscopeX, gyroscopeY, gyroscopeZ); 
+        processSensorData(accelerometerX, accelerometerY, accelerometerZ, gyroscopeX, gyroscopeY, gyroscopeZ, sensorData.id); 
     }
 
     started = true;
   }
 });
 
-const processSensorData = (accelerometerX, accelerometerY, accelerometerZ, gyroscopeX, gyroscopeY, gyroscopeZ) => {
+const processSensorData = (accelerometerX, accelerometerY, accelerometerZ, gyroscopeX, gyroscopeY, gyroscopeZ, id) => {
   // Perform TensorFlow.js processing on the accelerometer and gyroscope data
   // to extract relevant information for the Tetris game
     if(!predictionDone && liveData.length){
         predictionDone = true;
-        predict(model, liveData);
+        predict(model, liveData, id);
         liveData = []; //vaciar el array para el nuevo gesto
     }
 
 }
 
-const predict = (model, newSampleData) => {
+const predict = (model, newSampleData, id) => {
   console.log('Dentro de predict');
+  console.log(id);
   tf.tidy(() => {
       const inputData = newSampleData;
 
@@ -87,49 +87,67 @@ const predict = (model, newSampleData) => {
       const winner = gestureClasses[predictOut.argMax(-1).dataSync()[0]];
       
       // Update the state of the Tetris game using the processed data
+      var obj = new Object();
+      obj.id = id;
       switch(winner){
           case 'izquierda':
-              io.emit('message', winner);
-              console.log('izquierda');
-              break;
+            obj.action = 'left';
+            console.log('izquierda');
+            break;
           case 'derecha':
-              io.emit('message', winner);
-              console.log('derecha');
-              break;
+            obj.action = 'right';
+            console.log('derecha');
+            break;
           case 'abajo':
-              io.emit('message', winner);
-              console.log('abajo');
-              break;
+            obj.action = 'down';
+            console.log('abajo');
+            break;
           case 'espacio':
-              io.emit('message', winner);
-              console.log('espacio');
-              break;
+            obj.action = 'space';
+            console.log('espacio');
+            break;
           case 'rotar':
-              io.emit('message', winner);
-              console.log('rotar');
-              break;
+            obj.action = 'up';
+            console.log('rotar');
+            break;
           default:
+            obj.action = 'default'
               console.log('default');
               break;
       }
+      io.emit('message', obj);
   });
 }
 
 init();
 
 //socket.io
+var players_id = [];
+var num_player = 0;
+players_id.push(1);
+players_id.push(2);
 
 io.on('connection', (socket) => {
   console.log('Un nuevo usuario se ha conectado');
+
+  //asignación de id-tetris
+  if (players_id.length != 0) {
+    tetris_id = players_id.shift(); //eliminar el primer elemento del array
+    io.emit('user_join', tetris_id);
+    console.log(players_id);
+  }
   
-  socket.on('disconnect', () => {
+  socket.on('disconnect', (id) => {
+    let index = players_id.indexOf(id);
+    players_id.splice(index, 1);
+    console.log(players_id.length);
+    //console.log(players_id);
     console.log('user disconnected');
   });
 
-  socket.on('message', function(message){
-    console.log('message: ' + message);
-    io.emit('message', message);
-
+  socket.on('message', function(obj){
+    //console.log('message: ' + obj.id);
+    io.emit('message', obj);
   });
 });
 
