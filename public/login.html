@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="tetris.css" rel="stylesheet" type="text/css" />
+    <title>Login</title>
+  </head>
+  <script>
+    const database = require("./database");
+    var cubos = database.query("SELECT id FROM Cubo");
+  </script>
+  <body id="login">
+    <form action="/auth" method="POST">
+      <div id="username">
+        <label>Username</label>
+        <input id="text" type="text" name="user" required />
+      </div>
+      <div>
+        <label>Selecciona una placa para jugar</label>
+        <input id="text" type="text" name="board" required />
+      </div>
+      <div id="password">
+        <label>Password</label>
+        <input id="text" type="password" name="pass" required />
+      </div>
+      <input id="button" type="submit" value="login" />
+      <p>¿No tienes cuenta? <a href="register.html">Registráte</a></p>
+    </form>
+  </body>
+</html>

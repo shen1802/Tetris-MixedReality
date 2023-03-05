@@ -1,51 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin</title>
-</head>
-<body>
+  </head>
+  <body>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        var id = 2;
-        var socket = io();
-        var obj = new Object();
+      var id = 2;
+      var socket = io();
+      var obj = new Object();
 
-         //asignación de id en la primera conexion
-        /* socket.on('user_join', function(serverId){
+      //asignación de id en la primera conexion
+      /* socket.on('user_join', function(serverId){
             id = serverId;
             console.log('El id del jugador es: ' + id);
         });*/
 
-        function perform(action) {
+      function perform(action) {
+        obj.id = id;
 
-            obj.id = id;
-
-            if (action == 'right') {
-                obj.action = action;
-            } else if (action == 'left') {
-                obj.action = action;
-            } else if (action == 'start') {
-                obj.action = action;
-            } else if (action == 'pause') {
-                obj.action = action;
-            } else if (action == 'reset') {
-                obj.action = action;
-            } else if (action == 'up') {
-                obj.action = action
-            } else if (action == 'down') {
-                obj.action = action;
-            } else if (action == 'space') {
-                obj.action = action;
-            }
-            
-            var jsonString = JSON.stringify(obj);
-            console.log(obj);
-            socket.emit('message', obj);
+        if (action == "right") {
+          obj.action = action;
+        } else if (action == "left") {
+          obj.action = action;
+        } else if (action == "start") {
+          obj.action = action;
+        } else if (action == "pause") {
+          obj.action = action;
+        } else if (action == "reset") {
+          obj.action = action;
+        } else if (action == "up") {
+          obj.action = action;
+        } else if (action == "down") {
+          obj.action = action;
+        } else if (action == "space") {
+          obj.action = action;
         }
 
+        var jsonString = JSON.stringify(obj);
+        console.log(obj);
+        socket.emit("message", obj);
+      }
     </script>
     <button id="right" onclick="perform('right')">RIGHT</button>
     <button id="left" onclick="perform('left')">LEFT</button>
@@ -56,5 +54,5 @@
     <button id="down" onclick="perform('down')">DOWN</button>
     <button id="space" onclick="perform('space')">SPACE</button>
     <button id="salir" onclick="exit()">SALIR</button>
-</body>
+  </body>
 </html>
