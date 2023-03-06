@@ -7,10 +7,6 @@
     <link href="tetris.css" rel="stylesheet" type="text/css" />
     <title>Login</title>
   </head>
-  <script>
-    const database = require("./database");
-    var cubos = database.query("SELECT id FROM Cubo");
-  </script>
   <body id="login">
     <form action="/auth" method="POST">
       <div id="username">
@@ -19,7 +15,12 @@
       </div>
       <div>
         <label>Selecciona una placa para jugar</label>
-        <input id="text" type="text" name="board" required />
+        <select name="board" required>
+          <option value="">---</option>
+          <% if(boards.length){ for(var i = 0; i < boards.length; i++) { %>
+          <option value="<%= boards[i].id %>" "<% if (boards[i].ocupado == "si") { %> disabled <% } %> > <%= boards[i].id%> <% if (boards[i].ocupado == "si") {%> - Placa en uso <% } else { %> - Disponible <% } %></option>
+          <% } } %>
+        </select>
       </div>
       <div id="password">
         <label>Password</label>

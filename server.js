@@ -154,11 +154,14 @@ const predict = (model, newSampleData, id) => {
 
 init();
 
+//View engine setup
+app.set("view engine", "ejs");
+
 //socket.io
 var sessions = [];
 
 io.on("connection", (socket) => {
-  console.log("Un nuevo usuario se ha conectado");
+  console.log( +"se ha conectado");
 
   //asignación de id-tetris
   if (sessions.length != 0) {
@@ -166,9 +169,11 @@ io.on("connection", (socket) => {
     console.log(sessions);
   }
 
-  socket.on("disconnect", (id) => {
-    console.log(sessions);
+  socket.on("disconnect", (request) => {
+    //console.log(sessions);
     //console.log(players_id);
+    console.log(request.session);
+    //database.query("UPDATE Cubo SET ocupado = 'no' WHERE id = ")
     console.log("user disconnected");
   });
 
@@ -182,10 +187,11 @@ io.on("connection", (socket) => {
 app.use(
   session({
     secret: "tetristfg",
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
   })
 );
+
 /*----- express.json and express.urlencode: is for passing data when the client send an PUT-PATCH */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -193,7 +199,11 @@ app.use(express.static(__dirname + "/public"));
 
 app.get("/", function (req, res) {
   //si no hemos iniciado sesion redireccionar a login
-  res.sendFile(__dirname + "/public/login.html");
+  database.query("SELECT * FROM Cubo", function (error, data) {
+    if (error) throw error;
+    res.render("login", { boards: data });
+  });
+  //res.sendFile(__dirname + "/public/login.html");
 });
 
 app.get("/tetris", function (req, res) {
@@ -201,8 +211,9 @@ app.get("/tetris", function (req, res) {
   res.sendFile(__dirname + "/public/tetris.html");
 });
 
-app.get("/error", function (req, res) {
-  res.sendFile(__dirname + "/public/error.html");
+app.get("/user_error", function (req, res) {
+  //console.log(req);
+  res.sendFile(__dirname + "/public/user_error.html");
 });
 
 app.post("/auth", function (request, response, next) {
@@ -210,7 +221,25 @@ app.post("/auth", function (request, response, next) {
   var username = request.body.user;
   var password = request.body.pass;
   var board = request.body.board;
+  var ocupado = false;
 
+  //comprobación de la placa
+  database.query(
+    "SELECT ocupado FROM Cubo where id = ?",
+    [board],
+    function (error, result) {
+      if (error) throw error;
+      else {
+        if (result[0].ocupado == "no") {
+          database.query("UPDATE Cubo SET ocupado = 'si' WHERE id = ? ", [
+            board,
+          ]);
+        } else {
+          ocupado = true;
+        }
+      }
+    }
+  );
   //comprobación de registro
   if (username && password) {
     database.query(
@@ -220,19 +249,21 @@ app.post("/auth", function (request, response, next) {
         // If there is an issue with the query, output the error
         if (error) throw error;
         // If the account exists
-        if (results.length > 0) {
+        if (results.length > 0 && !ocupado) {
           var session = Object.create(null);
           // Authenticate the user
           //request.session.loggedin = true;
-          //request.session.username = username;
+          request.session.username = username;
           session["user"] = username;
           session["board"] = board;
           sessions.push(session);
+          //console.log(request.session);
           var string = encodeURIComponent(board);
           // Redirect to home page
           response.redirect("/tetris?id=" + string);
+          //response.render("tetris", { board_id: board });
         } else {
-          response.redirect("/error");
+          response.render("user_error");
         }
         response.end();
       }
