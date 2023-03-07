@@ -158,23 +158,29 @@ init();
 app.set("view engine", "ejs");
 
 //socket.io
-var sessions = [];
+var sessions = {};
+var board;
 
 io.on("connection", (socket) => {
-  console.log( +"se ha conectado");
+  sessions[socket.id] = board;
 
-  //asignación de id-tetris
-  if (sessions.length != 0) {
-    //tetris_id = players_id.shift(); //eliminar el primer elemento del array
-    console.log(sessions);
-  }
+  console.log(sessions);
 
-  socket.on("disconnect", (request) => {
-    //console.log(sessions);
-    //console.log(players_id);
-    console.log(request.session);
-    //database.query("UPDATE Cubo SET ocupado = 'no' WHERE id = ")
-    console.log("user disconnected");
+  socket.on("disconnect", (response) => {
+    console.log(response);
+    board_id = sessions[socket.id];
+    console.log(board_id);
+    database.query(
+      "UPDATE Cubo SET ocupado = 'no' WHERE id = ?",
+      [board_id],
+      function (error, result) {
+        if (error) throw error;
+        else {
+          //result.redirect("/");
+        }
+      }
+    );
+    console.log(socket.id + " has disconnected");
   });
 
   socket.on("message", function (obj) {
@@ -220,7 +226,7 @@ app.post("/auth", function (request, response, next) {
   //recibir credenciales e iniciar sesion
   var username = request.body.user;
   var password = request.body.pass;
-  var board = request.body.board;
+  board = request.body.board;
   var ocupado = false;
 
   //comprobación de la placa
@@ -250,13 +256,9 @@ app.post("/auth", function (request, response, next) {
         if (error) throw error;
         // If the account exists
         if (results.length > 0 && !ocupado) {
-          var session = Object.create(null);
           // Authenticate the user
           //request.session.loggedin = true;
-          request.session.username = username;
-          session["user"] = username;
-          session["board"] = board;
-          sessions.push(session);
+          // request.session.username = username;
           //console.log(request.session);
           var string = encodeURIComponent(board);
           // Redirect to home page

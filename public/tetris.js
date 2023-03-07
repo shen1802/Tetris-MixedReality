@@ -315,6 +315,10 @@ function Tetris() {
     }
   });
 
+  socket.on("connect", function(obj){
+    console.log("Client side socket ID: " + socket.id);
+  });
+
   console.log("ID del tetris: " + id);
 
   // windows
