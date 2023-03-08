@@ -363,14 +363,14 @@ form {
   cursor: pointer;
   width: 100%;
 } 
-div#username, div#password {
+div#username, div#password, div#board, div#nombre, div#apellidos, div#edad {
   display: block;
   margin-top: 5%;
   margin-bottom: 5%;
   text-align: left;
   width: 100%;
 }
-form #text {
+form input, select {
 margin-top: 1%;
 padding-top: 1%;
 padding-bottom: 1%;

@@ -148,6 +148,7 @@ const predict = (model, newSampleData, id) => {
         console.log("default");
         break;
     }
+    //io.to(socket.id)
     io.emit("message", obj);
   });
 };
@@ -167,7 +168,7 @@ io.on("connection", (socket) => {
   console.log(sessions);
 
   socket.on("disconnect", (response) => {
-    console.log(response);
+    //console.log(response);
     board_id = sessions[socket.id];
     console.log(board_id);
     database.query(
@@ -175,9 +176,6 @@ io.on("connection", (socket) => {
       [board_id],
       function (error, result) {
         if (error) throw error;
-        else {
-          //result.redirect("/");
-        }
       }
     );
     console.log(socket.id + " has disconnected");
@@ -213,13 +211,14 @@ app.get("/", function (req, res) {
 });
 
 app.get("/tetris", function (req, res) {
-  //mostrar formulario de login
+  //mostrar tetris
   res.sendFile(__dirname + "/public/tetris.html");
 });
 
 app.get("/user_error", function (req, res) {
   //console.log(req);
-  res.sendFile(__dirname + "/public/user_error.html");
+  res.render("user_error");
+  //res.sendFile(__dirname + "/public/user_error.html");
 });
 
 app.post("/auth", function (request, response, next) {
@@ -257,12 +256,13 @@ app.post("/auth", function (request, response, next) {
         // If the account exists
         if (results.length > 0 && !ocupado) {
           // Authenticate the user
-          //request.session.loggedin = true;
-          // request.session.username = username;
+          request.session.loggedin = true;
+          request.session.username = username;
           //console.log(request.session);
           var string = encodeURIComponent(board);
           // Redirect to home page
-          response.redirect("/tetris?id=" + string);
+          response.render("/tetris");
+          //response.redirect("/tetris?id=" + string);
           //response.render("tetris", { board_id: board });
         } else {
           response.render("user_error");
@@ -286,7 +286,7 @@ app.post("/new", function (request, response, next) {
       [username, name, surname, age, password, 0],
       function (error, results) {
         // If there is an issue with the query, output the error
-        if (error) throw error;
+        if (error) response.redirect("user_error");
         else response.redirect("/");
         response.end();
       }
