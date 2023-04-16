@@ -37,7 +37,7 @@ const init = async () => {
 
 client.on("connect", () => {
   client.subscribe("sensorData");
-  //client.subscribe("Scanned");
+  client.subscribe("Scanned");
 });
 
 client.on("message", (topic, message) => {
@@ -89,7 +89,42 @@ client.on("message", (topic, message) => {
 
     started = true;
   }
-});
+  if(topic === "Scanned"){
+      
+      const str = message.toString();
+      const list = str.slice(1, -1).split("','");
+      const lista =[];
+      for (let i=0;i<list.length;i++){
+        lista.push(extractNumberFromMAC(list[i]));
+      }
+      console.log("scanned");
+      console.log(lista);
+    }
+  }
+
+);
+
+
+
+function extractNumberFromMAC(mac) {
+  let result = 0;
+  let count = 0;
+  for (let i = mac.length - 1; i >= 0; i--) {
+    if (/\d/.test(mac[i])) {
+      result += (mac[i] - '0') * Math.pow(10, count);
+      count++;
+      if (count === 4) {
+        break;
+      }
+    }
+  }
+  return result;
+}
+
+
+
+
+
 
 const processSensorData = (
   accelerometerX,
