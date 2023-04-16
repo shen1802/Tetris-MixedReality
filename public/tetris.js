@@ -120,6 +120,43 @@
  *
  */
 function Tetris() {
+
+  //socket.io
+  let socket = io();
+  //let params = new URLSearchParams(document.location.search);
+  const id = document.getElementById("tetris_id").innerHTML;
+  const user = document.getElementById("username").innerHTML;
+
+  socket.on("message", function (obj) {
+    if (obj.id == id) {
+      console.log("[Tetris]" + obj.action);
+      if (obj.action == "start") {
+        self.start();
+      } else if (obj.action == "pause") {
+        self.pause();
+      } else if (obj.action == "left") {
+        self.left();
+      } else if (obj.action == "right") {
+        self.right();
+      } else if (obj.action == "reset") {
+        self.reset();
+      } else if (obj.action == "up") {
+        self.up();
+      } else if (obj.action == "down") {
+        self.down();
+      } else if (obj.action == "space") {
+        self.space();
+      }
+    }
+  });
+
+  socket.on("connect", function(obj){
+    console.log("Client side socket ID: " + socket.id);
+  });
+
+  console.log("ID del tetris: " + id);
+  console.log("Nombre del jugador: " + user);
+
   var self = this;
 
   this.stats = new Stats();
@@ -214,12 +251,14 @@ function Tetris() {
     self.puzzle.stop();
     document.getElementById("tetris-nextpuzzle").style.display = "none";
     document.getElementById("tetris-gameover").style.display = "block";
-    if (this.highscores.mayAdd(this.stats.getScore())) {
+    confirm("Game Over!");
+    socket.emit("game_over", "ESTO ES UNA PRUEBA");
+    /*if (this.highscores.mayAdd(this.stats.getScore())) {
       var name = prompt("Game Over !\nEnter your name:", "");
       if (name && name.trim().length) {
         this.highscores.add(name, this.stats.getScore());
       }
-    }
+    }*/
   };
 
   /**
@@ -285,41 +324,6 @@ function Tetris() {
       self.puzzle.forceMoveDown();
     }
   };
-
-  //socket.io
-
-  var socket = io();
-  let params = new URLSearchParams(document.location.search);
-  const id = params.get("id");
-
-  socket.on("message", function (obj) {
-    if (obj.id == id) {
-      console.log("[Tetris]" + obj.action);
-      if (obj.action == "start") {
-        self.start();
-      } else if (obj.action == "pause") {
-        self.pause();
-      } else if (obj.action == "left") {
-        self.left();
-      } else if (obj.action == "right") {
-        self.right();
-      } else if (obj.action == "reset") {
-        self.reset();
-      } else if (obj.action == "up") {
-        self.up();
-      } else if (obj.action == "down") {
-        self.down();
-      } else if (obj.action == "space") {
-        self.space();
-      }
-    }
-  });
-
-  socket.on("connect", function(obj){
-    console.log("Client side socket ID: " + socket.id);
-  });
-
-  console.log("ID del tetris: " + id);
 
   // windows
   var helpwindow = new Window("tetris-help");

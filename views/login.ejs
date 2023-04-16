@@ -8,26 +8,13 @@
     <title>Login</title>
   </head>
   <body id="login">
-    <form action="/auth" method="POST">
-      <div id="username">
-        <label>Username</label>
-        <input id="text" type="text" name="user" required />
-      </div>
-      <div id="board">
-        <label>Selecciona una placa para jugar</label>
-        <select name="board" required>
-          <option value="">---</option>
-          <% if(boards.length){ for(var i = 0; i < boards.length; i++) { %>
-          <option value="<%= boards[i].id %>" "<% if (boards[i].ocupado == "si") { %> disabled <% } %> > <%= boards[i].id%> <% if (boards[i].ocupado == "si") {%> - Placa en uso <% } else { %> - Disponible <% } %></option>
-          <% } } %>
-        </select>
-      </div>
-      <div id="password">
-        <label>Password</label>
-        <input id="text" type="password" name="pass" required />
-      </div>
-      <input id="button" type="submit" value="login" />
-      <p>¿No tienes cuenta? <a href="register.html">Registráte</a></p>
+    <form id="login" action="/auth" method="POST">
+      <p id="iniciar-sesion">Sign In</p>
+      <input id="text" type="text" name="user" placeholder="Username" required />
+      <input id="text" type="password" name="pass" placeholder="Password"  required />
+      <input id="button" type="submit" value="LOGIN" />
+      <hr>
+      <a id="button" href="register">SIGN UP</a>
     </form>
   </body>
 </html>

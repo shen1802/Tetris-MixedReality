@@ -37,6 +37,7 @@ const init = async () => {
 
 client.on("connect", () => {
   client.subscribe("sensorData");
+  //client.subscribe("Scanned");
 });
 
 client.on("message", (topic, message) => {
@@ -120,7 +121,7 @@ const predict = (model, newSampleData, id) => {
     const winner = gestureClasses[predictOut.argMax(-1).dataSync()[0]];
 
     // Update the state of the Tetris game using the processed data
-    var obj = new Object();
+    let obj = new Object();
     obj.id = id;
     switch (winner) {
       case "izquierda":
@@ -159,25 +160,24 @@ init();
 app.set("view engine", "ejs");
 
 //socket.io
-var sessions = {};
-var board;
 
 io.on("connection", (socket) => {
-  sessions[socket.id] = board;
+  console.log("Nuevo usuario contado con ID: " + socket.id);
+  //console.log(socket.request);
 
-  console.log(sessions);
+  socket.on("game_over", (data) => {
+    console.log("Fin de la partida del usuario:  " + data);
+  });
 
   socket.on("disconnect", (response) => {
     //console.log(response);
-    board_id = sessions[socket.id];
-    console.log(board_id);
-    database.query(
+    /*database.query(
       "UPDATE Cubo SET ocupado = 'no' WHERE id = ?",
       [board_id],
       function (error, result) {
         if (error) throw error;
       }
-    );
+    );*/
     console.log(socket.id + " has disconnected");
   });
 
@@ -195,7 +195,10 @@ app.use(
     saveUninitialized: false,
   })
 );
-
+app.use(function(req, res, next) {
+  res.locals.user = req.session.user;
+  next();
+});
 /*----- express.json and express.urlencode: is for passing data when the client send an PUT-PATCH */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -203,16 +206,36 @@ app.use(express.static(__dirname + "/public"));
 
 app.get("/", function (req, res) {
   //si no hemos iniciado sesion redireccionar a login
+  if (req.session.loggedin) {
+    if (req.session.board == undefined) {
+      database.query("SELECT * FROM Cubo", function (error, data) {
+        if (error) throw error;
+        res.render("board", { datos: {boards: data, user: req.session.username}});
+      });
+    } else {
+      res.render("tetris", { datos: {board: req.session.board, user: req.session.username} });
+    }
+  } else{
+    res.render("login");
+  }
+  /*
   database.query("SELECT * FROM Cubo", function (error, data) {
     if (error) throw error;
     res.render("login", { boards: data });
   });
+  */
   //res.sendFile(__dirname + "/public/login.html");
 });
 
-app.get("/tetris", function (req, res) {
-  //mostrar tetris
-  res.sendFile(__dirname + "/public/tetris.html");
+app.get("/register", function (req, res){
+  res.render("register");
+});
+
+app.get("/board", function(req, res){
+  database.query("SELECT * FROM Cubo", function (error, data) {
+    if (error) throw error;
+    res.render("board", { datos: {boards: data, user: req.session.username}});
+  });
 });
 
 app.get("/user_error", function (req, res) {
@@ -221,30 +244,19 @@ app.get("/user_error", function (req, res) {
   //res.sendFile(__dirname + "/public/user_error.html");
 });
 
+app.post("/tetris", function (req, res) {
+  //mostrar tetris
+  req.session.board = req.body.board;
+  console.log(req.session.board);
+  res.render("tetris", { datos: {board: req.session.board, user: req.session.username} });
+});
+
 app.post("/auth", function (request, response, next) {
   //recibir credenciales e iniciar sesion
-  var username = request.body.user;
-  var password = request.body.pass;
-  board = request.body.board;
-  var ocupado = false;
-
-  //comprobación de la placa
-  database.query(
-    "SELECT ocupado FROM Cubo where id = ?",
-    [board],
-    function (error, result) {
-      if (error) throw error;
-      else {
-        if (result[0].ocupado == "no") {
-          database.query("UPDATE Cubo SET ocupado = 'si' WHERE id = ? ", [
-            board,
-          ]);
-        } else {
-          ocupado = true;
-        }
-      }
-    }
-  );
+  let username = request.body.user;
+  let password = request.body.pass;
+  //board = request.body.board;
+  //let ocupado = false;
   //comprobación de registro
   if (username && password) {
     database.query(
@@ -254,15 +266,15 @@ app.post("/auth", function (request, response, next) {
         // If there is an issue with the query, output the error
         if (error) throw error;
         // If the account exists
-        if (results.length > 0 && !ocupado) {
+        if (results.length > 0) {
           // Authenticate the user
           request.session.loggedin = true;
           request.session.username = username;
           //console.log(request.session);
-          var string = encodeURIComponent(board);
+          //let string = encodeURIComponent(board);
           // Redirect to home page
-          response.render("/tetris");
-          //response.redirect("/tetris?id=" + string);
+          //response.render("/tetris", {board_id: board});
+          response.redirect("/board");
           //response.render("tetris", { board_id: board });
         } else {
           response.render("user_error");
@@ -274,11 +286,11 @@ app.post("/auth", function (request, response, next) {
 });
 
 app.post("/new", function (request, response, next) {
-  var username = request.body.user;
-  var name = request.body.name;
-  var surname = request.body.surname;
-  var age = parseInt(request.body.age);
-  var password = request.body.pass;
+  let username = request.body.user;
+  let name = request.body.name;
+  let surname = request.body.surname;
+  let age = parseInt(request.body.age);
+  let password = request.body.pass;
 
   if (username && name && surname && age && password) {
     database.query(
@@ -291,6 +303,20 @@ app.post("/new", function (request, response, next) {
         response.end();
       }
     );
+  }
+});
+
+app.post("/logout", function (req, res) {
+  if (req.session) {
+    req.session.destroy(err => {
+      if (err) {
+        res.status(400).send('Unable to log out')
+      } else {
+        res.render("login");
+      }
+    });
+  } else {
+    res.end();
   }
 });
 
