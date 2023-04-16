@@ -200,8 +200,11 @@ io.on("connection", (socket) => {
   console.log("Nuevo usuario contado con ID: " + socket.id);
   //console.log(socket.request);
 
-  socket.on("game_over", (data) => {
-    console.log("Fin de la partida del usuario:  " + data);
+  socket.on("game_over", function(game) {
+    database.query("INSERT INTO Sesion (id, username, id_cubo, puntos_sesion) VALUES (NULL, ?, ?, ?)", 
+    [game.username, game.board, game.score]), function (error, result) {
+      if (error) throw error;
+    }
   });
 
   socket.on("disconnect", (response) => {
@@ -240,7 +243,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/public"));
 
 app.get("/", function (req, res) {
-  //si no hemos iniciado sesion redireccionar a login
+  //si ya habíamos iniciado sesión redireccionar a la pantalla correspondiente
   if (req.session.loggedin) {
     if (req.session.board == undefined) {
       database.query("SELECT * FROM Cubo", function (error, data) {
@@ -251,15 +254,9 @@ app.get("/", function (req, res) {
       res.render("tetris", { datos: {board: req.session.board, user: req.session.username} });
     }
   } else{
+    //si no hemos iniciado sesion redireccionar a login
     res.render("login");
   }
-  /*
-  database.query("SELECT * FROM Cubo", function (error, data) {
-    if (error) throw error;
-    res.render("login", { boards: data });
-  });
-  */
-  //res.sendFile(__dirname + "/public/login.html");
 });
 
 app.get("/register", function (req, res){
@@ -283,6 +280,14 @@ app.post("/tetris", function (req, res) {
   //mostrar tetris
   req.session.board = req.body.board;
   console.log(req.session.board);
+  //actualizar en la base de datos el estado de la placa
+  database.query(
+    "UPDATE Cubo SET ocupado = 'si' WHERE id = ?",
+    [req.body.board],
+    function (error, result) {
+      if (error) throw error;
+    }
+  );
   res.render("tetris", { datos: {board: req.session.board, user: req.session.username} });
 });
 
@@ -343,6 +348,15 @@ app.post("/new", function (request, response, next) {
 
 app.post("/logout", function (req, res) {
   if (req.session) {
+    if (req.session?.board){
+      database.query(
+        "UPDATE Cubo SET ocupado = 'no' WHERE id = ?",
+        [req.session.board],
+        function (error, result) {
+          if (error) throw error;
+        }
+      );
+    }
     req.session.destroy(err => {
       if (err) {
         res.status(400).send('Unable to log out')

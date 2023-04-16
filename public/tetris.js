@@ -252,7 +252,11 @@ function Tetris() {
     document.getElementById("tetris-nextpuzzle").style.display = "none";
     document.getElementById("tetris-gameover").style.display = "block";
     confirm("Game Over!");
-    socket.emit("game_over", "ESTO ES UNA PRUEBA");
+    let game = new Object();
+    game.username = user;
+    game.score = this.stats.getScore();
+    game.board = id;
+    socket.emit("game_over", game);
     /*if (this.highscores.mayAdd(this.stats.getScore())) {
       var name = prompt("Game Over !\nEnter your name:", "");
       if (name && name.trim().length) {
