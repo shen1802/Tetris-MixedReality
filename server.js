@@ -165,8 +165,11 @@ io.on("connection", (socket) => {
   console.log("Nuevo usuario contado con ID: " + socket.id);
   //console.log(socket.request);
 
-  socket.on("game_over", (data) => {
-    console.log("Fin de la partida del usuario:  " + data);
+  socket.on("game_over", function(game) {
+    database.query("INSERT INTO Sesion (id, username, id_cubo, puntos_sesion) VALUES (NULL, ?, ?, ?)", 
+    [game.username, game.board, game.score]), function (error, result) {
+      if (error) throw error;
+    }
   });
 
   socket.on("disconnect", (response) => {
