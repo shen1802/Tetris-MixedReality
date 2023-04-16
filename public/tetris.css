@@ -393,7 +393,7 @@ form#login a#button{
 body#register {
   display: flex;
   justify-content: center;
-  margin-top: 10%;
+  margin-top: 5%;
   background-image: url("images/tetris.jpeg");
 }
 form#register{
