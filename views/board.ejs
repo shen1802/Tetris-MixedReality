@@ -7,6 +7,13 @@
     <link href="tetris.css" rel="stylesheet" type="text/css" />
     <title>Sync</title>
 </head>
+<script>
+  setInterval(function(){
+    if (<%= datos.boards.length === 0 %>) {
+      location.reload();
+    }
+  }, 10000); // Recarga la página cada 10 segundos
+</script>
 <body id="board">
   <p>Bienvenido <%= datos.user %></p>
   <form action="/logout" method="POST">
@@ -21,6 +28,7 @@
         <option value="<%= datos.boards[i].id %>" "<% if (datos.boards[i].ocupado == "si") { %> disabled <% } %> > <%= datos.boards[i].id%> <% if (datos.boards[i].ocupado == "si") {%> - Placa en uso <% } else { %> - Disponible <% } %></option>
         <% } } %>
       </select>
+      <label>Si la lista esta vacia espera a que se detecten automaticamente las placas</label>
     </div>
     <input id="button" type="submit" value="Aceptar" />
   </form>
