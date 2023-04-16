@@ -11,7 +11,7 @@ const tf = require("@tensorflow/tfjs");
 const { query } = require("express");
 require("@tensorflow/tfjs-node");
 
-const client = mqtt.connect("mqtt://public.mqtthq.com");
+const client = mqtt.connect("mqtt://localhost");
 
 let liveData = [];
 let predictionDone = false;
