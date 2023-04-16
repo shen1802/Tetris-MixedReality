@@ -310,14 +310,9 @@ app.post("/auth", function (request, response, next) {
           // Authenticate the user
           request.session.loggedin = true;
           request.session.username = username;
-          //console.log(request.session);
-          //let string = encodeURIComponent(board);
-          // Redirect to home page
-          //response.render("/tetris", {board_id: board});
           response.redirect("/board");
-          //response.render("tetris", { board_id: board });
         } else {
-          response.render("user_error");
+          response.render("login_error");
         }
         response.end();
       }
@@ -331,19 +326,30 @@ app.post("/new", function (request, response, next) {
   let surname = request.body.surname;
   let age = parseInt(request.body.age);
   let password = request.body.pass;
+  let password_verification = request.body.pass2;
 
-  if (username && name && surname && age && password) {
-    database.query(
-      "INSERT INTO Usuario (username, nombre, apellidos, edad, password, puntos) VALUES (?, ?, ?, ?, ?, ?)",
-      [username, name, surname, age, password, 0],
-      function (error, results) {
-        // If there is an issue with the query, output the error
-        if (error) response.redirect("user_error");
-        else response.redirect("/");
-        response.end();
-      }
-    );
-  }
+  if (username && name && surname && age && password && password_verification) {
+    if (password == password_verification) {
+      database.query("SELECT username FROM Usuario WHERE username = ?", [username], function(error, result) {
+        if (result) {
+          alert("El usuario ya existe");
+          response.render("register");
+        }
+      });
+      database.query(
+        "INSERT INTO Usuario (username, nombre, apellidos, edad, password, puntos) VALUES (?, ?, ?, ?, ?, ?)",
+        [username, name, surname, age, password, 0],
+        function (error, results) {
+          // If there is an issue with the query, output the error
+          if (error) response.render("login_error");
+          else response.redirect("/");
+          response.end();
+        }
+      );
+    } else {
+      response.render("password_error");
+    }
+    }
 });
 
 app.post("/logout", function (req, res) {
