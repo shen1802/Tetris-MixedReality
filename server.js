@@ -10,6 +10,7 @@ const mqtt = require("mqtt");
 const tf = require("@tensorflow/tfjs");
 const { query } = require("express");
 const { count } = require("console");
+const fs = require('fs');
 require("@tensorflow/tfjs-node");
 
 const client = mqtt.connect("mqtt://localhost");
@@ -18,6 +19,8 @@ let liveData = [];
 let predictionDone = false;
 let started = false;
 let model;
+let threshold_gyro = 2000;
+let threshold_acc = 6000;
 const gestureClasses = [
   "izquierda",
   "derecha",
@@ -28,9 +31,11 @@ const gestureClasses = [
 ];
 
 let numParametersRecorded = 6; // 6 values from board -> 3 accelerometer and 3 gyroscope;
-let numLinesPerFile = 600;
+let numLinesPerFile = 35;
 let numValuesExpected = numParametersRecorded * numLinesPerFile; //total de valores por cada gesto
-
+let numLinesRead = numLinesPerFile;
+let numFileWrite = 1;
+let datafile ="";
 // cargar el modelo
 const init = async () => {
   model = await tf.loadLayersModel("file://model/model.json");
@@ -65,28 +70,85 @@ client.on("message", (topic, message) => {
       zGyro: sensorData.gyroscope.z,
     };
 
-    if (liveData.length < numValuesExpected) {
-      // rellenar liveData[] hasta recopilar todos los valores de un gesto
-      predictionDone = false;
-      liveData.push(
-        data.xAcc,
-        data.yAcc,
-        data.zAcc,
-        data.xGyro,
-        data.yGyro,
-        data.zGyro
-      );
-    } else {
-      processSensorData(
-        accelerometerX,
-        accelerometerY,
-        accelerometerZ,
-        gyroscopeX,
-        gyroscopeY,
-        gyroscopeZ,
-        sensorData.id
-      );
-    }
+        // sum up the absolutes
+        if (numLinesRead == numLinesPerFile) {
+            let aSum_G = Math.abs(data.xGyro) + Math.abs(data.yGyro) + Math.abs(data.zGyro);
+            let aSum_A = Math.abs(data.xAcc) + Math.abs(data.yAcc) + Math.abs(data.zAcc);
+            
+          
+            // check of it's above the threshold
+            if (aSum_G >= threshold_gyro || aSum_A >= threshold_acc ) {
+              numLinesRead = 0;
+              //console.log("suma absoluto : "+aSum+" xG:"+data.xGyro+"  yG"+data.yGyro+"  zG"+data.zGyro);
+              datafile ="sequence,AccelerometerX,AccelerometerY,AccelerometerZ,GyroscopeX,GyroscopeY,GyroscopeZ\n";
+              
+            }
+          }
+      
+          if (numLinesRead < numLinesPerFile) {
+      
+            if (liveData.length < numValuesExpected) {
+              // rellenar liveData[] hasta recopilar todos los valores de un gesto
+              predictionDone = false;
+              liveData.push(
+                data.xAcc,
+                data.yAcc,
+                data.zAcc,
+                data.xGyro,
+                data.yGyro,
+                data.zGyro
+              );
+              datafile +=numLinesRead+","+data.xAcc+","+data.yAcc+","+data.zAcc+","+data.xGyro+","+data.yGyro+","+data.zGyro+"\n";
+              numLinesRead ++;
+              //console.log("leyendo lineas: "+numLinesRead);
+            }
+            
+            if (liveData.length == numValuesExpected) {
+              //console.log("Array: "+datafile);
+              //console.log("liveData: "+liveData);
+              /*let gesto = "izquierda";
+              let filename = "./txt/prueba2_"+gesto+"_"+numFileWrite+".csv";
+              //const writeStream = fs.createWriteStream('data.csv');
+              const writeStream = fs.createWriteStream(filename);
+              writeStream.write(datafile);
+              numFileWrite++;*/
+              processSensorData(
+                accelerometerX,
+                accelerometerY,
+                accelerometerZ,
+                gyroscopeX,
+                gyroscopeY,
+                gyroscopeZ,
+                sensorData.id
+              );
+              
+            }
+      
+          }
+      
+      
+          /*if (liveData.length < numValuesExpected) {
+            // rellenar liveData[] hasta recopilar todos los valores de un gesto
+            predictionDone = false;
+            liveData.push(
+              data.xAcc,
+              data.yAcc,
+              data.zAcc,
+              data.xGyro,
+              data.yGyro,
+              data.zGyro
+            );
+          } else {
+            processSensorData(
+              accelerometerX,
+              accelerometerY,
+              accelerometerZ,
+              gyroscopeX,
+              gyroscopeY,
+              gyroscopeZ,
+              sensorData.id
+            );
+          }*/
 
     started = true;
   }
@@ -94,13 +156,13 @@ client.on("message", (topic, message) => {
       
     const str = message.toString();
     const list = str.slice(1, -1).split("','");
-    const lista =[];
+    let lista =[];
     for (let i=0;i<list.length;i++){
       lista.push(extractNumberFromMAC(list[i]));
     }
     console.log("scanned");
     console.log(lista);
-    let current_array;
+    let current_array=[];
 
     database.query("SELECT * FROM Cubo", function (error, result) {
       if (error) throw SELECTerror;
@@ -126,14 +188,14 @@ client.on("message", (topic, message) => {
     for (let i = 0; i < lista.length; i++) {
       let existe = false;
       for ( let j = 0; j < current_array.lista; j++) {
-        if (current_array[j].id == lista[i].id){
+        if (current_array[j].id == lista[i]){
           existe = true;
         }
       }
-
+      console.log(lista[i]);
       if (!existe) {
         database.query("INSERT INTO Cubo (id, ocupado) VALUES (?, 'no')", 
-        [lista[i].id]), function (error, result) {
+        [lista[i]]), function (error, result) {
           if (error) throw error;
         }
       }
