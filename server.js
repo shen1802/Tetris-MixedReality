@@ -9,6 +9,7 @@ const io = new Server(server);
 const mqtt = require("mqtt");
 const tf = require("@tensorflow/tfjs");
 const { query } = require("express");
+const { count } = require("console");
 require("@tensorflow/tfjs-node");
 
 const client = mqtt.connect("mqtt://localhost");
@@ -91,20 +92,57 @@ client.on("message", (topic, message) => {
   }
   if(topic === "Scanned"){
       
-      const str = message.toString();
-      const list = str.slice(1, -1).split("','");
-      const lista =[];
-      for (let i=0;i<list.length;i++){
-        lista.push(extractNumberFromMAC(list[i]));
-      }
-      console.log("scanned");
-      console.log(lista);
+    const str = message.toString();
+    const list = str.slice(1, -1).split("','");
+    const lista =[];
+    for (let i=0;i<list.length;i++){
+      lista.push(extractNumberFromMAC(list[i]));
     }
+    console.log("scanned");
+    console.log(lista);
+    let current_array;
+
+    database.query("SELECT * FROM Cubo", function (error, result) {
+      if (error) throw SELECTerror;
+      else {
+        current_array = result.map(item => {
+          return {
+            id: item.id,
+            ocupado: item.ocupado,
+          };
+        });
+      }
+    });
+
+    for (let i = 0; i < current_array.length; i++) {
+      let counter = 0;
+      let estado;
+      for ( let j = 0; j < lista; j++) {
+        if (current_array[i].id == lista[j].id){
+          counter++;
+          if (current_array[i].ocupado != "si"){
+            estado = "si";
+          }
+        }
+
+        if (counter < 0) {
+          database.query("DELETE FROM Cubo WHERE id = ? ", 
+          [lista[j].id]), function (error, result) {
+            if (error) throw error;
+          }
+        } else if (counter > 0 && estado != "si") {
+  
+        } else {
+          database.query("INSERT INTO Cubo (id, ocupado) VALUES (?, ?)", 
+          [lista[j].id, lista[j].ocupado]), function (error, result) {
+            if (error) throw error;
+          }
+        }
+      }
+    }
+
   }
-
-);
-
-
+});
 
 function extractNumberFromMAC(mac) {
   let result = 0;
@@ -120,11 +158,6 @@ function extractNumberFromMAC(mac) {
   }
   return result;
 }
-
-
-
-
-
 
 const processSensorData = (
   accelerometerX,
@@ -279,7 +312,7 @@ app.get("/user_error", function (req, res) {
 app.post("/tetris", function (req, res) {
   //mostrar tetris
   req.session.board = req.body.board;
-  console.log(req.session.board);
+  //console.log(req.session.board);
   //actualizar en la base de datos el estado de la placa
   database.query(
     "UPDATE Cubo SET ocupado = 'si' WHERE id = ?",
