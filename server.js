@@ -115,28 +115,26 @@ client.on("message", (topic, message) => {
     });
 
     for (let i = 0; i < current_array.length; i++) {
-      let counter = 0;
-      let estado;
-      for ( let j = 0; j < lista; j++) {
-        if (current_array[i].id == lista[j].id){
-          counter++;
-          if (current_array[i].ocupado != "si"){
-            estado = "si";
+      if (current_array[i].ocupado == "no") {
+        database.query("DELETE FROM Cubo WHERE id = ? ", 
+          [current_array[i].id]), function (error, result) {
+            if (error) throw error;
           }
-        }
+      }
+    }
 
-        if (counter < 0) {
-          database.query("DELETE FROM Cubo WHERE id = ? ", 
-          [lista[j].id]), function (error, result) {
-            if (error) throw error;
-          }
-        } else if (counter > 0 && estado != "si") {
-  
-        } else {
-          database.query("INSERT INTO Cubo (id, ocupado) VALUES (?, ?)", 
-          [lista[j].id, lista[j].ocupado]), function (error, result) {
-            if (error) throw error;
-          }
+    for (let i = 0; i < lista.length; i++) {
+      let existe = false;
+      for ( let j = 0; j < current_array.lista; j++) {
+        if (current_array[j].id == lista[i].id){
+          existe = true;
+        }
+      }
+
+      if (!existe) {
+        database.query("INSERT INTO Cubo (id, ocupado) VALUES (?, 'no')", 
+        [lista[i].id]), function (error, result) {
+          if (error) throw error;
         }
       }
     }
