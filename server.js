@@ -156,51 +156,63 @@ client.on("message", (topic, message) => {
       
     const str = message.toString();
     const list = str.slice(1, -1).split("','");
-    let lista =[];
-    for (let i=0;i<list.length;i++){
+    let lista = [];
+    for (let i = 0; i < list.length; i++) {
       lista.push(extractNumberFromMAC(list[i]));
     }
     console.log("scanned");
     console.log(lista);
-    let current_array=[];
-
-    database.query("SELECT * FROM Cubo", function (error, result) {
-      if (error) throw SELECTerror;
+    let current_array = [];
+    
+    database.query("SELECT * FROM Cubo", function (SELECTerror, result) {
+      if (SELECTerror) throw SELECTerror;
       else {
-        current_array = result.map(item => {
+        current_array = result.map((item) => {
           return {
             id: item.id,
             ocupado: item.ocupado,
           };
         });
-      }
-    });
-
-    for (let i = 0; i < current_array.length; i++) {
-      if (current_array[i].ocupado == "no") {
-        database.query("DELETE FROM Cubo WHERE id = ? ", 
-          [current_array[i].id]), function (error, result) {
-            if (error) throw error;
+    
+        for (let i = current_array.length - 1; i >= 0; i--) {
+          if (current_array[i].ocupado == "no") {
+            database.query(
+              "DELETE FROM Cubo WHERE id = ? ",
+              [current_array[i].id],
+              function (error, result) {
+                if (error) throw error;
+              }
+            );
+            current_array.splice(i, 1);
           }
-      }
-    }
+        }
+    
+        for (let i = 0; i < lista.length; i++) {
+          let existe = new Boolean(false);
+          console.log(current_array.length);
+          for (let j = 0; j < current_array.length; j++) {
+            if (current_array[j].id == lista[i]) {
+              existe = true;
 
-    for (let i = 0; i < lista.length; i++) {
-      let existe = false;
-      for ( let j = 0; j < current_array.lista; j++) {
-        if (current_array[j].id == lista[i]){
-          existe = true;
+            }
+          }
+    
+          console.log(existe);
+          if (!existe) {
+            console.log("no existe y se inserta");
+            database.query(
+              "INSERT INTO Cubo (id, ocupado) VALUES (?, 'no')",
+              [lista[i]],
+              function (error, result) {
+                if (error) throw error;
+              }
+            );
+          }
         }
       }
-      console.log(lista[i]);
-      if (!existe) {
-        database.query("INSERT INTO Cubo (id, ocupado) VALUES (?, 'no')", 
-        [lista[i]]), function (error, result) {
-          if (error) throw error;
-        }
-      }
-    }
 
+    });
+    
   }
 });
 
