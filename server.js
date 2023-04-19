@@ -198,7 +198,7 @@ client.on("message", (topic, message) => {
           }
     
           console.log(existe);
-          if (!existe) {
+          if (existe==false) {
             console.log("no existe y se inserta");
             database.query(
               "INSERT INTO Cubo (id, ocupado) VALUES (?, 'no')",
