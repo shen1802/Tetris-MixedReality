@@ -10,7 +10,7 @@ const mqtt = require("mqtt");
 const tf = require("@tensorflow/tfjs");
 const { query } = require("express");
 const { count } = require("console");
-const fs = require('fs');
+const fs = require("fs");
 require("@tensorflow/tfjs-node");
 
 const client = mqtt.connect("mqtt://localhost");
@@ -35,7 +35,7 @@ let numLinesPerFile = 35;
 let numValuesExpected = numParametersRecorded * numLinesPerFile; //total de valores por cada gesto
 let numLinesRead = numLinesPerFile;
 let numFileWrite = 1;
-let datafile ="";
+let datafile = "";
 // cargar el modelo
 const init = async () => {
   model = await tf.loadLayersModel("file://model/model.json");
@@ -70,64 +70,75 @@ client.on("message", (topic, message) => {
       zGyro: sensorData.gyroscope.z,
     };
 
-        // sum up the absolutes
-        if (numLinesRead == numLinesPerFile) {
-            let aSum_G = Math.abs(data.xGyro) + Math.abs(data.yGyro) + Math.abs(data.zGyro);
-            let aSum_A = Math.abs(data.xAcc) + Math.abs(data.yAcc) + Math.abs(data.zAcc);
-            
-          
-            // check of it's above the threshold
-            if (aSum_G >= threshold_gyro || aSum_A >= threshold_acc ) {
-              numLinesRead = 0;
-              //console.log("suma absoluto : "+aSum+" xG:"+data.xGyro+"  yG"+data.yGyro+"  zG"+data.zGyro);
-              datafile ="sequence,AccelerometerX,AccelerometerY,AccelerometerZ,GyroscopeX,GyroscopeY,GyroscopeZ\n";
-              
-            }
-          }
-      
-          if (numLinesRead < numLinesPerFile) {
-      
-            if (liveData.length < numValuesExpected) {
-              // rellenar liveData[] hasta recopilar todos los valores de un gesto
-              predictionDone = false;
-              liveData.push(
-                data.xAcc,
-                data.yAcc,
-                data.zAcc,
-                data.xGyro,
-                data.yGyro,
-                data.zGyro
-              );
-              datafile +=numLinesRead+","+data.xAcc+","+data.yAcc+","+data.zAcc+","+data.xGyro+","+data.yGyro+","+data.zGyro+"\n";
-              numLinesRead ++;
-              //console.log("leyendo lineas: "+numLinesRead);
-            }
-            
-            if (liveData.length == numValuesExpected) {
-              //console.log("Array: "+datafile);
-              //console.log("liveData: "+liveData);
-              /*let gesto = "izquierda";
+    // sum up the absolutes
+    if (numLinesRead == numLinesPerFile) {
+      let aSum_G =
+        Math.abs(data.xGyro) + Math.abs(data.yGyro) + Math.abs(data.zGyro);
+      let aSum_A =
+        Math.abs(data.xAcc) + Math.abs(data.yAcc) + Math.abs(data.zAcc);
+
+      // check of it's above the threshold
+      if (aSum_G >= threshold_gyro || aSum_A >= threshold_acc) {
+        numLinesRead = 0;
+        //console.log("suma absoluto : "+aSum+" xG:"+data.xGyro+"  yG"+data.yGyro+"  zG"+data.zGyro);
+        datafile =
+          "sequence,AccelerometerX,AccelerometerY,AccelerometerZ,GyroscopeX,GyroscopeY,GyroscopeZ\n";
+      }
+    }
+
+    if (numLinesRead < numLinesPerFile) {
+      if (liveData.length < numValuesExpected) {
+        // rellenar liveData[] hasta recopilar todos los valores de un gesto
+        predictionDone = false;
+        liveData.push(
+          data.xAcc,
+          data.yAcc,
+          data.zAcc,
+          data.xGyro,
+          data.yGyro,
+          data.zGyro
+        );
+        datafile +=
+          numLinesRead +
+          "," +
+          data.xAcc +
+          "," +
+          data.yAcc +
+          "," +
+          data.zAcc +
+          "," +
+          data.xGyro +
+          "," +
+          data.yGyro +
+          "," +
+          data.zGyro +
+          "\n";
+        numLinesRead++;
+        //console.log("leyendo lineas: "+numLinesRead);
+      }
+
+      if (liveData.length == numValuesExpected) {
+        //console.log("Array: "+datafile);
+        //console.log("liveData: "+liveData);
+        /*let gesto = "izquierda";
               let filename = "./txt/prueba2_"+gesto+"_"+numFileWrite+".csv";
               //const writeStream = fs.createWriteStream('data.csv');
               const writeStream = fs.createWriteStream(filename);
               writeStream.write(datafile);
               numFileWrite++;*/
-              processSensorData(
-                accelerometerX,
-                accelerometerY,
-                accelerometerZ,
-                gyroscopeX,
-                gyroscopeY,
-                gyroscopeZ,
-                sensorData.id
-              );
-              
-            }
-      
-          }
-      
-      
-          /*if (liveData.length < numValuesExpected) {
+        processSensorData(
+          accelerometerX,
+          accelerometerY,
+          accelerometerZ,
+          gyroscopeX,
+          gyroscopeY,
+          gyroscopeZ,
+          sensorData.id
+        );
+      }
+    }
+
+    /*if (liveData.length < numValuesExpected) {
             // rellenar liveData[] hasta recopilar todos los valores de un gesto
             predictionDone = false;
             liveData.push(
@@ -152,8 +163,7 @@ client.on("message", (topic, message) => {
 
     started = true;
   }
-  if(topic === "Scanned"){
-      
+  if (topic === "Scanned") {
     const str = message.toString();
     const list = str.slice(1, -1).split("','");
     let lista = [];
@@ -163,7 +173,7 @@ client.on("message", (topic, message) => {
     console.log("scanned");
     console.log(lista);
     let current_array = [];
-    
+
     database.query("SELECT * FROM Cubo", function (SELECTerror, result) {
       if (SELECTerror) throw SELECTerror;
       else {
@@ -173,7 +183,7 @@ client.on("message", (topic, message) => {
             ocupado: item.ocupado,
           };
         });
-    
+
         for (let i = current_array.length - 1; i >= 0; i--) {
           if (current_array[i].ocupado == "no") {
             database.query(
@@ -186,19 +196,18 @@ client.on("message", (topic, message) => {
             current_array.splice(i, 1);
           }
         }
-    
+
         for (let i = 0; i < lista.length; i++) {
           let existe = new Boolean(false);
           console.log(current_array.length);
           for (let j = 0; j < current_array.length; j++) {
             if (current_array[j].id == lista[i]) {
               existe = true;
-
             }
           }
-    
+
           console.log(existe);
-          if (existe==false) {
+          if (existe == false) {
             console.log("no existe y se inserta");
             database.query(
               "INSERT INTO Cubo (id, ocupado) VALUES (?, 'no')",
@@ -210,9 +219,7 @@ client.on("message", (topic, message) => {
           }
         }
       }
-
     });
-    
   }
 });
 
@@ -221,7 +228,7 @@ function extractNumberFromMAC(mac) {
   let count = 0;
   for (let i = mac.length - 1; i >= 0; i--) {
     if (/\d/.test(mac[i])) {
-      result += (mac[i] - '0') * Math.pow(10, count);
+      result += (mac[i] - "0") * Math.pow(10, count);
       count++;
       if (count === 4) {
         break;
@@ -305,11 +312,14 @@ io.on("connection", (socket) => {
   console.log("Nuevo usuario contado con ID: " + socket.id);
   //console.log(socket.request);
 
-  socket.on("game_over", function(game) {
-    database.query("INSERT INTO Sesion (id, username, id_cubo, puntos_sesion) VALUES (NULL, ?, ?, ?)", 
-    [game.username, game.board, game.score]), function (error, result) {
-      if (error) throw error;
-    }
+  socket.on("game_over", function (game) {
+    database.query(
+      "INSERT INTO Sesion (id, username, id_cubo, puntos_sesion) VALUES (NULL, ?, ?, ?)",
+      [game.username, game.board, game.score]
+    ),
+      function (error, result) {
+        if (error) throw error;
+      };
   });
 
   socket.on("disconnect", (response) => {
@@ -338,7 +348,7 @@ app.use(
     saveUninitialized: false,
   })
 );
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.locals.user = req.session.user;
   next();
 });
@@ -353,25 +363,31 @@ app.get("/", function (req, res) {
     if (req.session.board == undefined) {
       database.query("SELECT * FROM Cubo", function (error, data) {
         if (error) throw error;
-        res.render("board", { datos: {boards: data, user: req.session.username}});
+        res.render("board", {
+          datos: { boards: data, user: req.session.username },
+        });
       });
     } else {
-      res.render("tetris", { datos: {board: req.session.board, user: req.session.username} });
+      res.render("tetris", {
+        datos: { board: req.session.board, user: req.session.username },
+      });
     }
-  } else{
+  } else {
     //si no hemos iniciado sesion redireccionar a login
     res.render("login");
   }
 });
 
-app.get("/register", function (req, res){
+app.get("/register", function (req, res) {
   res.render("register");
 });
 
-app.get("/board", function(req, res){
+app.get("/board", function (req, res) {
   database.query("SELECT * FROM Cubo", function (error, data) {
     if (error) throw error;
-    res.render("board", { datos: {boards: data, user: req.session.username}});
+    res.render("board", {
+      datos: { boards: data, user: req.session.username },
+    });
   });
 });
 
@@ -393,7 +409,9 @@ app.post("/tetris", function (req, res) {
       if (error) throw error;
     }
   );
-  res.render("tetris", { datos: {board: req.session.board, user: req.session.username} });
+  res.render("tetris", {
+    datos: { board: req.session.board, user: req.session.username },
+  });
 });
 
 app.post("/auth", function (request, response, next) {
@@ -435,12 +453,16 @@ app.post("/new", function (request, response, next) {
 
   if (username && name && surname && age && password && password_verification) {
     if (password == password_verification) {
-      database.query("SELECT username FROM Usuario WHERE username = ?", [username], function(error, result) {
-        if (result) {
-          alert("El usuario ya existe");
-          response.render("register");
+      database.query(
+        "SELECT username FROM Usuario WHERE username = ?",
+        [username],
+        function (error, result) {
+          if (result) {
+            alert("El usuario ya existe");
+            response.render("register");
+          }
         }
-      });
+      );
       database.query(
         "INSERT INTO Usuario (username, nombre, apellidos, edad, password, puntos) VALUES (?, ?, ?, ?, ?, ?)",
         [username, name, surname, age, password, 0],
@@ -454,12 +476,12 @@ app.post("/new", function (request, response, next) {
     } else {
       response.render("password_error");
     }
-    }
+  }
 });
 
 app.post("/logout", function (req, res) {
   if (req.session) {
-    if (req.session?.board){
+    if (req.session?.board) {
       database.query(
         "UPDATE Cubo SET ocupado = 'no' WHERE id = ?",
         [req.session.board],
@@ -468,9 +490,9 @@ app.post("/logout", function (req, res) {
         }
       );
     }
-    req.session.destroy(err => {
+    req.session.destroy((err) => {
       if (err) {
-        res.status(400).send('Unable to log out')
+        res.status(400).send("Unable to log out");
       } else {
         res.render("login");
       }

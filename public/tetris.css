@@ -7,6 +7,7 @@ body {
 body {
   background: #e1d4c0;
 }
+
 body,
 table,
 input {
@@ -32,6 +33,7 @@ input {
   left: 0px;
   top: 0px;
 }
+
 .left-border {
   background: #e4be95;
   position: absolute;
@@ -66,21 +68,27 @@ input {
   height: 307px;
   background: #f4efe9;
 }
+
 .grid1 {
   left: 14px;
 }
+
 .grid2 {
   left: 42px;
 }
+
 .grid3 {
   left: 70px;
 }
+
 .grid4 {
   left: 98px;
 }
+
 .grid5 {
   left: 126px;
 }
+
 .grid6 {
   left: 154px;
 }
@@ -113,10 +121,12 @@ input {
   margin-top: 10px;
   margin-bottom: 10px;
 }
+
 #tetris .left h1 a {
   color: #3366cc;
   text-decoration: none;
 }
+
 #tetris .left h1 a:hover {
   color: #ff6600;
   text-decoration: none;
@@ -127,6 +137,7 @@ input {
 #tetris .left .menu {
   margin-top: 1em;
 }
+
 #tetris .menu a,
 #tetris .menu a:visited {
   display: block;
@@ -146,6 +157,7 @@ input {
   padding-bottom: 1px;
   margin-left: 20px;
 }
+
 #tetris .menu a:hover {
   background: #efe8de;
 }
@@ -170,20 +182,24 @@ input {
   overflow: visible;
   display: none;
 }
+
 #tetris-keys {
   position: absolute;
   left: 25px;
   top: 135px;
 }
+
 #tetris div.h5 {
   margin-bottom: 0.5em;
   display: block;
   font-weight: bold;
 }
+
 #tetris-keys td {
   padding-right: 1px;
   padding-bottom: 1px;
 }
+
 #tetris-keys img {
   border-width: 0px;
 }
@@ -195,6 +211,7 @@ input {
   left: 25px;
   bottom: 5px;
 }
+
 #tetris .stats td {
   padding-bottom: 1px;
   line-height: 1.25em;
@@ -204,6 +221,7 @@ input {
   text-align: left;
   padding-right: 5px;
 }
+
 #tetris-stats-level {
   font-weight: bold;
 }
@@ -212,6 +230,7 @@ input {
   text-align: left;
   padding-right: 5px;
 }
+
 #tetris-stats-time {
   font-weight: bold;
 }
@@ -220,6 +239,7 @@ input {
   text-align: left;
   padding-right: 5px;
 }
+
 #tetris-stats-apm {
   font-weight: bold;
 }
@@ -228,6 +248,7 @@ input {
   text-align: left;
   padding-right: 5px;
 }
+
 #tetris-stats-lines {
   font-weight: bold;
 }
@@ -236,6 +257,7 @@ input {
   text-align: left;
   padding-right: 5px;
 }
+
 #tetris-stats-score {
   font-weight: bold;
 }
@@ -307,6 +329,7 @@ input {
   z-index: 50000;
   display: none;
 }
+
 #tetris .window .top {
   position: relative;
   background: #eae0d1;
@@ -318,6 +341,7 @@ input {
   border-bottom: 1px solid #ffffff;
   text-indent: 10px;
 }
+
 #tetris .window .top .close {
   position: absolute;
   background: #eae0d1;
@@ -332,19 +356,23 @@ input {
   border-left: 1px solid #ffffff;
   cursor: pointer;
 }
+
 #tetris .window .top .close:hover {
   background: #efe8de;
 }
+
 #tetris .window .content {
   margin: 10px;
 }
+
 body#login {
   margin-left: 8%;
   margin-top: 10%;
   background-image: url("images/tetris.jpeg");
 }
+
 /*login form*/
-form#login{
+form#login {
   background-color: white;
   width: 350px;
   height: 380px;
@@ -352,10 +380,13 @@ form#login{
   text-align: center;
   border-radius: 15px;
 }
-p#iniciar-sesion, p#register{
+
+p#iniciar-sesion,
+p#register {
   padding-bottom: 20px;
   font-size: 25px;
 }
+
 form input#text {
   width: 97%;
   height: 30px;
@@ -364,6 +395,7 @@ form input#text {
   border: 1px solid rgb(179, 179, 179);
   padding-left: 8px;
 }
+
 form#login #button {
   background-color: orange;
   width: 100%;
@@ -376,19 +408,22 @@ form#login #button {
   box-shadow: 1px 1px 10px #b3b3b3;
   font-weight: bold;
   text-decoration: none;
-} 
-form hr{
+}
+
+form hr {
   border-color: rgb(179, 179, 179);
   border-width: 0.2px;
   margin-top: 5%;
   margin-bottom: 10%;
 }
-form#login a#button{
+
+form#login a#button {
   margin-top: 10%;
   background-color: #3366cc;
   padding-left: 150px;
   padding-right: 150px;
 }
+
 /*Register form*/
 body#register {
   display: flex;
@@ -396,7 +431,8 @@ body#register {
   margin-top: 5%;
   background-image: url("images/tetris.jpeg");
 }
-form#register{
+
+form#register {
   background-color: white;
   width: 350px;
   height: 500px;
@@ -404,21 +440,24 @@ form#register{
   text-align: center;
   border-radius: 15px;
 }
+
 form#register #button {
   background-color: orange;
   width: 100%;
   color: white;
   padding: 14px 20px;
   margin-top: 15px;
-  margin-bottom: 30px;;
+  margin-bottom: 30px;
+  ;
   border: none;
   cursor: pointer;
   border-radius: 3px;
   box-shadow: 1px 1px 10px #b3b3b3;
   font-weight: bold;
   text-decoration: none;
-} 
-form#register a#button{
+}
+
+form#register a#button {
   margin-top: 10%;
   background-color: #3366cc;
   padding-left: 160px;
