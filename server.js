@@ -155,13 +155,15 @@ client.on("message", (topic, message) => {
   if(topic === "Scanned"){
       
     const str = message.toString();
-    const list = str.slice(1, -1).split("','");
+    const list = str.replace(/'/g, "").split(", ");
+    console.log(list);
     let lista = [];
     for (let i = 0; i < list.length; i++) {
       lista.push(extractNumberFromMAC(list[i]));
     }
     console.log("scanned");
     console.log(lista);
+    console.log(lista.length);
     let current_array = [];
     
     database.query("SELECT * FROM Cubo", function (SELECTerror, result) {
@@ -267,6 +269,7 @@ const predict = (model, newSampleData, id) => {
       case "izquierda":
         obj.action = "left";
         console.log("izquierda");
+
         break;
       case "derecha":
         obj.action = "right";
