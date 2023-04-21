@@ -120,7 +120,6 @@
  *
  */
 function Tetris() {
-
   //socket.io
   let socket = io();
   //let params = new URLSearchParams(document.location.search);
@@ -150,7 +149,7 @@ function Tetris() {
     }
   });
 
-  socket.on("connect", function(obj){
+  socket.on("connect", function (obj) {
     console.log("Client side socket ID: " + socket.id);
   });
 
