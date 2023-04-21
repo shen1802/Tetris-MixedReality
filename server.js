@@ -15,8 +15,14 @@ require("@tensorflow/tfjs-node");
 
 const client = mqtt.connect("mqtt://localhost");
 
-let liveData = [];
-let predictionDone = false;
+const ids = new Map();
+let current_id_pos;
+let numBoard = 0;
+let predictionDone = [];
+let numLinesRead = [];
+
+let liveDatas = [];
+//let predictionDone = false;
 let started = false;
 let model;
 let threshold_gyro = 2000;
@@ -33,9 +39,9 @@ const gestureClasses = [
 let numParametersRecorded = 6; // 6 values from board -> 3 accelerometer and 3 gyroscope;
 let numLinesPerFile = 35;
 let numValuesExpected = numParametersRecorded * numLinesPerFile; //total de valores por cada gesto
-let numLinesRead = numLinesPerFile;
+//let numLinesRead = numLinesPerFile;
 let numFileWrite = 1;
-let datafile = "";
+let datafile ="";
 // cargar el modelo
 const init = async () => {
   model = await tf.loadLayersModel("file://model/model.json");
@@ -51,15 +57,20 @@ client.on("message", (topic, message) => {
     const sensorData = JSON.parse(message.toString());
 
     let dataAvailable = sensorData;
+    current_id_pos = ids.get(sensorData.id);
+
     if (dataAvailable && !started) {
       console.log("ready");
+      numLinesRead[current_id_pos] = numLinesPerFile;
+      predictionDone[current_id_pos] = false;
+      liveDatas[current_id_pos] = [];
     }
-    const accelerometerX = sensorData.accelerometer.x;
+    /*const accelerometerX = sensorData.accelerometer.x;
     const accelerometerY = sensorData.accelerometer.y;
     const accelerometerZ = sensorData.accelerometer.z;
     const gyroscopeX = sensorData.gyroscope.x;
     const gyroscopeY = sensorData.gyroscope.y;
-    const gyroscopeZ = sensorData.gyroscope.z;
+    const gyroscopeZ = sensorData.gyroscope.z;*/
 
     let data = {
       xAcc: sensorData.accelerometer.x,
@@ -71,26 +82,26 @@ client.on("message", (topic, message) => {
     };
 
     // sum up the absolutes
-    if (numLinesRead == numLinesPerFile) {
-      let aSum_G =
-        Math.abs(data.xGyro) + Math.abs(data.yGyro) + Math.abs(data.zGyro);
-      let aSum_A =
-        Math.abs(data.xAcc) + Math.abs(data.yAcc) + Math.abs(data.zAcc);
-
+    if (numLinesRead[current_id_pos] == numLinesPerFile) {
+      let aSum_G = Math.abs(data.xGyro) + Math.abs(data.yGyro) + Math.abs(data.zGyro);
+      let aSum_A = Math.abs(data.xAcc) + Math.abs(data.yAcc) + Math.abs(data.zAcc);
+      
+    
       // check of it's above the threshold
-      if (aSum_G >= threshold_gyro || aSum_A >= threshold_acc) {
-        numLinesRead = 0;
+      if (aSum_G >= threshold_gyro || aSum_A >= threshold_acc ) {
+        numLinesRead[current_id_pos] = 0;
         //console.log("suma absoluto : "+aSum+" xG:"+data.xGyro+"  yG"+data.yGyro+"  zG"+data.zGyro);
-        datafile =
-          "sequence,AccelerometerX,AccelerometerY,AccelerometerZ,GyroscopeX,GyroscopeY,GyroscopeZ\n";
+        datafile ="sequence,AccelerometerX,AccelerometerY,AccelerometerZ,GyroscopeX,GyroscopeY,GyroscopeZ\n";
+        
       }
     }
 
-    if (numLinesRead < numLinesPerFile) {
-      if (liveData.length < numValuesExpected) {
+    if (numLinesRead[current_id_pos] < numLinesPerFile) {
+      
+      if (liveDatas[current_id_pos].length < numValuesExpected) {
         // rellenar liveData[] hasta recopilar todos los valores de un gesto
-        predictionDone = false;
-        liveData.push(
+        predictionDone[current_id_pos] = false;
+        liveDatas[current_id_pos].push(
           data.xAcc,
           data.yAcc,
           data.zAcc,
@@ -98,8 +109,9 @@ client.on("message", (topic, message) => {
           data.yGyro,
           data.zGyro
         );
+
         datafile +=
-          numLinesRead +
+          numLinesRead[current_id_pos] +
           "," +
           data.xAcc +
           "," +
@@ -113,11 +125,11 @@ client.on("message", (topic, message) => {
           "," +
           data.zGyro +
           "\n";
-        numLinesRead++;
+          numLinesRead[current_id_pos] ++;
         //console.log("leyendo lineas: "+numLinesRead);
       }
 
-      if (liveData.length == numValuesExpected) {
+      if (liveDatas[current_id_pos].length == numValuesExpected) {
         //console.log("Array: "+datafile);
         //console.log("liveData: "+liveData);
         /*let gesto = "izquierda";
@@ -127,12 +139,12 @@ client.on("message", (topic, message) => {
               writeStream.write(datafile);
               numFileWrite++;*/
         processSensorData(
-          accelerometerX,
-          accelerometerY,
-          accelerometerZ,
-          gyroscopeX,
-          gyroscopeY,
-          gyroscopeZ,
+          data.xAcc,
+          data.yAcc,
+          data.zAcc,
+          data.xGyro,
+          data.yGyro,
+          data.zGyro,
           sensorData.id
         );
       }
@@ -235,6 +247,13 @@ function extractNumberFromMAC(mac) {
       }
     }
   }
+
+  // insert board id into position array
+  if (ids.has(result)==false){
+    ids.set(result,numBoard);
+    numBoard++;
+  }
+
   return result;
 }
 
@@ -249,10 +268,10 @@ const processSensorData = (
 ) => {
   // Perform TensorFlow.js processing on the accelerometer and gyroscope data
   // to extract relevant information for the Tetris game
-  if (!predictionDone && liveData.length) {
-    predictionDone = true;
-    predict(model, liveData, id);
-    liveData = []; //vaciar el array para el nuevo gesto
+if (!predictionDone[current_id_pos] && liveDatas[current_id_pos].length) {
+    predictionDone[current_id_pos] = true;
+    predict(model, liveDatas[current_id_pos], id);
+    liveDatas[current_id_pos] = []; //vaciar el array para el nuevo gesto
   }
 };
 
