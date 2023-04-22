@@ -15,8 +15,8 @@ require("@tensorflow/tfjs-node");
 
 const client = mqtt.connect("mqtt://localhost");
 
-let liveData = [];
-let predictionDone = false;
+let liveData = new Map();
+//let predictionDone = false;
 let started = false;
 let model;
 let threshold_gyro = 2000;
@@ -54,12 +54,7 @@ client.on("message", (topic, message) => {
     if (dataAvailable && !started) {
       console.log("ready");
     }
-    const accelerometerX = sensorData.accelerometer.x;
-    const accelerometerY = sensorData.accelerometer.y;
-    const accelerometerZ = sensorData.accelerometer.z;
-    const gyroscopeX = sensorData.gyroscope.x;
-    const gyroscopeY = sensorData.gyroscope.y;
-    const gyroscopeZ = sensorData.gyroscope.z;
+    
 
     let data = {
       xAcc: sensorData.accelerometer.x,
@@ -69,9 +64,19 @@ client.on("message", (topic, message) => {
       yGyro: sensorData.gyroscope.y,
       zGyro: sensorData.gyroscope.z,
     };
+    if(liveData.has(sensorData.id)){
 
+    }else{
+      let content = {
+        values: [],
+        predictionDone: false,
+        numLinesRead: 35
+        
+      };
+      liveData.set(sensorData.id,content);
+    }
     // sum up the absolutes
-    if (numLinesRead == numLinesPerFile) {
+    if (liveData.get(sensorData.id).numLinesRead == numLinesPerFile) {
       let aSum_G =
         Math.abs(data.xGyro) + Math.abs(data.yGyro) + Math.abs(data.zGyro);
       let aSum_A =
@@ -79,18 +84,20 @@ client.on("message", (topic, message) => {
 
       // check of it's above the threshold
       if (aSum_G >= threshold_gyro || aSum_A >= threshold_acc) {
-        numLinesRead = 0;
+        let content= liveData.get(sensorData.id);
+        content.numLinesRead=0;
+        liveData.set(sensorData.id,content);
         //console.log("suma absoluto : "+aSum+" xG:"+data.xGyro+"  yG"+data.yGyro+"  zG"+data.zGyro);
         datafile =
           "sequence,AccelerometerX,AccelerometerY,AccelerometerZ,GyroscopeX,GyroscopeY,GyroscopeZ\n";
       }
     }
 
-    if (numLinesRead < numLinesPerFile) {
-      if (liveData.length < numValuesExpected) {
+    if (liveData.get(sensorData.id).numLinesRead < numLinesPerFile) {
+      if (liveData.get(sensorData.id).values.length < numValuesExpected) {
         // rellenar liveData[] hasta recopilar todos los valores de un gesto
-        predictionDone = false;
-        liveData.push(
+        let content= liveData.get(sensorData.id);
+        content.values.push(
           data.xAcc,
           data.yAcc,
           data.zAcc,
@@ -98,6 +105,10 @@ client.on("message", (topic, message) => {
           data.yGyro,
           data.zGyro
         );
+        content.predictionDone = false;
+        
+        
+        
         datafile +=
           numLinesRead +
           "," +
@@ -113,12 +124,13 @@ client.on("message", (topic, message) => {
           "," +
           data.zGyro +
           "\n";
-        numLinesRead++;
+        content.numLinesRead++;
+        liveData.set(sensorData.id,content);
         //console.log("leyendo lineas: "+numLinesRead);
       }
 
-      if (liveData.length == numValuesExpected) {
-        //console.log("Array: "+datafile);
+      if (liveData.get(sensorData.id).values.length == numValuesExpected) {
+        //console.log(liveData.get(sensorData.id));
         //console.log("liveData: "+liveData);
         /*let gesto = "izquierda";
               let filename = "./txt/prueba2_"+gesto+"_"+numFileWrite+".csv";
@@ -127,45 +139,19 @@ client.on("message", (topic, message) => {
               writeStream.write(datafile);
               numFileWrite++;*/
         processSensorData(
-          accelerometerX,
-          accelerometerY,
-          accelerometerZ,
-          gyroscopeX,
-          gyroscopeY,
-          gyroscopeZ,
           sensorData.id
         );
       }
     }
 
-    /*if (liveData.length < numValuesExpected) {
-            // rellenar liveData[] hasta recopilar todos los valores de un gesto
-            predictionDone = false;
-            liveData.push(
-              data.xAcc,
-              data.yAcc,
-              data.zAcc,
-              data.xGyro,
-              data.yGyro,
-              data.zGyro
-            );
-          } else {
-            processSensorData(
-              accelerometerX,
-              accelerometerY,
-              accelerometerZ,
-              gyroscopeX,
-              gyroscopeY,
-              gyroscopeZ,
-              sensorData.id
-            );
-          }*/
+    
 
     started = true;
   }
   if (topic === "Scanned") {
     const str = message.toString();
-    const list = str.slice(1, -1).split("','");
+    const list = str.replace(/'/g, "").split(", ");
+    console.log(list);
     let lista = [];
     for (let i = 0; i < list.length; i++) {
       lista.push(extractNumberFromMAC(list[i]));
@@ -239,20 +225,16 @@ function extractNumberFromMAC(mac) {
 }
 
 const processSensorData = (
-  accelerometerX,
-  accelerometerY,
-  accelerometerZ,
-  gyroscopeX,
-  gyroscopeY,
-  gyroscopeZ,
   id
 ) => {
   // Perform TensorFlow.js processing on the accelerometer and gyroscope data
   // to extract relevant information for the Tetris game
-  if (!predictionDone && liveData.length) {
-    predictionDone = true;
-    predict(model, liveData, id);
-    liveData = []; //vaciar el array para el nuevo gesto
+  let content=liveData.get(id);
+  if (content.predictionDone==false && content.values.length) {
+    content.predictionDone = true;
+    predict(model, content.values, id);
+    content.values = []; //vaciar el array para el nuevo gesto
+    liveData.set(id,content);
   }
 };
 
@@ -298,6 +280,7 @@ const predict = (model, newSampleData, id) => {
     }
     //io.to(socket.id)
     io.emit("message", obj);
+    //console.log(id+"message"+obj.action)
   });
 };
 
@@ -337,6 +320,7 @@ io.on("connection", (socket) => {
   socket.on("message", function (obj) {
     //console.log('message: ' + obj.id);
     io.emit("message", obj);
+    
   });
 });
 
