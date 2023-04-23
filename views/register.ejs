@@ -10,37 +10,13 @@
   <body id="register">
     <form id="register" action="/new" method="POST">
       <p id="register">Register</p>
-      <input
-        id="text"
-        type="text"
-        name="user"
-        placeholder="Username"
-        required
-      />
-      <input id="text" type="text" name="name" placeholder="Name" required />
-      <input
-        id="text"
-        type="text"
-        name="surname"
-        placeholder="Surname"
-        required
-      />
-      <input id="text" type="text" name="age" placeholder="Age" required />
-      <input
-        id="text"
-        type="password"
-        name="pass"
-        placeholder="Password"
-        required
-      />
-      <input
-        id="text"
-        type="password"
-        name="pass2"
-        placeholder="Repeat the password"
-        required
-      />
-      <input id="button" type="submit" value="REGISTER" />
+      <input id="text" type="text" name="username" placeholder="Username" size="30" required />
+      <input id="text" type="text" name="name" placeholder="Name" size="30" required />
+      <input id="text" type="text" name="surname" placeholder="Surname" size="40" required/>
+      <input id="text" type="number" name="age" placeholder="Age" min="1" max="150" required />
+      <input id="text" type="password" name="pass" placeholder="Password" size="40" required/>
+      <input id="text" type="password" name="pass2" placeholder="Repeat the password" size="40" required/>
+      <input id="button" type="submit" value="SUBMIT" />
       <a id="button" href="/">BACK</a>
     </form>
   </body>

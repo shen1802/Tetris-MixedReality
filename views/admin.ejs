@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="" rel="stylesheet" type="text/css" />
+    <!--DataTable-->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <title>Admin</title>
+</head>
+
+<body>
+    <div id="header">
+        <p>Bienvenido <%= user %>
+        </p>
+        <form action="/logout" method="POST">
+            <input type="submit" value="salir" />
+        </form>
+    </div>
+    <div>
+        <div id="user_block">
+            <form id="add_user" action="/new" method="POST">
+                <p id="register">Add new user</p>
+                <input id="text" type="text" name="username" placeholder="Username" size="30" required />
+                <input id="text" type="text" name="name" placeholder="Name" size="30" required />
+                <input id="text" type="text" name="surname" placeholder="Surname" size="40" required />
+                <input id="text" type="number" name="age" placeholder="Age" min="1" max="150" required />
+                <input id="text" type="password" name="pass" placeholder="Password" size="40" required />
+                <input id="text" type="password" name="pass2" placeholder="Repeat the password" size="40" required />
+                <input id="button" type="submit" value="ADD" />
+            </form>
+            <table id="user" class="">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Surname</th>
+                        <th scope="col">Age</th>
+                        <th scope="col">Educational institution</th>
+                        <th scope="col">Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let i=0; i < user_list.length; i++) { %>
+                        <tr>
+                            <td>
+                                <%= i + 1%>
+                            </td>
+                            <td>
+                                <%= user_list[i].username%>
+                            </td>
+                            <td>
+                                <%= user_list[i].name%>
+                            </td>
+                            <td>
+                                <%= user_list[i].surname%>
+                            </td>
+                            <td>
+                                <%= user_list[i].age%>
+                            </td>
+                            <td>
+                                <%= user_list[i].institution%>
+                            </td>
+                            <td>
+                                <%= user_list[i].role%>
+                            </td>
+                        </tr>
+                        <% } %>
+                </tbody>
+            </table>
+        </div>
+        <div id="board_block">
+            <form id="add_board" action="/new" method="POST">
+                <p id="register">Add new board</p>
+                <input id="text" type="text" name="board_id" placeholder="Board" size="30" required />
+                <input id="text" type="text" name="taken" placeholder="Name" size="30" required />
+                <input id="button" type="submit" value="ADD" />
+            </form>
+            <table id="board" class="">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Id</th>
+                        <th scope="col">taken</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let i=0; i < board_list.length; i++) { %>
+                        <tr>
+                            <td>
+                                <%= i + 1%>
+                            </td>
+                            <td>
+                                <%= board_list[i].id%>
+                            </td>
+                            <td>
+                                <%= board_list[i].taken%>
+                            </td>
+                        </tr>
+                        <% } %>
+                </tbody>
+            </table>
+        </div>
+        <form id="add_institution" action="/new" method="POST">
+            <p id="register">Add new Educational institution</p>
+            <input id="text" type="text" name="board_id" placeholder="Board" size="30" required />
+            <input id="text" type="text" name="taken" placeholder="Name" size="30" required />
+            <input id="button" type="submit" value="ADD" />
+        </form>
+    </div>
+    <!--DataTable-->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#user').DataTable({
+                order: [[0, 'asc']],
+                lengthMenu: [
+                    [5, 10, 25, -1],
+                    [5, 10, 25, 'All'],
+                ],
+            });
+        });
+        $(document).ready(function () {
+            $('#board').DataTable({
+                order: [[0, 'asc']],
+                lengthMenu: [
+                    [5, 10, 25, -1],
+                    [5, 10, 25, 'All'],
+                ],
+            });
+        });
+    </script>
+</body>
+
+</html>

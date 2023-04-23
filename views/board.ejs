@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="tetris.css" rel="stylesheet" type="text/css" />
-    <title>Sync</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="tetris.css" rel="stylesheet" type="text/css" />
+  <title>Sync</title>
 </head>
 <script>
-  setInterval(function(){
-    if (<%= datos.boards.length === 0 %>) {
-      location.reload();
-    }
+  setInterval(function () {
+    if (<%= boards.length === 0 %>) {
+    location.reload();
+  }
   }, 10000); // Recarga la página cada 10 segundos
 </script>
+
 <body id="board">
-  <p>Bienvenido <%= datos.user %></p>
+  <p>Bienvenido <%= user %>
+  </p>
   <form action="/logout" method="POST">
     <input type="submit" value="salir" />
   </form>
@@ -24,13 +27,16 @@
       <label>Selecciona una placa para jugar</label>
       <select name="board" required>
         <option value="">---</option>
-        <% if(datos.boards.length){ for(var i = 0; i < datos.boards.length; i++) { %>
-        <option value="<%= datos.boards[i].id %>" "<% if (datos.boards[i].ocupado == "si") { %> disabled <% } %> > <%= datos.boards[i].id%> <% if (datos.boards[i].ocupado == "si") {%> - Placa en uso <% } else { %> - Disponible <% } %></option>
-        <% } } %>
+        <% if(boards.length){ for(var i=0; i < boards.length; i++) { %>
+          <option value="<%= boards[i].id %>" "<% if (boards[i].taken == " si") { %> disabled <% } %> > <%=
+                boards[i].id%><% if (boards[i].taken=="si" ) {%> - Placa en uso <% } else { %> - Disponible <% } %>
+          </option>
+          <% } } %>
       </select>
       <label>Si la lista esta vacia espera a que se detecten automaticamente las placas</label>
     </div>
     <input id="button" type="submit" value="Aceptar" />
   </form>
 </body>
+
 </html>

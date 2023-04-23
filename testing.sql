@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 05-03-2023 a las 12:50:06
+-- Tiempo de generación: 24-04-2023 a las 00:32:18
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.2.0
 
@@ -24,80 +24,77 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `Cubo`
+-- Estructura de tabla para la tabla `board`
 --
 
-CREATE TABLE `Cubo` (
+CREATE TABLE `board` (
   `id` int(3) NOT NULL,
-  `ocupado` varchar(255) NOT NULL
+  `taken` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `Cubo`
+-- Volcado de datos para la tabla `board`
 --
 
-INSERT INTO `Cubo` (`id`, `ocupado`) VALUES
-(1, 'no'),
-(2, 'no');
+INSERT INTO `board` (`id`, `taken`) VALUES
+(0, 'no');
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `Sesion`
+-- Estructura de tabla para la tabla `session`
 --
 
-CREATE TABLE `Sesion` (
-  `id` int(3) NOT NULL,
+CREATE TABLE `session` (
+  `id` int(4) NOT NULL,
   `username` varchar(255) NOT NULL,
-  `id_cubo` int(3) NOT NULL,
-  `puntos_sesion` int(10) DEFAULT NULL
+  `id_board` int(3) NOT NULL,
+  `session_score` int(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `Usuario`
+-- Estructura de tabla para la tabla `user`
 --
 
-CREATE TABLE `Usuario` (
+CREATE TABLE `user` (
   `username` varchar(255) NOT NULL,
-  `nombre` varchar(255) NOT NULL,
-  `apellidos` varchar(255) NOT NULL,
-  `edad` int(10) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `surname` varchar(255) NOT NULL,
+  `age` int(10) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `puntos` int(10) DEFAULT NULL
+  `role` varchar(10) DEFAULT NULL,
+  `institution` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `Usuario`
+-- Volcado de datos para la tabla `user`
 --
 
-INSERT INTO `Usuario` (`username`, `nombre`, `apellidos`, `edad`, `password`, `puntos`) VALUES
-('prueba1', 'prueba', 'tetris', 10, '1234', 0),
-('siao', 'Shihao', 'S', 23, '1234', NULL),
-('user1', 'user', 's', 12, '1234', 0),
-('user2', 'user2', 's', 20, '1234', 0);
+INSERT INTO `user` (`username`, `name`, `surname`, `age`, `password`, `role`, `institution`) VALUES
+('admin', 'admin', 'admin', 0, 'admin', 'admin', 'UCM');
 
 --
 -- Índices para tablas volcadas
 --
 
 --
--- Indices de la tabla `Cubo`
+-- Indices de la tabla `board`
 --
-ALTER TABLE `Cubo`
+ALTER TABLE `board`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indices de la tabla `Sesion`
+-- Indices de la tabla `session`
 --
-ALTER TABLE `Sesion`
+ALTER TABLE `session`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indices de la tabla `Usuario`
+-- Indices de la tabla `user`
 --
-ALTER TABLE `Usuario`
+ALTER TABLE `user`
   ADD PRIMARY KEY (`username`);
 
 --
@@ -105,16 +102,10 @@ ALTER TABLE `Usuario`
 --
 
 --
--- AUTO_INCREMENT de la tabla `Cubo`
+-- AUTO_INCREMENT de la tabla `session`
 --
-ALTER TABLE `Cubo`
-  MODIFY `id` int(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT de la tabla `Sesion`
---
-ALTER TABLE `Sesion`
-  MODIFY `id` int(3) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `session`
+  MODIFY `id` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

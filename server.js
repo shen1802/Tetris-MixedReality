@@ -54,7 +54,6 @@ client.on("message", (topic, message) => {
     if (dataAvailable && !started) {
       console.log("ready");
     }
-    
 
     let data = {
       xAcc: sensorData.accelerometer.x,
@@ -64,16 +63,14 @@ client.on("message", (topic, message) => {
       yGyro: sensorData.gyroscope.y,
       zGyro: sensorData.gyroscope.z,
     };
-    if(liveData.has(sensorData.id)){
-
-    }else{
+    if (liveData.has(sensorData.id)) {
+    } else {
       let content = {
         values: [],
         predictionDone: false,
-        numLinesRead: 35
-        
+        numLinesRead: 35,
       };
-      liveData.set(sensorData.id,content);
+      liveData.set(sensorData.id, content);
     }
     // sum up the absolutes
     if (liveData.get(sensorData.id).numLinesRead == numLinesPerFile) {
@@ -84,9 +81,9 @@ client.on("message", (topic, message) => {
 
       // check of it's above the threshold
       if (aSum_G >= threshold_gyro || aSum_A >= threshold_acc) {
-        let content= liveData.get(sensorData.id);
-        content.numLinesRead=0;
-        liveData.set(sensorData.id,content);
+        let content = liveData.get(sensorData.id);
+        content.numLinesRead = 0;
+        liveData.set(sensorData.id, content);
         //console.log("suma absoluto : "+aSum+" xG:"+data.xGyro+"  yG"+data.yGyro+"  zG"+data.zGyro);
         datafile =
           "sequence,AccelerometerX,AccelerometerY,AccelerometerZ,GyroscopeX,GyroscopeY,GyroscopeZ\n";
@@ -96,7 +93,7 @@ client.on("message", (topic, message) => {
     if (liveData.get(sensorData.id).numLinesRead < numLinesPerFile) {
       if (liveData.get(sensorData.id).values.length < numValuesExpected) {
         // rellenar liveData[] hasta recopilar todos los valores de un gesto
-        let content= liveData.get(sensorData.id);
+        let content = liveData.get(sensorData.id);
         content.values.push(
           data.xAcc,
           data.yAcc,
@@ -106,9 +103,7 @@ client.on("message", (topic, message) => {
           data.zGyro
         );
         content.predictionDone = false;
-        
-        
-        
+
         datafile +=
           numLinesRead +
           "," +
@@ -125,7 +120,7 @@ client.on("message", (topic, message) => {
           data.zGyro +
           "\n";
         content.numLinesRead++;
-        liveData.set(sensorData.id,content);
+        liveData.set(sensorData.id, content);
         //console.log("leyendo lineas: "+numLinesRead);
       }
 
@@ -138,13 +133,9 @@ client.on("message", (topic, message) => {
               const writeStream = fs.createWriteStream(filename);
               writeStream.write(datafile);
               numFileWrite++;*/
-        processSensorData(
-          sensorData.id
-        );
+        processSensorData(sensorData.id);
       }
     }
-
-    
 
     started = true;
   }
@@ -160,7 +151,7 @@ client.on("message", (topic, message) => {
     console.log(lista);
     let current_array = [];
 
-    database.query("SELECT * FROM Cubo", function (SELECTerror, result) {
+    database.query("SELECT * FROM board", function (SELECTerror, result) {
       if (SELECTerror) throw SELECTerror;
       else {
         current_array = result.map((item) => {
@@ -173,7 +164,7 @@ client.on("message", (topic, message) => {
         for (let i = current_array.length - 1; i >= 0; i--) {
           if (current_array[i].ocupado == "no") {
             database.query(
-              "DELETE FROM Cubo WHERE id = ? ",
+              "DELETE FROM board WHERE id = ? ",
               [current_array[i].id],
               function (error, result) {
                 if (error) throw error;
@@ -196,7 +187,7 @@ client.on("message", (topic, message) => {
           if (existe == false) {
             console.log("no existe y se inserta");
             database.query(
-              "INSERT INTO Cubo (id, ocupado) VALUES (?, 'no')",
+              "INSERT INTO board (id, taken) VALUES (?, 'no')",
               [lista[i]],
               function (error, result) {
                 if (error) throw error;
@@ -224,17 +215,15 @@ function extractNumberFromMAC(mac) {
   return result;
 }
 
-const processSensorData = (
-  id
-) => {
+const processSensorData = (id) => {
   // Perform TensorFlow.js processing on the accelerometer and gyroscope data
   // to extract relevant information for the Tetris game
-  let content=liveData.get(id);
-  if (content.predictionDone==false && content.values.length) {
+  let content = liveData.get(id);
+  if (content.predictionDone == false && content.values.length) {
     content.predictionDone = true;
     predict(model, content.values, id);
     content.values = []; //vaciar el array para el nuevo gesto
-    liveData.set(id,content);
+    liveData.set(id, content);
   }
 };
 
@@ -297,7 +286,7 @@ io.on("connection", (socket) => {
 
   socket.on("game_over", function (game) {
     database.query(
-      "INSERT INTO Sesion (id, username, id_cubo, puntos_sesion) VALUES (NULL, ?, ?, ?)",
+      "INSERT INTO session (id, username, id_board, session_score) VALUES (NULL, ?, ?, ?)",
       [game.username, game.board, game.score]
     ),
       function (error, result) {
@@ -320,7 +309,6 @@ io.on("connection", (socket) => {
   socket.on("message", function (obj) {
     //console.log('message: ' + obj.id);
     io.emit("message", obj);
-    
   });
 });
 
@@ -339,16 +327,17 @@ app.use(function (req, res, next) {
 /*----- express.json and express.urlencode: is for passing data when the client send an PUT-PATCH */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname + "/public"));
+app.use(express.static(__dirname + "/src"));
 
 app.get("/", function (req, res) {
   //si ya habíamos iniciado sesión redireccionar a la pantalla correspondiente
-  if (req.session.loggedin) {
-    if (req.session.board == undefined) {
-      database.query("SELECT * FROM Cubo", function (error, data) {
+  if (req.session.loggedin && req.session) {
+    if (req.session.board === undefined) {
+      database.query("SELECT * FROM board", function (error, data) {
         if (error) throw error;
         res.render("board", {
-          datos: { boards: data, user: req.session.username },
+          boards: data,
+          user: req.session.username,
         });
       });
     } else {
@@ -367,12 +356,24 @@ app.get("/register", function (req, res) {
 });
 
 app.get("/board", function (req, res) {
-  database.query("SELECT * FROM Cubo", function (error, data) {
-    if (error) throw error;
-    res.render("board", {
-      datos: { boards: data, user: req.session.username },
+  if (req.session.role === "student") {
+    database.query("SELECT * FROM board", function (error, data) {
+      if (error) throw error;
+      else res.render("board", { boards: data, user: req.session.username });
     });
-  });
+  } else if (req.session.role === "professor") {
+    res.render("professor");
+  } else if (req.session.role === "admin") {
+    database.query("SELECT * FROM user", function (error, user_data) {
+      if (error) throw error;
+      else {
+        database.query("SELECT * FROM board", function (error, board_data) {
+          if (error) throw error;
+          else res.render("admin", { user: req.session.username, user_list: user_data, board_list: board_data });
+        });
+      }
+    });
+  }
 });
 
 app.get("/user_error", function (req, res) {
@@ -387,7 +388,7 @@ app.post("/tetris", function (req, res) {
   //console.log(req.session.board);
   //actualizar en la base de datos el estado de la placa
   database.query(
-    "UPDATE Cubo SET ocupado = 'si' WHERE id = ?",
+    "UPDATE board SET taken = 'si' WHERE id = ?",
     [req.body.board],
     function (error, result) {
       if (error) throw error;
@@ -407,16 +408,17 @@ app.post("/auth", function (request, response, next) {
   //comprobación de registro
   if (username && password) {
     database.query(
-      "SELECT * FROM Usuario WHERE username = ? and password = ?",
+      "SELECT * FROM user WHERE username = ? and password = ?",
       [username, password],
-      function (error, results) {
+      function (error, result) {
         // If there is an issue with the query, output the error
         if (error) throw error;
         // If the account exists
-        if (results.length > 0) {
+        if (result.length > 0) {
           // Authenticate the user
           request.session.loggedin = true;
-          request.session.username = username;
+          request.session.username = result[0].username;
+          request.session.role = result[0].role;
           response.redirect("/board");
         } else {
           response.render("login_error");
@@ -427,39 +429,47 @@ app.post("/auth", function (request, response, next) {
   }
 });
 
-app.post("/new", function (request, response, next) {
-  let username = request.body.user;
+app.post("/new", function (request, response) {
+  let username = request.body.username;
   let name = request.body.name;
   let surname = request.body.surname;
-  let age = parseInt(request.body.age);
+  let age = request.body.age;
   let password = request.body.pass;
   let password_verification = request.body.pass2;
 
   if (username && name && surname && age && password && password_verification) {
-    if (password == password_verification) {
+    if (password === password_verification) {
+      //check if username is already taken or exist on the database
       database.query(
-        "SELECT username FROM Usuario WHERE username = ?",
+        "SELECT username FROM user WHERE username = ?",
         [username],
         function (error, result) {
-          if (result) {
-            alert("El usuario ya existe");
-            response.render("register");
+          if (error) throw error;
+          else {
+            if (result.length > 0) {
+              response.render("register_ko");
+            } else {
+              //insert the new username into the database
+              database.query(
+                "INSERT INTO user (username, name, surname, age, password, role) VALUES (?, ?, ?, ?, ?,'student')",
+                [username, name, surname, age, password],
+                function (error) {
+                  // If there is an issue with the query, output the error
+                  if (error) throw error;
+                  else {
+                    response.render("register_ok");
+                  }
+                }
+              );
+            }
           }
-        }
-      );
-      database.query(
-        "INSERT INTO Usuario (username, nombre, apellidos, edad, password, puntos) VALUES (?, ?, ?, ?, ?, ?)",
-        [username, name, surname, age, password, 0],
-        function (error, results) {
-          // If there is an issue with the query, output the error
-          if (error) response.render("login_error");
-          else response.redirect("/");
-          response.end();
         }
       );
     } else {
       response.render("password_error");
     }
+  } else {
+    response.end("Se ha producido un error en alguno de los campos introducidos");
   }
 });
 
@@ -467,7 +477,7 @@ app.post("/logout", function (req, res) {
   if (req.session) {
     if (req.session?.board) {
       database.query(
-        "UPDATE Cubo SET ocupado = 'no' WHERE id = ?",
+        "UPDATE board SET taken = 'no' WHERE id = ?",
         [req.session.board],
         function (error, result) {
           if (error) throw error;
@@ -482,7 +492,7 @@ app.post("/logout", function (req, res) {
       }
     });
   } else {
-    res.end();
+    res.end("{'message': 'no se ha iniciado sesion previamente'}");
   }
 });
 
