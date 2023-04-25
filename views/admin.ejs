@@ -22,16 +22,25 @@
     <div>
         <div id="user_block">
             <form id="add_user" action="/new" method="POST">
-                <p id="register">Add new user</p>
-                <input id="text" type="text" name="username" placeholder="Username" size="30" required />
-                <input id="text" type="text" name="name" placeholder="Name" size="30" required />
-                <input id="text" type="text" name="surname" placeholder="Surname" size="40" required />
-                <input id="text" type="number" name="age" placeholder="Age" min="1" max="150" required />
-                <input id="text" type="password" name="pass" placeholder="Password" size="40" required />
-                <input id="text" type="password" name="pass2" placeholder="Repeat the password" size="40" required />
+                <h1 id="register">Add new user</h1>
+                <input type="text" name="username" placeholder="Username" size="30" required />
+                <input type="text" name="name" placeholder="Name" size="30" required />
+                <input type="text" name="surname" placeholder="Surname" size="40" required />
+                <input type="number" name="age" placeholder="Age" min="1" max="150" required />
+                <input id="pass" type="password" name="pass" placeholder="Password" size="40" required />
+                <select name="institution" required>
+                    <% if(institution_list.length){ for(var i=0; i < institution_list.length; i++) { %>
+                        <option value="<%= institution_list[i].id %>">
+                            <%=institution_list[i].name %>
+                        </option>
+                        <% } }%>
+                </select>
+                <input id="pass2" type="password" name="pass2" hidden size="40" />
+                <input type="text" name="admin" value="true" hidden>
                 <input id="button" type="submit" value="ADD" />
             </form>
-            <table id="user" class="">
+            <button id="user_delete_button">Delete selected row</button>
+            <table id="user">
                 <thead>
                     <tr>
                         <th scope="col">#</th>
@@ -41,6 +50,7 @@
                         <th scope="col">Age</th>
                         <th scope="col">Educational institution</th>
                         <th scope="col">Role</th>
+                        <th scope="col">Update</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,20 +62,46 @@
                             <td>
                                 <%= user_list[i].username%>
                             </td>
-                            <td>
+                            <td <% if(user_list[i].name === "admin") {%> contenteditable="false" <% } else {%> contenteditable="true" <%}%> >
                                 <%= user_list[i].name%>
                             </td>
-                            <td>
+                            <td <% if(user_list[i].name === "admin") {%> contenteditable="false" <% } else {%> contenteditable="true" <%}%> >
                                 <%= user_list[i].surname%>
                             </td>
-                            <td>
-                                <%= user_list[i].age%>
+                            <td <% if(user_list[i].name === "admin") {%> contenteditable="false" <% } else {%> contenteditable="true" <%}%> >
+                                <input type="number" name="age" placeholder="<%= user_list[i].age%>" min="1" max="150" required />
+                            </td>
+                            <td <% if(user_list[i].name === "admin") {%> contenteditable="false" <% } else {%> contenteditable="true" <%}%> >
+                                <select name="institution" required>
+                                    <option value="<%= user_list[i].institution_id%>"><%= user_list[i].institution%></option>
+                                    <% if(institution_list.length){ for(var j = 0; j < institution_list.length; j++) { %>
+                                      <option value="<%= institution_list[j].id %>">
+                                        <%=institution_list[j].name %>
+                                      </option>
+                                      <% } }%>
+                                </select>
+                            </td>
+                            <% if(user_list[i].name === "admin") { %>
+                                <td>
+                                    <%= user_list[i].role_description%>
+                                </td> 
+                            <% } else { %>
+                                <td contenteditable="true">
+                                    <select name="role" required>
+                                        <option value="<%= user_list[i].role %>"> <%= user_list[i].role_description %></option>
+                                        <% if (role_list.length) { for(let i=0; i < role_list.length; i++) { %>
+                                          <option value="<%= role_list[i].role %>" > <%= role_list[i].description %>
+                                          </option>
+                                          <% } } %>
+                                    </select>
+                                </td>
+                                <% } %>
+                                
                             </td>
                             <td>
-                                <%= user_list[i].institution%>
-                            </td>
-                            <td>
-                                <%= user_list[i].role%>
+                                <% if(user_list[i].name !== "admin") {%>
+                                <button>Update</button>
+                                <% } %>
                             </td>
                         </tr>
                         <% } %>
@@ -73,13 +109,8 @@
             </table>
         </div>
         <div id="board_block">
-            <form id="add_board" action="/new" method="POST">
-                <p id="register">Add new board</p>
-                <input id="text" type="text" name="board_id" placeholder="Board" size="30" required />
-                <input id="text" type="text" name="taken" placeholder="Name" size="30" required />
-                <input id="button" type="submit" value="ADD" />
-            </form>
-            <table id="board" class="">
+            <h1 id="register">List of boards</h1>
+            <table id="board">
                 <thead>
                     <tr>
                         <th scope="col">#</th>
@@ -104,26 +135,96 @@
                 </tbody>
             </table>
         </div>
-        <form id="add_institution" action="/new" method="POST">
-            <p id="register">Add new Educational institution</p>
-            <input id="text" type="text" name="board_id" placeholder="Board" size="30" required />
-            <input id="text" type="text" name="taken" placeholder="Name" size="30" required />
-            <input id="button" type="submit" value="ADD" />
-        </form>
+        <div id="institution_block">
+            <form id="add_institution" action="/new_institution" method="POST">
+                <h1 id="register">Add New Educational Institution</h1>
+                <input type="text" name="institution" placeholder="Institution name" size="60" required />
+                <input id="button" type="submit" value="ADD" />
+            </form>
+            <button id="institution_delete_button">Delete selected row</button>
+            <table id="institution">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Id</th>
+                        <th scope="col">Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let i=0; i < institution_list.length; i++) { %>
+                        <tr>
+                            <td>
+                                <%= i + 1%>
+                            </td>
+                            <td>
+                                <%= institution_list[i].id%>
+                            </td>
+                            <td>
+                                <%= institution_list[i].name%>
+                            </td>
+                        </tr>
+                        <% } %>
+                </tbody>
+            </table>
+        </div>
     </div>
     <!--DataTable-->
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function () {
-            $('#user').DataTable({
+            let username = "";
+            let userTable = $('#user').DataTable({
                 order: [[0, 'asc']],
                 lengthMenu: [
                     [5, 10, 25, -1],
                     [5, 10, 25, 'All'],
                 ],
             });
+
+            $('#user tbody').on('click', 'tr', function () {
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                } else {
+                    userTable.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                }
+
+                username = $(this).find('td:eq(1)').text().trim();
+                name = $(this).find('td:eq(2)').text().trim();
+                surname = $(this).find('td:eq(3)').text().trim();
+                age = $(this).find('td:eq(4)').text().trim();
+                institution = $(this).find('td:eq(5)').text().trim();
+                role = $(this).find('td:eq(6)').text().trim();
+                console.log(username);
+                console.log(name);
+                console.log(surname);
+                console.log(age);
+                console.log(institution);
+                console.log(role);
+                
+
+            });
+
+            $('#user_delete_button').click(function () {
+                // Send POST request to server
+                $.ajax({
+                    url: '/delete_user',  // Replace with your server-side endpoint URL
+                    method: 'POST',
+                    data: { username: username },  // Replace with your data
+                    success: function (response) {
+                        // Handle successful response from server
+                        //window.alert(response.message);
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error from server
+                        console.log(error);
+                    }
+                });
+            });
+
         });
+
         $(document).ready(function () {
             $('#board').DataTable({
                 order: [[0, 'asc']],
@@ -133,6 +234,58 @@
                 ],
             });
         });
+
+        $(document).ready(function () {
+            let selectedColumnValue = "";
+            let institutionTable = $('#institution').DataTable({
+                order: [[0, 'asc']],
+                lengthMenu: [
+                    [5, 10, 25, -1],
+                    [5, 10, 25, 'All'],
+                ],
+            });
+
+            $('#institution tbody').on('click', 'tr', function () {
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                } else {
+                    institutionTable.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                }
+
+                selectedColumnValue = $(this).find('td:eq(1)').text();
+
+            });
+
+            $('#institution_delete_button').click(function () {
+                // Send POST request to server
+                $.ajax({
+                    url: '/delete_institution',  // Replace with your server-side endpoint URL
+                    method: 'POST',
+                    data: { institution_id: selectedColumnValue },  // Replace with your data
+                    success: function (response) {
+                        // Handle successful response from server
+                        //window.alert(response.message);
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error from server
+                        console.log(error);
+                    }
+                });
+            });
+
+        });
+
+        var passInput = document.getElementById('pass');
+        var pass2Input = document.getElementById('pass2');
+
+        passInput.addEventListener('input', function () {
+            pass2Input.value = passInput.value;
+        });
+
+        $(document).ajaxStop(function () {
+                window.location.reload();
+            });
     </script>
 </body>
 

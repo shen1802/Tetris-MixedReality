@@ -352,24 +352,41 @@ app.get("/", function (req, res) {
 });
 
 app.get("/register", function (req, res) {
-  res.render("register");
+  database.query("SELECT * FROM institution", function (error, data) {
+    if (error) throw error;
+    else res.render("register", { institution_list: data });
+  });
 });
 
 app.get("/board", function (req, res) {
-  if (req.session.role === "student") {
+  if (req.session.role === 3) {
     database.query("SELECT * FROM board", function (error, data) {
       if (error) throw error;
       else res.render("board", { boards: data, user: req.session.username });
     });
-  } else if (req.session.role === "professor") {
+  } else if (req.session.role === 2) {
     res.render("professor");
-  } else if (req.session.role === "admin") {
-    database.query("SELECT * FROM user", function (error, user_data) {
+
+  } else if (req.session.role === 1) {
+    database.query("SELECT u.*, i.name AS institution, r.description AS role_description FROM user u JOIN institution i ON u.institution_id = i.id JOIN role r ON u.role = r.id", function (error, user_data) {
       if (error) throw error;
       else {
+        console.log(user_data);
         database.query("SELECT * FROM board", function (error, board_data) {
           if (error) throw error;
-          else res.render("admin", { user: req.session.username, user_list: user_data, board_list: board_data });
+          else {
+            database.query("SELECT * FROM institution", function (error, institution_data) {
+              if (error) throw error;
+              else {
+                database.query("SELECT * FROM role", function (error, role_data) {
+                  if (error) throw error;
+                  else {
+                    res.render("admin", { user: req.session.username, user_list: user_data, board_list: board_data, institution_list: institution_data, role_list: role_data });
+                  }
+                });
+              }
+            });
+          }
         });
       }
     });
@@ -399,7 +416,35 @@ app.post("/tetris", function (req, res) {
   });
 });
 
-app.post("/auth", function (request, response, next) {
+app.post("/delete_user", function(req, res){
+  let username = req.body.username;
+  if (username.trim() === "admin"){
+    res.status(200).json({ message: "Operation not allowed" });
+  }else {
+    database.query("DELETE from user WHERE username = ?", [username.trim()], function(error, result){
+      if (error) throw error;
+      else {
+        res.redirect("/board"); 
+      }
+    });
+  }
+});
+
+app.post("/delete_institution", function(req, res){
+  let id = req.body.institution_id;
+  if (id.trim() === "1"){
+    res.status(200).json({ message: "Operation not allowed" });
+  }else {
+    database.query("DELETE from institution WHERE id = ?", [id.trim()], function(error, result){
+      if (error) throw error;
+      else {
+        res.redirect("/board"); 
+      }
+    });
+  }
+});
+
+app.post("/auth", function (request, response) {
   //recibir credenciales e iniciar sesion
   let username = request.body.user;
   let password = request.body.pass;
@@ -429,6 +474,14 @@ app.post("/auth", function (request, response, next) {
   }
 });
 
+app.post("/new_institution", function (req, res) {
+  let institution = req.body.institution;
+  database.query("INSERT INTO institution (id, name) VALUES (null, ?)", [institution], function (error, result) {
+    if (error) throw error;
+    else res.redirect("/board");
+  });
+});
+
 app.post("/new", function (request, response) {
   let username = request.body.username;
   let name = request.body.name;
@@ -436,8 +489,10 @@ app.post("/new", function (request, response) {
   let age = request.body.age;
   let password = request.body.pass;
   let password_verification = request.body.pass2;
+  let admin = request.body.admin;
+  let institution = request.body.institution;
 
-  if (username && name && surname && age && password && password_verification) {
+  if (username && name && surname && age && password && password_verification && institution) {
     if (password === password_verification) {
       //check if username is already taken or exist on the database
       database.query(
@@ -451,12 +506,14 @@ app.post("/new", function (request, response) {
             } else {
               //insert the new username into the database
               database.query(
-                "INSERT INTO user (username, name, surname, age, password, role) VALUES (?, ?, ?, ?, ?,'student')",
-                [username, name, surname, age, password],
+                "INSERT INTO user (username, name, surname, age, password, role, institution_id) VALUES (?, ?, ?, ?, ?,'3', ?)",
+                [username, name, surname, age, password, institution],
                 function (error) {
                   // If there is an issue with the query, output the error
                   if (error) throw error;
-                  else {
+                  else if (admin) {
+                    response.redirect("/board");
+                  } else {
                     response.render("register_ok");
                   }
                 }
