@@ -157,7 +157,7 @@ client.on("message", (topic, message) => {
         current_array = result.map((item) => {
           return {
             id: item.id,
-            ocupado: item.ocupado,
+            ocupado: item.taken,
           };
         });
 
