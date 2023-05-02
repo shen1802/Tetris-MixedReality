@@ -9,6 +9,8 @@
     "express-validator": "^7.0.1",
     "mqtt": "^4.3.7",
     "mysql": "^2.18.1",
-    "socket.io": "^4.6.0"
+    "socket.io": "^4.6.0",
+    "@xapi/xapi": "^2.2.0",
+    "dotenv": "^16.0.3"
   }
 }
