@@ -9,7 +9,7 @@ const io = new Server(server);
 const mqtt = require("mqtt");
 const tf = require("@tensorflow/tfjs");
 const { query } = require("express");
-const { count } = require("console");
+const { count, group } = require("console");
 const fs = require("fs");
 require("@tensorflow/tfjs-node");
 
@@ -365,9 +365,15 @@ app.get("/board", function (req, res) {
       else res.render("board", { boards: data, user: req.session.username });
     });
   } else if (req.session.role === 2) {
-    database.query("SELECT * FROM user WHERE institution_id = ?", [req.session.institution_id], function (error, data) {
+    database.query("SELECT u.*, i.name AS institution_name, r.description AS role_description, g.name AS study_group_name FROM user u JOIN institution i ON u.institution_id = i.id JOIN role r ON u.role = r.id LEFT JOIN study_group g ON g.id = u.study_group_id WHERE u.institution_id = ?", [req.session.institution_id], function (error, user_data) {
+      console.log(user_data);
       if (error) throw error;
-      else res.render("professor", { boards: data, user: req.session.username });
+      else {
+        database.query("SELECT * FROM study_group where institution_id = ?", [req.session.institution_id], function (error, group_data) {
+          if (error) throw error;
+          else res.render("professor", { user_list: user_data, user: req.session.username, group_list: group_data });
+        });
+      }
     });
   } else if (req.session.role === 1) {
     database.query("SELECT u.*, i.name AS institution, r.description AS role_description FROM user u JOIN institution i ON u.institution_id = i.id JOIN role r ON u.role = r.id", function (error, user_data) {
@@ -376,16 +382,16 @@ app.get("/board", function (req, res) {
         database.query("SELECT * FROM board", function (error, board_data) {
           if (error) throw error;
           else {
-            database.query("SELECT * FROM institution", function (error, institution_data) {
+            database.query("SELECT institution.*, COUNT(study_group.id) as num_group FROM institution LEFT JOIN study_group ON institution.id = study_group.institution_id GROUP BY institution.id", function (error, institution_data) {
               if (error) throw error;
               else {
                 database.query("SELECT * FROM role", function (error, role_data) {
                   if (error) throw error;
                   else {
-                    database.query("SELECT * FROM class", function (error, class_data){
+                    database.query("SELECT * FROM study_group", function (error, group_data) {
                       if (error) throw error;
                       else {
-                        res.render("admin", { user: req.session.username, user_list: user_data, board_list: board_data, institution_list: institution_data, role_list: role_data, class_list: class_data });
+                        res.render("admin", { user: req.session.username, user_list: user_data, board_list: board_data, institution_list: institution_data, role_list: role_data, group_list: group_data });
                       }
                     });
                   }
@@ -424,7 +430,9 @@ app.post("/tetris", function (req, res) {
 
 app.post("/delete_user", function (req, res) {
   let username = req.body.username;
-  if (username.trim() === "admin") {
+  let role = req.body.role;
+  console.log(role);
+  if (role === "admin" || role === "professor") {
     res.status(200).json({ message: "Operation not allowed" });
   } else {
     database.query("DELETE from user WHERE username = ?", [username.trim()], function (error, result) {
@@ -450,6 +458,16 @@ app.post("/delete_institution", function (req, res) {
   }
 });
 
+app.post("/delete_group", function (req, res) {
+  let id = req.body.group_id;
+  database.query("DELETE from study_group WHERE id = ?", [id.trim()], function (error, result) {
+    if (error) throw error;
+    else {
+      res.redirect("/board");
+    }
+  });
+});
+
 app.post("/update_user", function (req, res) {
   let username = req.body.username;
   let name = req.body.name;
@@ -462,7 +480,7 @@ app.post("/update_user", function (req, res) {
   database.query("UPDATE user SET name = ?, surname = ?, age = ?, role = ?, institution_id = ? WHERE username = ?", [name, surname, age, role, institution, username], function (error, result) {
     if (error) throw error;
     else {
-      res.redirect("/board"); 
+      res.redirect("/board");
     }
   });
 });
@@ -484,7 +502,6 @@ app.post("/auth", function (request, response) {
         // If the account exists
         if (result.length > 0) {
           // Authenticate the user
-          console.log(result);
           request.session.loggedin = true;
           request.session.username = result[0].username;
           request.session.role = result[0].role;
@@ -499,21 +516,41 @@ app.post("/auth", function (request, response) {
   }
 });
 
-app.post("/new_institution", function (req, res) { 
+app.post("/new_institution", function (req, res) {
   let institution = req.body.institution;
   database.query("SELECT id FROM institution", function (error, institutions_id) {
     if (error) throw error;
     else {
       let val = Math.floor(1000 + Math.random() * 9000);
-      while(institutions_id.some(e => e.id === val)) {
+      while (institutions_id.some(e => e.id === val)) {
         val = Math.floor(1000 + Math.random() * 9000);
       }
       database.query("INSERT INTO institution (id, name) VALUES (?, ?)", [val, institution], function (error, result) {
         if (error) throw error;
-        else res.redirect("/board")});
+        else res.redirect("/board")
+      });
     }
   });
-  
+
+});
+
+app.post("/new_group", function (req, res) {
+  let institution_id = req.body.institution_id;
+  let group = req.body.group;
+  database.query("SELECT id FROM study_group", function (error, groups_id) {
+    if (error) throw error;
+    else {
+      let val = Math.floor(1000000000 + Math.random() * 9000000000);
+      while (groups_id.some(e => e.id === val)) {
+        val = Math.floor(1000000000 + Math.random() * 9000000000);
+      }
+      database.query("INSERT INTO study_group (id, name, institution_id) VALUES (?, ?, ?)", [val, group, institution_id], function (error, result) {
+        if (error) throw error;
+        else res.redirect("/board")
+      });
+    }
+  });
+
 });
 
 app.post("/new", function (request, response) {

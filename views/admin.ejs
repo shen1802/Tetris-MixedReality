@@ -163,6 +163,7 @@
                         <th scope="col">#</th>
                         <th scope="col">Id</th>
                         <th scope="col">Name</th>
+                        <th scope="col">Subgroups</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -172,10 +173,13 @@
                                 <%= i + 1%>
                             </td>
                             <td>
-                                <%= institution_list[i].id%>
+                                <%= institution_list[i].id %>
                             </td>
                             <td>
-                                <%= institution_list[i].name%>
+                                <%= institution_list[i].name %>
+                            </td>
+                            <td>
+                                <%= institution_list[i].num_class %>
                             </td>
                         </tr>
                         <% } %>

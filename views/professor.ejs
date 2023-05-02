@@ -28,7 +28,14 @@
                 <input type="text" name="surname" placeholder="Surname" size="40" required />
                 <input type="number" name="age" placeholder="Age" min="1" max="150" required />
                 <input id="pass" type="password" name="pass" placeholder="Password" size="40" required />
-                <input name="institution" value="" required>
+                <select name="group">
+                    <%for(var i=0; i < group_list.length; i++) { %>
+                        <option value="<%= group_list[i].id %>">
+                            <%=group_list[i].name %>
+                        </option>
+                        <% }%>
+                </select>
+                <input name="institution" value="<%=user_list[0].institution_id%>" hidden>
                 <input id="pass2" type="password" name="pass2" hidden size="40" />
                 <input type="text" name="admin" value="true" hidden>
                 <input type="submit" value="ADD" />
@@ -44,6 +51,7 @@
                         <th scope="col">Surname</th>
                         <th scope="col">Age</th>
                         <th scope="col">Educational institution</th>
+                        <th scope="col">Group</th>
                         <th scope="col">Role</th>
                     </tr>
                 </thead>
@@ -56,30 +64,79 @@
                             <td>
                                 <%= user_list[i].username%>
                             </td>
-                            <td id="username" <% if(user_list[i].name==="admin" ) {%> contenteditable="false" <% } else
-                                    {%> contenteditable="true" <%}%> >
+                            <td <% if(user_list[i].role===2) {%> contenteditable="false" <% } else {%>
+                                    contenteditable="true" <%}%> >
                                         <%= user_list[i].name%>
                             </td>
-                            <td <% if(user_list[i].name==="admin" ) {%> contenteditable="false" <% } else {%>
+                            <td <% if(user_list[i].role===2) {%> contenteditable="false" <% } else {%>
                                     contenteditable="true" <%}%> >
                                         <%= user_list[i].surname %>
                             </td>
-                            <td <% if(user_list[i].name !=="admin" ) { %> contenteditable="true" <% } %> >
-                                    <% if(user_list[i].name==="admin" ) { %>
-                                        <%= user_list[i].age %>
-                                            <% } else {%>
-                                                <input id="age" type="number" name="age"
-                                                    placeholder="<%= user_list[i].age%>" value="<%= user_list[i].age%>"
-                                                    min="1" max="150" required />
-                                                <% } %>
-
+                            <td contenteditable="true">
+                                <% if(user_list[i].role===2) { %>
+                                    <%= user_list[i].age %>
+                                        <% } else {%>
+                                            <input id="age" type="number" name="age"
+                                                placeholder="<%= user_list[i].age%>" value="<%= user_list[i].age%>"
+                                                min="1" max="150" required />
+                                            <% } %>
+                            </td>
+                            <td>
+                                <%= user_list[i].institution_name %>
                             </td>
                             <td <% if(user_list[i].role !==2 ) {%> contenteditable="true" <% } %> >
-                                    <%= user_list[i].institution %>
+                                    <% if(user_list[i].role===2 ) { %>
+                                        <%= user_list[i].study_group_name %>
+                                            <% } else { %>
+                                                <select name="study_group">
+                                                    <option value="<%= user_list[i].study_group_id%>">
+                                                        <%= user_list[i].study_group_name%>
+                                                    </option>
+                                                    <% if(group_list.length){ for(var j=0; j <
+                                                        group_list.length; j++) { %>
+                                                        <option value="<%= group_list[j].id %>">
+                                                            <%=group_list[j].name %>
+                                                        </option>
+                                                        <% } } }%>
+                                                </select>
                             </td>
-                            <%= user_list[i].role_description%>
+                            <td>
+                                <%= user_list[i].role_description %>
                             </td>
-
+                        </tr>
+                        <% } %>
+                </tbody>
+            </table>
+        </div>
+        <div id="group_block">
+            <form id="add_group" action="/new_group" method="POST">
+                <h1 id="register">Add new group</h1>
+                <input type="text" name="group" placeholder="Group name" size="60" required />
+                <input type="text" name="institution_id" value="<%= user_list[0].institution_id%>" hidden>
+                <input type="submit" value="ADD" />
+            </form>
+            <button id="group_delete_button">Delete selected row</button>
+            <button id="group_update_button">Update</button>
+            <table id="group">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Id</th>
+                        <th scope="col">Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let i=0; i < group_list.length; i++) { %>
+                        <tr>
+                            <td>
+                                <%= i + 1%>
+                            </td>
+                            <td>
+                                <%= group_list[i].id %>
+                            </td>
+                            <td>
+                                <%= group_list[i].name %>
+                            </td>
                         </tr>
                         <% } %>
                 </tbody>
@@ -118,8 +175,8 @@
                 name = $(this).find('td:eq(2)').text().trim();
                 surname = $(this).find('td:eq(3)').text().trim();
                 age = $(this).find('input:eq(0)').val();
-                institution = $(this).find('select:eq(0)').val();
-                role = $(this).find('select:eq(1)').val();
+                institution = $(this).find('td:eq(5)').text().trim();
+                role = $(this).find('td:eq(6)').text().trim();
 
             });
 
@@ -128,7 +185,7 @@
                 $.ajax({
                     url: '/delete_user',
                     method: 'POST',
-                    data: { username: username },
+                    data: { username: username, role: role },
                     success: function (response) {
                         // Handle successful response from server
                         //window.alert(response.message);
@@ -164,7 +221,7 @@
 
         $(document).ready(function () {
             let selectedColumnValue = "";
-            let institutionTable = $('#institution').DataTable({
+            let institutionTable = $('#group').DataTable({
                 order: [[0, 'asc']],
                 lengthMenu: [
                     [5, 10, 25, -1],
@@ -172,7 +229,7 @@
                 ],
             });
 
-            $('#institution tbody').on('click', 'tr', function () {
+            $('#group tbody').on('click', 'tr', function () {
                 if ($(this).hasClass('selected')) {
                     $(this).removeClass('selected');
                 } else {
@@ -184,12 +241,12 @@
 
             });
 
-            $('#institution_delete_button').click(function () {
+            $('#group_delete_button').click(function () {
                 // Send POST request to server
                 $.ajax({
-                    url: '/delete_institution',  // Replace with your server-side endpoint URL
+                    url: '/delete_group',  // Replace with your server-side endpoint URL
                     method: 'POST',
-                    data: { institution_id: selectedColumnValue },  // Replace with your data
+                    data: { group_id: selectedColumnValue },  // Replace with your data
                     success: function (response) {
                         // Handle successful response from server
                         //window.alert(response.message);
