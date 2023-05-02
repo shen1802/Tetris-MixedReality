@@ -444,6 +444,21 @@ app.post("/delete_institution", function(req, res){
   }
 });
 
+app.post("/update_user", function(req, res){
+  let username = req.body.username;
+  let name = req.body.name;
+  let surname = req.body.surname;
+  let age = req.body.age;
+  let role = req.body.role;
+  let institution = req.body.institution;
+  console.log(username);
+  console.log(name);
+  console.log(surname);
+  console.log(age);
+  console.log(role.toString());
+  console.log(institution);
+});
+
 app.post("/auth", function (request, response) {
   //recibir credenciales e iniciar sesion
   let username = request.body.user;

@@ -50,7 +50,7 @@
                         <th scope="col">Age</th>
                         <th scope="col">Educational institution</th>
                         <th scope="col">Role</th>
-                        <th scope="col">Update</th>
+                        <th scope="col">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -69,7 +69,7 @@
                                 <%= user_list[i].surname%>
                             </td>
                             <td <% if(user_list[i].name === "admin") {%> contenteditable="false" <% } else {%> contenteditable="true" <%}%> >
-                                <input type="number" name="age" placeholder="<%= user_list[i].age%>" min="1" max="150" required />
+                                <input id="age" type="number" name="age" placeholder="<%= user_list[i].age%>" min="1" max="150" required />
                             </td>
                             <td <% if(user_list[i].name === "admin") {%> contenteditable="false" <% } else {%> contenteditable="true" <%}%> >
                                 <select name="institution" required>
@@ -100,7 +100,7 @@
                             </td>
                             <td>
                                 <% if(user_list[i].name !== "admin") {%>
-                                <button>Update</button>
+                                <button id="user_update_button">Update</button>
                                 <% } %>
                             </td>
                         </tr>
@@ -171,9 +171,15 @@
     <!--DataTable-->
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script>
+    <script type="module">
         $(document).ready(function () {
             let username = "";
+            let name = "";
+            let surname = "";
+            let age = 0;
+            let institution = "";
+            let role = "";
+
             let userTable = $('#user').DataTable({
                 order: [[0, 'asc']],
                 lengthMenu: [
@@ -183,6 +189,7 @@
             });
 
             $('#user tbody').on('click', 'tr', function () {
+                console.log(this);
                 if ($(this).hasClass('selected')) {
                     $(this).removeClass('selected');
                 } else {
@@ -196,22 +203,33 @@
                 age = $(this).find('td:eq(4)').text().trim();
                 institution = $(this).find('td:eq(5)').text().trim();
                 role = $(this).find('td:eq(6)').text().trim();
-                console.log(username);
-                console.log(name);
-                console.log(surname);
-                console.log(age);
-                console.log(institution);
-                console.log(role);
-                
 
             });
 
             $('#user_delete_button').click(function () {
                 // Send POST request to server
                 $.ajax({
-                    url: '/delete_user',  // Replace with your server-side endpoint URL
+                    url: '/delete_user',
                     method: 'POST',
-                    data: { username: username },  // Replace with your data
+                    data: { username: username },
+                    success: function (response) {
+                        // Handle successful response from server
+                        //window.alert(response.message);
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error from server
+                        console.log(error);
+                    }
+                });
+            });
+
+            $('#user_update_button').click(function () {
+                console.log(username);
+                // Send POST request to server
+                $.ajax({
+                    url: '/update_user',
+                    method: 'POST',
+                    data: { username: username, name: name, surname: surname, age: age, institution: institution, role: role },
                     success: function (response) {
                         // Handle successful response from server
                         //window.alert(response.message);
