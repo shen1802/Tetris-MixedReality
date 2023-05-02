@@ -28,15 +28,7 @@
                 <input type="text" name="surname" placeholder="Surname" size="40" required />
                 <input type="number" name="age" placeholder="Age" min="1" max="150" required />
                 <input id="pass" type="password" name="pass" placeholder="Password" size="40" required />
-                <select name="institution" required>
-                    <% if(institution_list.length){ for(var i=0; i < institution_list.length; i++) { %>
-                        <% if(institution_list[i].name !=="admin" ) {%>
-                            <option value="<%= institution_list[i].id %>">
-                                <%=institution_list[i].name %>
-                            </option>
-                            <% } }%>
-                                <% } %>
-                </select>
+                <input name="institution" value="" required>
                 <input id="pass2" type="password" name="pass2" hidden size="40" />
                 <input type="text" name="admin" value="true" hidden>
                 <input type="submit" value="ADD" />
@@ -82,101 +74,12 @@
                                                 <% } %>
 
                             </td>
-                            <td <% if(user_list[i].name !=="admin" ) {%> contenteditable="true" <% } %> >
-                                    <% if(user_list[i].name==="admin" ) { %>
-                                        <%= user_list[i].institution %>
-                                            <% } else { %>
-                                                <select name="institution" required>
-                                                    <option value="<%= user_list[i].institution_id%>">
-                                                        <%= user_list[i].institution%>
-                                                    </option>
-                                                    <% if(institution_list.length){ for(var j=0; j <
-                                                        institution_list.length; j++) { %>
-                                                        <option value="<%= institution_list[j].id %>">
-                                                            <%=institution_list[j].name %>
-                                                        </option>
-                                                        <% } } }%>
-                                                </select>
+                            <td <% if(user_list[i].role !==2 ) {%> contenteditable="true" <% } %> >
+                                    <%= user_list[i].institution %>
                             </td>
-                            <% if(user_list[i].name==="admin" ) { %>
-                                <td>
-                                    <%= user_list[i].role_description%>
-                                </td>
-                                <% } else { %>
-                                    <td contenteditable="true">
-                                        <select name="role" required>
-                                            <option value="<%= user_list[i].role %>">
-                                                <%= user_list[i].role_description %>
-                                            </option>
-                                            <% if (role_list.length) { for(let i=0; i < role_list.length; i++) { %>
-                                                <option value="<%= role_list[i].id %>">
-                                                    <%= role_list[i].description %>
-                                                </option>
-                                                <% } } %>
-                                        </select>
-                                    </td>
-                                    <% } %>
+                            <%= user_list[i].role_description%>
+                            </td>
 
-                                        </td>
-                        </tr>
-                        <% } %>
-                </tbody>
-            </table>
-        </div>
-        <div id="board_block">
-            <h1 id="register">List of boards</h1>
-            <table id="board">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Id</th>
-                        <th scope="col">taken</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% for (let i=0; i < board_list.length; i++) { %>
-                        <tr>
-                            <td>
-                                <%= i + 1%>
-                            </td>
-                            <td>
-                                <%= board_list[i].id%>
-                            </td>
-                            <td>
-                                <%= board_list[i].taken%>
-                            </td>
-                        </tr>
-                        <% } %>
-                </tbody>
-            </table>
-        </div>
-        <div id="institution_block">
-            <form id="add_institution" action="/new_institution" method="POST">
-                <h1 id="register">Add New Educational Institution</h1>
-                <input type="text" name="institution" placeholder="Institution name" size="60" required />
-                <input type="submit" value="ADD" />
-            </form>
-            <button id="institution_delete_button">Delete selected row</button>
-            <table id="institution">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Id</th>
-                        <th scope="col">Name</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% for (let i=0; i < institution_list.length; i++) { %>
-                        <tr>
-                            <td>
-                                <%= i + 1%>
-                            </td>
-                            <td>
-                                <%= institution_list[i].id%>
-                            </td>
-                            <td>
-                                <%= institution_list[i].name%>
-                            </td>
                         </tr>
                         <% } %>
                 </tbody>
@@ -257,16 +160,6 @@
                 });
             });
 
-        });
-
-        $(document).ready(function () {
-            $('#board').DataTable({
-                order: [[0, 'asc']],
-                lengthMenu: [
-                    [5, 10, 25, -1],
-                    [5, 10, 25, 'All'],
-                ],
-            });
         });
 
         $(document).ready(function () {

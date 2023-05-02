@@ -368,7 +368,7 @@ input {
 body#login {
   margin-left: 8%;
   margin-top: 10%;
-  background-image: url("images/tetris.jpeg");
+  background-image: url("/images/tetris.jpeg");
 }
 
 /*login form*/
@@ -429,7 +429,7 @@ body#register {
   display: flex;
   justify-content: center;
   margin-top: 5%;
-  background-image: url("images/tetris.jpeg");
+  background-image: url("/images/tetris.jpeg");
 }
 
 form#register {

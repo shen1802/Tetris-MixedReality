@@ -327,7 +327,7 @@ app.use(function (req, res, next) {
 /*----- express.json and express.urlencode: is for passing data when the client send an PUT-PATCH */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname + "/src"));
+app.use(express.static(__dirname + "/public"));
 
 app.get("/", function (req, res) {
   //si ya habíamos iniciado sesión redireccionar a la pantalla correspondiente
@@ -365,13 +365,14 @@ app.get("/board", function (req, res) {
       else res.render("board", { boards: data, user: req.session.username });
     });
   } else if (req.session.role === 2) {
-    res.render("professor");
-
+    database.query("SELECT * FROM user WHERE institution_id = ?", [req.session.institution_id], function (error, data) {
+      if (error) throw error;
+      else res.render("professor", { boards: data, user: req.session.username });
+    });
   } else if (req.session.role === 1) {
     database.query("SELECT u.*, i.name AS institution, r.description AS role_description FROM user u JOIN institution i ON u.institution_id = i.id JOIN role r ON u.role = r.id", function (error, user_data) {
       if (error) throw error;
       else {
-        console.log(user_data);
         database.query("SELECT * FROM board", function (error, board_data) {
           if (error) throw error;
           else {
@@ -381,7 +382,12 @@ app.get("/board", function (req, res) {
                 database.query("SELECT * FROM role", function (error, role_data) {
                   if (error) throw error;
                   else {
-                    res.render("admin", { user: req.session.username, user_list: user_data, board_list: board_data, institution_list: institution_data, role_list: role_data });
+                    database.query("SELECT * FROM class", function (error, class_data){
+                      if (error) throw error;
+                      else {
+                        res.render("admin", { user: req.session.username, user_list: user_data, board_list: board_data, institution_list: institution_data, role_list: role_data, class_list: class_data });
+                      }
+                    });
                   }
                 });
               }
@@ -416,47 +422,49 @@ app.post("/tetris", function (req, res) {
   });
 });
 
-app.post("/delete_user", function(req, res){
+app.post("/delete_user", function (req, res) {
   let username = req.body.username;
-  if (username.trim() === "admin"){
+  if (username.trim() === "admin") {
     res.status(200).json({ message: "Operation not allowed" });
-  }else {
-    database.query("DELETE from user WHERE username = ?", [username.trim()], function(error, result){
+  } else {
+    database.query("DELETE from user WHERE username = ?", [username.trim()], function (error, result) {
       if (error) throw error;
       else {
-        res.redirect("/board"); 
+        res.redirect("/board");
       }
     });
   }
 });
 
-app.post("/delete_institution", function(req, res){
+app.post("/delete_institution", function (req, res) {
   let id = req.body.institution_id;
-  if (id.trim() === "1"){
+  if (id.trim() === "0") {
     res.status(200).json({ message: "Operation not allowed" });
-  }else {
-    database.query("DELETE from institution WHERE id = ?", [id.trim()], function(error, result){
+  } else {
+    database.query("DELETE from institution WHERE id = ?", [id.trim()], function (error, result) {
       if (error) throw error;
       else {
-        res.redirect("/board"); 
+        res.redirect("/board");
       }
     });
   }
 });
 
-app.post("/update_user", function(req, res){
+app.post("/update_user", function (req, res) {
   let username = req.body.username;
   let name = req.body.name;
   let surname = req.body.surname;
   let age = req.body.age;
   let role = req.body.role;
   let institution = req.body.institution;
-  console.log(username);
-  console.log(name);
-  console.log(surname);
-  console.log(age);
-  console.log(role.toString());
-  console.log(institution);
+  console.log(role);
+
+  database.query("UPDATE user SET name = ?, surname = ?, age = ?, role = ?, institution_id = ? WHERE username = ?", [name, surname, age, role, institution, username], function (error, result) {
+    if (error) throw error;
+    else {
+      res.redirect("/board"); 
+    }
+  });
 });
 
 app.post("/auth", function (request, response) {
@@ -476,9 +484,11 @@ app.post("/auth", function (request, response) {
         // If the account exists
         if (result.length > 0) {
           // Authenticate the user
+          console.log(result);
           request.session.loggedin = true;
           request.session.username = result[0].username;
           request.session.role = result[0].role;
+          request.session.institution_id = result[0].institution_id;
           response.redirect("/board");
         } else {
           response.render("login_error");
@@ -489,12 +499,21 @@ app.post("/auth", function (request, response) {
   }
 });
 
-app.post("/new_institution", function (req, res) {
+app.post("/new_institution", function (req, res) { 
   let institution = req.body.institution;
-  database.query("INSERT INTO institution (id, name) VALUES (null, ?)", [institution], function (error, result) {
+  database.query("SELECT id FROM institution", function (error, institutions_id) {
     if (error) throw error;
-    else res.redirect("/board");
+    else {
+      let val = Math.floor(1000 + Math.random() * 9000);
+      while(institutions_id.some(e => e.id === val)) {
+        val = Math.floor(1000 + Math.random() * 9000);
+      }
+      database.query("INSERT INTO institution (id, name) VALUES (?, ?)", [val, institution], function (error, result) {
+        if (error) throw error;
+        else res.redirect("/board")});
+    }
   });
+  
 });
 
 app.post("/new", function (request, response) {
