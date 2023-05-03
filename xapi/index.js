@@ -1,7 +1,7 @@
 require('dotenv').config()
 const XAPI = require("@xapi/xapi");
-const { iniciaPartida } = require('./xapi-tetris');
-const { creaUUID } = require('./xapi-utils');
+const funciones = require('./xapi-tetris');
+
 
 const endpoint = process.env.LRS_ENDPOINT || "https://my-lms.com/endpoint";
 const username = process.env.LRS_USERNAME || "";
