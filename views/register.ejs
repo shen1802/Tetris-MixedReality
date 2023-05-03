@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="tetris.css" rel="stylesheet" type="text/css" />
+  <link href="/css/tetris.css" rel="stylesheet" type="text/css" />
   <title>Register</title>
 </head>
 
@@ -17,11 +17,13 @@
     <input id="text" type="text" name="surname" placeholder="Surname" size="40" required />
     <input id="text" type="number" name="age" placeholder="Age" min="1" max="150" required />
     <select name="institution" required>
-      <% if(institution_list.length){ for(var i=0; i < institution_list.length; i++) { %>
-        <option value="<%= institution_list[i].id %>">
-          <%=institution_list[i].name %>
-        </option>
-        <% } }%>
+        <% if(institution_list.length){ for(var i=0; i < institution_list.length; i++) { %>
+          <% if(institution_list[i].name !== "admin") {%>
+            <option value="<%= institution_list[i].id %>">
+                <%=institution_list[i].name %>
+            </option>
+            <% } }%>
+        <% } %>
     </select>
     <input id="text" type="password" name="pass" placeholder="Password" size="40" required />
     <input id="text" type="password" name="pass2" placeholder="Repeat the password" size="40" required />
