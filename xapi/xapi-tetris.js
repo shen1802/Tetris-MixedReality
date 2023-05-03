@@ -4,7 +4,7 @@ const Verbs = require('./verbs');
 const { agent } = require('./xapi-utils');
 
 const IRI_PREFIX = 'https://www.tetris.com/';
-
+//funciones auxiliares para paramtrizar una funcion que genera trazas y usarla para varias trazas
 function actividadFicha(ficha){
     let fichaId;
     switch(ficha) {
@@ -539,6 +539,19 @@ function salirPaginaWeb({ user, email}) {
   
   
   
-
-exports.abrirWeb = abrirWeb;
-exports.iniciaPartida = iniciaPartida;
+module.exports = {
+    iniciaPartida,
+    finalizaPartida,
+    pausaPartida,
+    resumePartida,
+    accessHighscore,
+    accessAbout,
+    iraJuego,
+    ficha,
+    destruyeFila,
+    arrow,
+    interfaz,
+    abrirWeb,
+    salirPaginaWeb,
+    gyroAndAccel,
+  };
