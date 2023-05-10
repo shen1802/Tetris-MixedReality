@@ -12,6 +12,24 @@ const { query } = require("express");
 const { count, group } = require("console");
 const fs = require("fs");
 require("@tensorflow/tfjs-node");
+const NodeCache = require('node-cache');
+const cache = new NodeCache();
+//--------XAPI----------------------------------
+
+require('dotenv').config()
+const XAPI = require("@xapi/xapi");
+const funciones = require('./xapi/xapi-tetris');
+const endpoint = process.env.LRS_ENDPOINT || "https://my-lms.com/endpoint";
+const username = process.env.LRS_USERNAME || "";
+const password = process.env.LRS_PASSWORD || "";
+const auth = XAPI.toBasicAuth(username, password);
+const xapi = new XAPI({
+  endpoint: endpoint,
+  auth: auth
+});
+
+
+//----------------------------------------------
 
 const client = mqtt.connect("mqtt://localhost");
 
@@ -283,6 +301,21 @@ app.set("view engine", "ejs");
 io.on("connection", (socket) => {
   console.log("Nuevo usuario contado con ID: " + socket.id);
   //console.log(socket.request);
+  
+  socket.on("start", function (data) {
+    const myStatement = funciones.iniciaPartida({
+      user: data.user,
+      email: data.email,
+      sessionId : data.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      classId: data.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
+      niclaId: data.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
+    });  
+    // Send your statement
+    xapi.sendStatement({
+      statement: myStatement
+    });
+  });
+
 
   socket.on("game_over", function (game) {
     database.query(
@@ -506,6 +539,10 @@ app.post("/auth", function (request, response) {
           request.session.username = result[0].username;
           request.session.role = result[0].role;
           request.session.institution_id = result[0].institution_id;
+          ///-----
+          cache.set(result[0].username, {sessionId: request.sessionID, classId: result[0].classId , niclaId: ""});
+          console.log(cache.get(result[0].username));
+          //-------
           response.redirect("/board");
         } else {
           response.render("login_error");

@@ -2,15 +2,16 @@
   "dependencies": {
     "@tensorflow/tfjs": "^4.2.0",
     "@tensorflow/tfjs-node": "^4.2.0",
+    "@xapi/xapi": "^2.2.0",
     "body-parser": "^1.20.2",
+    "dotenv": "^16.0.3",
     "ejs": "^3.1.9",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "express-validator": "^7.0.1",
     "mqtt": "^4.3.7",
     "mysql": "^2.18.1",
-    "socket.io": "^4.6.0",
-    "@xapi/xapi": "^2.2.0",
-    "dotenv": "^16.0.3"
+    "node-cache": "^5.1.2",
+    "socket.io": "^4.6.0"
   }
 }

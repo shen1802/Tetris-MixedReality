@@ -156,6 +156,15 @@ function Tetris() {
   console.log("ID del tetris: " + id);
   console.log("Nombre del jugador: " + user);
 
+
+
+   //-----------
+
+   const nombresPiezas = ["T", "L", "S", "Z", "J", "O", "I"];
+
+
+
+
   var self = this;
 
   this.stats = new Stats();
@@ -187,6 +196,11 @@ function Tetris() {
     } else {
       self.gameOver();
     }
+    
+   //let data =new Object();
+   //data.user = user;
+   //socket.emit("start", data);
+   //console.log(data);
   };
 
   /**

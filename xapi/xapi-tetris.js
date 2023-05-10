@@ -504,7 +504,7 @@ function salirPaginaWeb({ user, email}) {
     return myStatement;
   }
   
-  function gyroAndAccel({user, email, sessionId, classId, niclaId, gyrox, gyroy, gyroz , accx, accy, accz,ficha,accion, iduser,puntosMAx}) {
+  function gyroAndAccel({user, email, sessionId, classId, niclaId, gyrox, gyroy, gyroz , accx, accy, accz}) {
     const myStatement = {
         actor: agent(user, email),
         verb: Verbs.INTERACTED,
@@ -515,7 +515,7 @@ function salirPaginaWeb({ user, email}) {
             accelerometer_y: accy , 
             accelerometer_z: accz ,
             gyroscope_x : gyrox  ,
-            gyroscope_y: gyroz  ,
+            gyroscope_y: gyroy  ,
             gyroscope_z: gyroz
 
             

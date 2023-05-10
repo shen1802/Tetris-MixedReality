@@ -28,7 +28,7 @@
       <select name="board" required>
         <option value="">---</option>
         <% if(boards.length){ for(var i=0; i < boards.length; i++) { %>
-          <option value="<%= boards[i].id %>" "<% if (boards[i].taken == " si") { %> disabled <% } %> > <%=
+          <option value="<%= boards[i].id %>" "<% if (boards[i].taken === "si") { %> disabled <% } %> > <%=
                 boards[i].id%><% if (boards[i].taken=="si" ) {%> - Placa en uso <% } else { %> - Disponible <% } %>
           </option>
           <% } } %>
