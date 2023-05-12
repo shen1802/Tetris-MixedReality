@@ -14,6 +14,7 @@ const fs = require("fs");
 require("@tensorflow/tfjs-node");
 const NodeCache = require('node-cache');
 const cache = new NodeCache();
+const userNicla = new NodeCache();
 //--------XAPI----------------------------------
 
 require('dotenv').config()
@@ -303,12 +304,13 @@ io.on("connection", (socket) => {
   //console.log(socket.request);
   
   socket.on("start", function (data) {
+    let dtt= cache.get(data.user);
     const myStatement = funciones.iniciaPartida({
       user: data.user,
-      email: data.email,
-      sessionId : data.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
-      classId: data.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
-      niclaId: data.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
+      email: "mm@ucm.es",
+      sessionId : dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
+      niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
     });  
     // Send your statement
     xapi.sendStatement({
@@ -456,6 +458,11 @@ app.post("/tetris", function (req, res) {
       if (error) throw error;
     }
   );
+  //mantener cache con los usuarios que tienen iniciado sesion
+  let dat= cache.get(req.session.username);
+  dat.niclaId=req.session.board;
+  cache.set(req.session.username,dat);
+  userNicla.set(req.session.board,req.session.username);
   res.render("tetris", {
     datos: { board: req.session.board, user: req.session.username },
   });
@@ -465,7 +472,7 @@ app.post("/delete_user", function (req, res) {
   let username = req.body.username;
   let role = req.body.role;
   console.log(role);
-  if (role === "admin" || role === "professor") {
+  if (role === "student" || role === "professor") {
     res.status(200).json({ message: "Operation not allowed" });
   } else {
     database.query("DELETE from user WHERE username = ?", [username.trim()], function (error, result) {
@@ -540,8 +547,8 @@ app.post("/auth", function (request, response) {
           request.session.role = result[0].role;
           request.session.institution_id = result[0].institution_id;
           ///-----
-          cache.set(result[0].username, {sessionId: request.sessionID, classId: result[0].classId , niclaId: ""});
-          console.log(cache.get(result[0].username));
+          cache.set(result[0].username, {sessionId: request.sessionID, classId: result[0].study_group_id , niclaId: "", enJuego: "no"});
+          
           //-------
           response.redirect("/board");
         } else {
@@ -552,7 +559,7 @@ app.post("/auth", function (request, response) {
     );
   }
 });
-
+si
 app.post("/new_institution", function (req, res) {
   let institution = req.body.institution;
   database.query("SELECT id FROM institution", function (error, institutions_id) {
@@ -648,7 +655,10 @@ app.post("/logout", function (req, res) {
           if (error) throw error;
         }
       );
+      
     }
+    cache.del(req.session.username);
+    
     req.session.destroy((err) => {
       if (err) {
         res.status(400).send("Unable to log out");
@@ -656,6 +666,7 @@ app.post("/logout", function (req, res) {
         res.render("login");
       }
     });
+
   } else {
     res.end("{'message': 'no se ha iniciado sesion previamente'}");
   }
