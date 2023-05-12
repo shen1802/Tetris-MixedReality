@@ -1,7 +1,7 @@
 
 const Activities = require('./activities');
 const Verbs = require('./verbs');
-const { agent } = require('./xapi-utils');
+const { agent, generateUUID } = require('./xapi-utils');
 
 const IRI_PREFIX = 'https://www.tetris.com/';
 //funciones auxiliares para paramtrizar una funcion que genera trazas y usarla para varias trazas
@@ -117,7 +117,7 @@ function iniciaPartida({user, email, sessionId, classId, niclaId}) {
           }),
         },
         "context": {
-            "registration": sessionId,
+            "registration": generateUUID(sessionId),
             "contextActivities": {
                 "parent": [actividadClase(classId),
                 Activities.TETRISS]
@@ -150,7 +150,7 @@ function finalizaPartida({user, email, sessionId, classId, niclaId, puntosPartid
           }),
         },
         "context": {
-            "registration": sessionId,
+            "registration": generateUUID(sessionId),
             "contextActivities": {
                 "parent": [actividadClase(classId),
                 Activities.TETRISS]
@@ -183,7 +183,7 @@ function pausaPartida({user, email, sessionId, classId, niclaId, puntosPartida,a
           }),
         },
         "context": {
-            "registration": sessionId,
+            "registration": generateUUID(sessionId),
             "contextActivities": {
                 "parent": [actividadClase(classId),
                 Activities.TETRISS]
@@ -216,7 +216,7 @@ function resumePartida({user, email, sessionId, classId, niclaId, puntosPartida,
           }),
         },
         "context": {
-            "registration": sessionId,
+            "registration": generateUUID(sessionId),
             "contextActivities": {
                 "parent": [actividadClase(classId),
                 Activities.TETRISS]
@@ -250,7 +250,7 @@ function accessHighscore({user, email, sessionId, classId, niclaId, puntosPartid
           }),
         },
         "context": {
-            "registration": sessionId,
+            "registration": generateUUID(sessionId),
             "contextActivities": {
                 "parent": [actividadClase(classId),
                 Activities.HIGHSCORE]
@@ -284,7 +284,7 @@ function accessAbout({user, email, sessionId, classId, niclaId, puntosPartida,at
           }),
         },
         "context": {
-            "registration": sessionId,
+            "registration": generateUUID(sessionId),
             "contextActivities": {
                 "parent": [actividadClase(classId),
                 Activities.ABOUT]
@@ -320,7 +320,7 @@ function iraJuego({user, email, sessionId, classId, niclaId, puntosPartida,attem
           }),
         },
         "context": {
-            "registration": sessionId,
+            "registration": generateUUID(sessionId),
             "contextActivities": {
                 "parent": [actividadClase(classId),
                 Activities.PLAY]
@@ -361,7 +361,7 @@ function ficha({user, email, sessionId, classId, niclaId, puntosPartida,attemptt
           }),
         },
         "context": {
-            "registration": sessionId,
+            "registration": generateUUID(sessionId),
             "contextActivities": {
                 "parent": [actividadClase(classId),
                 actividadFicha(ficha)]
@@ -402,7 +402,7 @@ function destruyeFila({user, email, sessionId, classId, niclaId, puntosPartida,a
           }),
         },
         "context": {
-            "registration": sessionId,
+            "registration": generateUUID(sessionId),
             "contextActivities": {
                 "parent": [actividadClase(classId),
                     Activities.DESTROY_ROW]
@@ -443,7 +443,7 @@ function arrow({user, email, sessionId, classId, niclaId, puntosPartida,attemptt
           }),
         },
         "context": {
-            "registration": sessionId,
+            "registration": generateUUID(sessionId),
             "contextActivities": {
                 "parent": [actividadClase(classId),
                     actividadMovimientoArrow(movimiento)]
@@ -466,7 +466,7 @@ function interfaz({user, email, sessionId, classId, niclaId, boton}) {
         verb: Verbs.PRESSED,
         object: botonPresionadoActivity(boton),
         "context": {
-            "registration": sessionId,
+            "registration": generateUUID(sessionId),
             "contextActivities": {
                 "parent": [actividadClase(classId),
                     botonPresionadoActivity(boton)]
@@ -522,7 +522,7 @@ function salirPaginaWeb({ user, email}) {
           }),
         },
         "context": {
-            "registration": sessionId,
+            "registration": generateUUID(sessionId),
             "contextActivities": {
                 "parent": [actividadClase(classId),
                 Activities.TETRISS]

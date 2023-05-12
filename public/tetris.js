@@ -197,10 +197,10 @@ function Tetris() {
       self.gameOver();
     }
     
-   //let data =new Object();
-   //data.user = user;
-   //socket.emit("start", data);
-   //console.log(data);
+   let data =new Object();
+   data.user = user;
+   socket.emit("start", data);
+   
   };
 
   /**
