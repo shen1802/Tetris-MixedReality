@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 03, 2023 at 10:04 AM
+-- Generation Time: May 12, 2023 at 06:48 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -33,11 +33,6 @@ CREATE TABLE `board` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Truncate table before insert `board`
---
-
-TRUNCATE TABLE `board`;
---
 -- Dumping data for table `board`
 --
 
@@ -56,18 +51,11 @@ CREATE TABLE `institution` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Truncate table before insert `institution`
---
-
-TRUNCATE TABLE `institution`;
---
 -- Dumping data for table `institution`
 --
 
 INSERT INTO `institution` (`id`, `name`) VALUES
 (0, 'admin'),
-(6458, 'Universidad Autónoma de Madrid'),
-(5242, 'Universidad Carlos III de Madrid'),
 (4203, 'Universidad Complutense de Madrid'),
 (5522, 'Universidad Politécnica de Madrid'),
 (5812, 'Universidad Rey Juan Carlos');
@@ -83,11 +71,6 @@ CREATE TABLE `role` (
   `description` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Truncate table before insert `role`
---
-
-TRUNCATE TABLE `role`;
 --
 -- Dumping data for table `role`
 --
@@ -110,11 +93,6 @@ CREATE TABLE `session` (
   `session_score` int(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Truncate table before insert `session`
---
-
-TRUNCATE TABLE `session`;
 -- --------------------------------------------------------
 
 --
@@ -127,11 +105,6 @@ CREATE TABLE `study_group` (
   `institution_id` int(4) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Truncate table before insert `study_group`
---
-
-TRUNCATE TABLE `study_group`;
 --
 -- Dumping data for table `study_group`
 --
@@ -157,18 +130,13 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Truncate table before insert `user`
---
-
-TRUNCATE TABLE `user`;
---
 -- Dumping data for table `user`
 --
 
 INSERT INTO `user` (`username`, `name`, `surname`, `age`, `password`, `role`, `institution_id`, `study_group_id`) VALUES
 ('admin', 'admin', 'admin', 0, 'admin', 1, 0, NULL),
-('profe', 'Tamayo', 'Salas', 32, '1234', 2, 4203, NULL),
-('Siao', 'Shihao', 'Shen', 23, '1234', 3, 4203, NULL);
+('profe', 'Tamayo', 'Martín', 43, '1234', 2, 4203, NULL),
+('prueba', 'prueba', 'prueba', 23, '1234', 3, 5522, NULL);
 
 --
 -- Indexes for dumped tables
@@ -191,25 +159,33 @@ ALTER TABLE `institution`
 -- Indexes for table `role`
 --
 ALTER TABLE `role`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `description` (`description`);
 
 --
 -- Indexes for table `session`
 --
 ALTER TABLE `session`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_board` (`id_board`),
+  ADD KEY `username` (`username`);
 
 --
 -- Indexes for table `study_group`
 --
 ALTER TABLE `study_group`
+  ADD PRIMARY KEY (`id`),
   ADD KEY `study_group_institution_id_fk` (`institution_id`);
 
 --
 -- Indexes for table `user`
 --
 ALTER TABLE `user`
-  ADD PRIMARY KEY (`username`);
+  ADD PRIMARY KEY (`username`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD KEY `institution_id` (`institution_id`),
+  ADD KEY `study_group_id` (`study_group_id`),
+  ADD KEY `role` (`role`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -226,10 +202,26 @@ ALTER TABLE `session`
 --
 
 --
+-- Constraints for table `session`
+--
+ALTER TABLE `session`
+  ADD CONSTRAINT `session_ibfk_1` FOREIGN KEY (`id_board`) REFERENCES `board` (`id`),
+  ADD CONSTRAINT `session_ibfk_2` FOREIGN KEY (`username`) REFERENCES `user` (`username`);
+
+--
 -- Constraints for table `study_group`
 --
 ALTER TABLE `study_group`
+  ADD CONSTRAINT `study_group_ibfk_1` FOREIGN KEY (`institution_id`) REFERENCES `institution` (`id`),
   ADD CONSTRAINT `study_group_institution_id_fk` FOREIGN KEY (`institution_id`) REFERENCES `institution` (`id`);
+
+--
+-- Constraints for table `user`
+--
+ALTER TABLE `user`
+  ADD CONSTRAINT `user_ibfk_1` FOREIGN KEY (`institution_id`) REFERENCES `institution` (`id`),
+  ADD CONSTRAINT `user_ibfk_2` FOREIGN KEY (`study_group_id`) REFERENCES `study_group` (`id`),
+  ADD CONSTRAINT `user_ibfk_3` FOREIGN KEY (`role`) REFERENCES `role` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -469,13 +469,13 @@ app.post("/tetris", function (req, res) {
 });
 
 app.post("/delete_user", function (req, res) {
-  let username = req.body.username;
-  let role = req.body.role;
-  console.log(role);
-  if (role === "student" || role === "professor") {
+  const data = new URLSearchParams(req.body.data);
+  const role = data.get('role');
+  const username = data.get('username');
+  if (role === "admin" || role === "professor") {
     res.status(200).json({ message: "Operation not allowed" });
   } else {
-    database.query("DELETE from user WHERE username = ?", [username.trim()], function (error, result) {
+    database.query("DELETE from user WHERE username = ?", [username], function (error, result) {
       if (error) throw error;
       else {
         res.redirect("/board");
@@ -487,10 +487,13 @@ app.post("/delete_user", function (req, res) {
 app.post("/delete_institution", function (req, res) {
   let id = req.body.institution_id;
   if (id.trim() === "0") {
-    res.status(200).json({ message: "Operation not allowed" });
+    res.status(500).send("Is not possible to delete the admin institution");
   } else {
     database.query("DELETE from institution WHERE id = ?", [id.trim()], function (error, result) {
-      if (error) throw error;
+      if (error) {
+        console.log(error.message);
+        res.status(500).send(error.message);
+      }
       else {
         res.redirect("/board");
       }
@@ -509,14 +512,13 @@ app.post("/delete_group", function (req, res) {
 });
 
 app.post("/update_user", function (req, res) {
-  let username = req.body.username;
-  let name = req.body.name;
-  let surname = req.body.surname;
-  let age = req.body.age;
-  let role = req.body.role;
-  let institution = req.body.institution;
-  console.log(role);
-
+  const data = new URLSearchParams(req.body.data);
+  const name = data.get('name');
+  const surname = data.get('surname');
+  const age = data.get('age');
+  const role = data.get('role');
+  const institution = data.get('institution');
+  const username = data.get('username');
   database.query("UPDATE user SET name = ?, surname = ?, age = ?, role = ?, institution_id = ? WHERE username = ?", [name, surname, age, role, institution, username], function (error, result) {
     if (error) throw error;
     else {
@@ -559,9 +561,12 @@ app.post("/auth", function (request, response) {
     );
   }
 });
-si
+
 app.post("/new_institution", function (req, res) {
-  let institution = req.body.institution;
+  const data = new URLSearchParams(req.body.data);
+  console.log(data);
+  const institution = data.get('institution');
+  console.log(institution);
   database.query("SELECT id FROM institution", function (error, institutions_id) {
     if (error) throw error;
     else {
@@ -570,7 +575,10 @@ app.post("/new_institution", function (req, res) {
         val = Math.floor(1000 + Math.random() * 9000);
       }
       database.query("INSERT INTO institution (id, name) VALUES (?, ?)", [val, institution], function (error, result) {
-        if (error) throw error;
+        if (error) {
+          console.log(error.message);
+          res.status(500).send(error.message);
+        }
         else res.redirect("/board")
       });
     }
