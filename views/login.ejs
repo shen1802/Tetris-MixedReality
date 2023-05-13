@@ -1,32 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="/css/tetris.css" rel="stylesheet" type="text/css" />
-    <title>Login</title>
-  </head>
-  <body id="login">
-    <form id="login" action="/auth" method="POST">
-      <p id="iniciar-sesion">Sign In</p>
-      <input
-        id="text"
-        type="text"
-        name="user"
-        placeholder="Username"
-        required
-      />
-      <input
-        id="text"
-        type="password"
-        name="pass"
-        placeholder="Password"
-        required
-      />
-      <input id="button" type="submit" value="LOGIN" />
-      <hr />
-      <a id="button" href="register">REGISTER</a>
-    </form>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/css/tetris.css" type="text/css">
+  <link rel="stylesheet" href="/css/form.css" type="text/css">
+  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <title>Login</title>
+</head>
+
+<body>
+  <form id="login" action="/auth" method="POST">
+    <p class="iniciar-sesion">Sign In</p>
+    <input class="text" type="text" name="user" placeholder="Username" required />
+    <input class="text" type="password" name="pass" placeholder="Password" required />
+    <input id="submit-button" class="button" type="submit" value="LOGIN" />
+    <hr />
+    <a id="href-button" class="button" href="register">REGISTER</a>
+  </form>
+</body>
+
+<script>
+  $(document).ready(function () {
+    $('#login').submit(function (event) {
+      // Evitar envío convencional del formulario
+      event.preventDefault();
+      // Obtener los datos del formulario
+      let formData = $(this).serialize();
+      // Realizar la solicitud Ajax
+      $.ajax({
+        type: 'POST',
+        url: '/auth',
+        data: { data: formData },
+        success: function (response) {
+          // Manejar la respuesta del servidor
+          window.location.href = response;
+        },
+        error: function (xhr, status, error) {
+          // Manejar errores de la solicitud
+          alert(xhr.responseText);
+        }
+      });
+    });
+  });
+
+</script>
+
 </html>

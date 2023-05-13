@@ -1,0 +1,98 @@
+/*login form*/
+form#login {
+    height: 340px;
+}
+
+form hr {
+    border-color: rgb(179, 179, 179);
+    border-width: 0.2px;
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
+
+/*register form*/
+body#register-body{
+margin-left: 0;
+}
+
+#register-body {
+    margin-top: 2%;
+    justify-content: center;
+}
+
+form#register {
+    height: 600px;
+}
+
+form#register #href-button {
+    margin-top: 20px;
+}
+
+form#register .registro {
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+form#register select{
+    font-size: 11px;
+    color: rgb(104, 104, 104);
+    line-height: 1.2em;
+    font-family: tahoma;
+    text-align: left;
+    content: '';
+}
+/*common elements*/
+body {
+    margin-left: 8%;
+    margin-top: 10%;
+    display: flex;
+    justify-content: left;
+    background-image: url("/images/tetris.jpeg");
+}
+
+form {
+    background-color: white;
+    width: 350px;
+    padding: 30px;
+    text-align: center;
+    border-radius: 15px;
+}
+
+.iniciar-sesion,
+.registro {
+    padding-bottom: 20px;
+    font-size: 25px;
+}
+
+.text {
+    width: 100%;
+    height: 30px;
+    margin: 10px 0;
+    border-radius: 3px;
+    border: 1px solid rgb(179, 179, 179);
+    padding-left: 8px;
+    box-sizing: border-box;
+}
+
+.button {
+    width: 100%;
+    color: white;
+    padding: 14px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 3px;
+    box-shadow: 1px 1px 10px #b3b3b3;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    box-sizing: border-box;
+}
+
+#href-button {
+    background-color: #3366cc;
+}
+
+#submit-button {
+    margin-top: 20px;
+    background-color: orange;
+}
