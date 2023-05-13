@@ -15,7 +15,11 @@ require("@tensorflow/tfjs-node");
 const NodeCache = require('node-cache');
 const cache = new NodeCache();
 const userNicla = new NodeCache();
+
 //--------XAPI----------------------------------
+let xapiTraces = []; // Array principal para almacenar las trazas xAPI
+let copyOfTraces = []; // Array secundario para la copia y guardado en la base de datos
+let isCopying = false; // Variable de control para indicar si se está realizando el copiado y guardado
 
 require('dotenv').config()
 const XAPI = require("@xapi/xapi");
@@ -29,7 +33,52 @@ const xapi = new XAPI({
   auth: auth
 });
 
+function guardarTrazaXAPI(classid, userid, traza) {
+  if(isCopying){
+    copyOfTraces.push({ classid, userid, traza });
+  }else{
+    xapiTraces.push({ classid, userid, traza });
+  }
+  
+}
 
+setInterval(() => {
+  
+  
+  isCopying = true; // Establecer la variable de control en true para indicar que se está realizando el copiado y guardado
+  
+  // Realizar el guardado en la tabla xapi
+  guardarEnTablaXAPI(xapiTraces);
+  
+  xapiTraces = [];
+  isCopying = false; // Restablecer la variable de control en false para permitir el siguiente copiado y guardado
+
+  // Realizar el guardado en la tabla xapi
+  guardarEnTablaXAPI(copyOfTraces);
+  
+  copyOfTraces = [];
+}, 1 * 60 * 1000); // 5 minutos en milisegundos
+
+function guardarEnTablaXAPI(xapiArray) {
+  for (let i = 0; i < xapiArray.length; i++) {
+    const { classid, userid, traza } = xapiArray[i];
+    xapi.sendStatement({
+      statement: traza
+    });
+    // Consulta SQL para insertar los valores en la tabla xapi
+    const query = 'INSERT INTO xapi (userId, classId, traza) VALUES (?, ?, ?)';
+    const values = [classid, userid, JSON.stringify(traza)];
+
+    // Ejecutar la consulta
+    database.query(query, values, (error, result) => {
+      if (error) {
+        console.error('Error al guardar los datos en la tabla xapi:', error);
+      } else {
+        console.log('Datos guardados correctamente en la tabla xapi');
+      }
+    });
+  }
+}
 //----------------------------------------------
 
 const client = mqtt.connect("mqtt://localhost");
@@ -304,7 +353,10 @@ io.on("connection", (socket) => {
   //console.log(socket.request);
   
   socket.on("start", function (data) {
+
     let dtt= cache.get(data.user);
+    dtt.enJuego="si";
+    cache.set(data.user, dtt);
     const myStatement = funciones.iniciaPartida({
       user: data.user,
       email: "mm@ucm.es",
@@ -313,13 +365,29 @@ io.on("connection", (socket) => {
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
     });  
     // Send your statement
-    xapi.sendStatement({
-      statement: myStatement
-    });
+    guardarTrazaXAPI(dtt.classId, data.user, myStatement);
   });
 
 
   socket.on("game_over", function (game) {
+    let dtt= cache.get(game.username);
+    dtt.enJuego="si";
+    cache.set(game.username, dtt);
+    const myStatement = funciones.resumePartida({
+      user: game.username,
+      email: "mm@ucm.es",
+      sessionId : dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
+      niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
+      puntosPartida: game.score,
+      attemptt: game.attempt,
+      levell: game.level,
+      liness: game.liness,
+      apmm: game.apm,
+      timee: game.time
+    });  
+    // Send your statement
+    guardarTrazaXAPI(dtt.classId, data.user, myStatement);
     database.query(
       "INSERT INTO session (id, username, id_board, session_score) VALUES (NULL, ?, ?, ?)",
       [game.username, game.board, game.score]
@@ -329,6 +397,91 @@ io.on("connection", (socket) => {
       };
   });
 
+
+  socket.on("paused", function (game) {
+    let dtt= cache.get(game.username);
+    dtt.enJuego="no";
+    cache.set(game.username, dtt);
+    const myStatement = funciones.resumePartida({
+      user: game.username,
+      email: "mm@ucm.es",
+      sessionId : dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
+      niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
+      puntosPartida: game.score,
+      attemptt: game.attempt,
+      levell: game.level,
+      liness: game.liness,
+      apmm: game.apm,
+      timee: game.time
+    });  
+    // Send your statement
+    guardarTrazaXAPI(dtt.classId, data.user, myStatement);
+   
+  });
+  socket.on("reanudado", function (game) {
+    let dtt= cache.get(game.username);
+    dtt.enJuego="si";
+    cache.set(game.username, dtt);
+    const myStatement = funciones.resumePartida({
+      user: game.username,
+      email: "mm@ucm.es",
+      sessionId : dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
+      niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
+      puntosPartida: game.score,
+      attemptt: game.attempt,
+      levell: game.level,
+      liness: game.liness,
+      apmm: game.apm,
+      timee: game.time
+    });  
+    // Send your statement
+    guardarTrazaXAPI(dtt.classId, data.user, myStatement);
+   
+  });
+  socket.on("accessHighscore", function (game) {
+    let dtt= cache.get(game.username);
+    dtt.enJuego="no";
+    cache.set(game.username, dtt);
+    const myStatement = funciones.resumePartida({
+      user: game.username,
+      email: "mm@ucm.es",
+      sessionId : dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
+      niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
+      puntosPartida: game.score,
+      attemptt: game.attempt,
+      levell: game.level,
+      liness: game.liness,
+      apmm: game.apm,
+      timee: game.time
+    });  
+    // Send your statement
+    guardarTrazaXAPI(dtt.classId, data.user, myStatement);
+   
+  });
+  socket.on("about", function (game) {
+    let dtt= cache.get(game.username);
+    dtt.enJuego="no";
+    cache.set(game.username, dtt);
+    const myStatement = funciones.resumePartida({
+      user: game.username,
+      email: "mm@ucm.es",
+      sessionId : dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
+      niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
+      puntosPartida: game.score,
+      attemptt: game.attempt,
+      levell: game.level,
+      liness: game.liness,
+      apmm: game.apm,
+      timee: game.time
+    });  
+    // Send your statement
+    guardarTrazaXAPI(dtt.classId, data.user, myStatement);
+   
+  });
   socket.on("disconnect", (response) => {
     //console.log(response);
     /*database.query(
@@ -346,6 +499,12 @@ io.on("connection", (socket) => {
     io.emit("message", obj);
   });
 });
+
+
+
+
+
+
 
 //express
 app.use(

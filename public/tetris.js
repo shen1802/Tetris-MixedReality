@@ -187,19 +187,21 @@ function Tetris() {
       return;
     self.reset();
     self.stats.start();
+    self.stats.incrementaPartida();
     document.getElementById("tetris-nextpuzzle").style.display = "block";
     document.getElementById("tetris-keys").style.display = "none";
     self.area = new Area(self.unit, self.areaX, self.areaY, "tetris-area");
     self.puzzle = new Puzzle(self, self.area);
     if (self.puzzle.mayPlace()) {
       self.puzzle.place();
+      let data =new Object();
+      data.user = user;
+      socket.emit("start", data);
     } else {
       self.gameOver();
     }
     
-   let data =new Object();
-   data.user = user;
-   socket.emit("start", data);
+   
    
   };
 
@@ -231,6 +233,16 @@ function Tetris() {
    * @access public event
    */
   this.pause = function () {
+    let game = new Object();
+    game.username = user;
+    game.score = this.stats.getScore();
+    game.board = id;
+    game.attempt= this.stats.getAttempt();
+    game.level=this.stats.getLevel();
+    game.time=this.stats.getTime();
+    game.apm=this.stats.getApm();
+    game.lines=this.stats.getLines();
+  
     if (self.puzzle == null) return;
     if (self.paused) {
       self.puzzle.running = true;
@@ -242,6 +254,7 @@ function Tetris() {
       document.getElementById("tetris-resume").style.display = "none";
       self.stats.timerId = setInterval(self.stats.incTime, 1000);
       self.paused = false;
+      socket.emit("reanudado", game);
     } else {
       if (!self.puzzle.isRunning()) return;
       if (self.puzzle.fallDownID) clearTimeout(self.puzzle.fallDownID);
@@ -250,6 +263,8 @@ function Tetris() {
       clearTimeout(self.stats.timerId);
       self.paused = true;
       self.puzzle.running = false;
+      socket.emit("paused", game);
+      //---
     }
   };
 
@@ -269,6 +284,11 @@ function Tetris() {
     game.username = user;
     game.score = this.stats.getScore();
     game.board = id;
+    game.attempt= this.stats.getAttempt();
+    game.level=this.stats.getLevel();
+    game.time=this.stats.getTime();
+    game.apm=this.stats.getApm();
+    game.lines=this.stats.getLines();
     socket.emit("game_over", game);
     /*if (this.highscores.mayAdd(this.stats.getScore())) {
       var name = prompt("Game Over !\nEnter your name:", "");
@@ -346,8 +366,25 @@ function Tetris() {
   var helpwindow = new Window("tetris-help");
   var highscores = new Window("tetris-highscores");
 
+  window.onbeforeunload = function () {
+   self.stats.resetAttempt();
+   
+  };
+  
+
+
   // game menu
   document.getElementById("tetris-menu-start").onclick = function () {
+    let game = new Object();
+    game.username = user;
+    game.score = self.stats.getScore();
+    game.board = id;
+    game.attempt= self.stats.getAttempt();
+    game.level=self.stats.getLevel();
+    game.time=self.stats.getTime();
+    game.apm=self.stats.getApm();
+    game.lines=self.stats.getLines();
+    socket.emit("about", game);
     helpwindow.close();
     highscores.close();
     self.start();
@@ -375,6 +412,16 @@ function Tetris() {
 
   // highscores
   document.getElementById("tetris-menu-highscores").onclick = function () {
+    let game = new Object();
+    game.username = user;
+    game.score = self.stats.getScore();
+    game.board = id;
+    game.attempt= self.stats.getAttempt();
+    game.level=self.stats.getLevel();
+    game.time=self.stats.getTime();
+    game.apm=self.stats.getApm();
+    game.lines=self.stats.getLines();
+    socket.emit("accessHighscore", game);
     helpwindow.close();
     document.getElementById("tetris-highscores-content").innerHTML =
       self.highscores.toHtml();
@@ -390,6 +437,8 @@ function Tetris() {
   //document.getElementById("tetris-keyboard-right").onclick = function() { self.right(); this.blur(); };
 
   // keyboard
+  
+  
   var keyboard = new Keyboard();
   keyboard.set(keyboard.n, this.start);
   keyboard.set(keyboard.r, this.reset);
@@ -416,6 +465,7 @@ function Tetris() {
      * @access event
      */
     this.activate = function () {
+     
       self.el.style.display =
         self.el.style.display == "block" ? "none" : "block";
     };
@@ -427,6 +477,8 @@ function Tetris() {
      */
     this.close = function () {
       self.el.style.display = "none";
+      console.log("cerrado");
+     
     };
 
     /**
@@ -440,7 +492,7 @@ function Tetris() {
 
   /**
    * Assigning functions to keyboard events
-   * When key is pressed, searching in a table if any function has been assigned to this key, execute the function.
+   * When key is pressthis
    */
   function Keyboard() {
     this.up = 38;
@@ -492,6 +544,7 @@ function Tetris() {
    * Updating html
    */
   function Stats() {
+    this.attempt;
     this.level;
     this.time;
     this.apm;
@@ -588,7 +641,15 @@ function Tetris() {
       this.level = i;
       this.el.level.innerHTML = this.level;
     };
-
+    this.incrementaPartida = function (){
+      this.attempt= this.attempt+1;
+    }
+    this.getAttempt = function (){
+      this.attempt= this.attempt+1;
+    }
+    this.resetAttempt = function (){
+      this.attempt= 0;
+    }
     /**
      * Set lines - update html
      * @param int i
@@ -651,7 +712,12 @@ function Tetris() {
     this.getPuzzles = function () {
       return this.puzzles;
     };
-
+    this.getApm = function () {
+      return this.apm;
+    };
+    this.getTime = function (){
+      return this.time;
+    };
     /**
      * @return int
      * @access public
@@ -1428,6 +1494,7 @@ function Tetris() {
      * @access public
      */
     this.toHtml = function () {
+   
       var s =
         '<table cellspacing="0" cellpadding="2"><tr><th></th><th>Name</th><th>Score</th></tr>';
       for (var i = 0; i < this.scores.length; ++i) {
