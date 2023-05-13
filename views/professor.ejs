@@ -28,7 +28,7 @@
                 <input type="text" name="surname" placeholder="Surname" size="40" required />
                 <input type="number" name="age" placeholder="Age" min="1" max="150" required />
                 <input id="pass" type="password" name="pass" placeholder="Password" size="40" required />
-                <select name="group">
+                <select name="group" required>
                     <%for(var i=0; i < group_list.length; i++) { %>
                         <option value="<%= group_list[i].id %>">
                             <%=group_list[i].name %>
@@ -62,46 +62,41 @@
                                 <%= i + 1%>
                             </td>
                             <td>
-                                <%= user_list[i].username%>
+                                <input type="text" name="username" value="<%= user_list[i].username %>" readonly>
                             </td>
-                            <td <% if(user_list[i].role===2) {%> contenteditable="false" <% } else {%>
-                                    contenteditable="true" <%}%> >
-                                        <%= user_list[i].name%>
+                            <td>
+                                <input type="text" name="name" value="<%= user_list[i].name %>" <%
+                                    if(user_list[i].role===2) { %> readonly <% } %> >
                             </td>
-                            <td <% if(user_list[i].role===2) {%> contenteditable="false" <% } else {%>
-                                    contenteditable="true" <%}%> >
-                                        <%= user_list[i].surname %>
+                            <td>
+                                <input type="text" name="surname" value="<%= user_list[i].surname %>" <%
+                                    if(user_list[i].role===2) { %> readonly <% } %> >
                             </td>
-                            <td contenteditable="true">
-                                <% if(user_list[i].role===2) { %>
-                                    <%= user_list[i].age %>
-                                        <% } else {%>
-                                            <input id="age" type="number" name="age"
-                                                placeholder="<%= user_list[i].age%>" value="<%= user_list[i].age%>"
-                                                min="1" max="150" required />
-                                            <% } %>
+                            <td>
+                                <input type="number" name="age" value="<%= user_list[i].age %>" min="1" max="150" <%
+                                    if(user_list[i].role===2) { %> readonly <% } %> />
                             </td>
                             <td>
                                 <%= user_list[i].institution_name %>
+                                    <input type="text" name="institution" value="<%= user_list[i].institution_id %> "
+                                        hidden contenteditable="false">
                             </td>
-                            <td <% if(user_list[i].role !==2 ) {%> contenteditable="true" <% } %> >
-                                    <% if(user_list[i].role===2 ) { %>
-                                        <%= user_list[i].study_group_name %>
-                                            <% } else { %>
-                                                <select name="study_group">
-                                                    <option value="<%= user_list[i].study_group_id%>">
-                                                        <%= user_list[i].study_group_name%>
-                                                    </option>
-                                                    <% if(group_list.length){ for(var j=0; j <
-                                                        group_list.length; j++) { %>
-                                                        <option value="<%= group_list[j].id %>">
-                                                            <%=group_list[j].name %>
-                                                        </option>
-                                                        <% } } }%>
-                                                </select>
+                            <td>
+                                <select name="study_group">
+                                    <option value="<%= user_list[i].study_group_id%>">
+                                        <%= user_list[i].study_group_name%>
+                                    </option>
+                                    <% if(group_list.length){ for(var j=0; j < group_list.length; j++) { %>
+                                        <option value="<%= group_list[j].id %>">
+                                            <%=group_list[j].name %>
+                                        </option>
+                                        <% } }%>
+                                </select>
                             </td>
                             <td>
                                 <%= user_list[i].role_description %>
+                                    <input type="text" name="role" value="<%= user_list[i].role %>" hidden
+                                        contenteditable="false">
                             </td>
                         </tr>
                         <% } %>
@@ -110,7 +105,7 @@
         </div>
         <div id="group_block">
             <h1 id="register">Add new group</h1>
-            <form id="add_group" action="/new_group" method="POST">
+            <form id="add_group">
                 <input type="text" name="group" placeholder="Group name" size="60" required />
                 <input type="text" name="institution_id" value="<%= user_list[0].institution_id%>" hidden>
                 <input type="submit" value="ADD" />
@@ -148,13 +143,7 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script type="module">
         $(document).ready(function () {
-            let username = "";
-            let name = "";
-            let surname = "";
-            let age = 0;
-            let institution = "";
-            let role = "";
-
+            let selected_row = '';
             let userTable = $('#user').DataTable({
                 order: [[0, 'asc']],
                 lengthMenu: [
@@ -170,22 +159,22 @@
                     userTable.$('tr.selected').removeClass('selected');
                     $(this).addClass('selected');
                 }
-
-                username = $(this).find('td:eq(1)').text().trim();
-                name = $(this).find('td:eq(2)').text().trim();
-                surname = $(this).find('td:eq(3)').text().trim();
-                age = $(this).find('input:eq(0)').val();
-                institution = $(this).find('td:eq(5)').text().trim();
-                role = $(this).find('td:eq(6)').text().trim();
-
+                selected_row = $(this).find('td:eq(0)').text().trim();
             });
 
             $('#user_delete_button').click(function () {
+                // Obtén la segunda fila de userTable
+                const selectedRow = userTable.row(selected_row - 1).node();
+                // Buscar los elementos <input> y <select> solo dentro de la fila seleccionada
+                const inputsAndSelects = $(selectedRow).find('input, select');
+                // Serializa los valores de los elementos seleccionados
+                const data_aux = inputsAndSelects.serialize();
+                const data = data_aux + "&admin=false";
                 // Send POST request to server
                 $.ajax({
                     url: '/delete_user',
                     method: 'POST',
-                    data: { username: username, role: role },
+                    data: { data: data },
                     success: function (response) {
                         // Handle successful response from server
                         //window.alert(response.message);
@@ -198,17 +187,21 @@
             });
 
             $('#user_update_button').click(function () {
+                // Obtén la segunda fila de userTable
+                const selectedRow = userTable.row(selected_row - 1).node();
+                // Buscar los elementos <input> y <select> solo dentro de la fila seleccionada
+                const inputsAndSelects = $(selectedRow).find('input, select');
+                // Serializa los valores de los elementos seleccionados
+                const data = inputsAndSelects.serialize();
                 // Send POST request to server
-                if (age > 150) {
-                    age = 150;
-                }
                 $.ajax({
                     url: '/update_user',
                     method: 'POST',
-                    data: { username: username, name: name, surname: surname, age: age, institution: institution, role: role },
+                    data: { data: data },
                     success: function (response) {
                         // Handle successful response from server
                         //window.alert(response.message);
+                        console.log('Fila actualizada con éxito');
                     },
                     error: function (xhr, status, error) {
                         // Handle error from server
@@ -236,9 +229,7 @@
                     institutionTable.$('tr.selected').removeClass('selected');
                     $(this).addClass('selected');
                 }
-
                 selectedColumnValue = $(this).find('td:eq(1)').text();
-
             });
 
             $('#group_delete_button').click(function () {
@@ -253,11 +244,38 @@
                     },
                     error: function (xhr, status, error) {
                         // Handle error from server
-                        console.log(error);
+                        alert(xhr.responseText);
                     }
                 });
             });
 
+        });
+
+        $(document).ready(function () {
+            $('#add_group').submit(function (event) {
+                // Evitar envío convencional del formulario
+                event.preventDefault();
+
+                // Obtener los datos del formulario
+                let formData = $(this).serialize();
+                console.log(formData);
+
+                // Realizar la solicitud Ajax
+                $.ajax({
+                    type: 'POST',
+                    url: '/new_group',
+                    data: { data: formData },
+                    success: function (response) {
+                        // Manejar la respuesta del servidor
+                        //alert("Institución insertada con éxito");
+                        // Aquí puedes actualizar la interfaz de usuario según la respuesta recibida
+                    },
+                    error: function (xhr, status, error) {
+                        // Manejar errores de la solicitud
+                        alert(xhr.responseText);
+                    }
+                });
+            });
         });
 
         var passInput = document.getElementById('pass');

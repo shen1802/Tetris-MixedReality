@@ -34,28 +34,28 @@ const xapi = new XAPI({
 });
 
 function guardarTrazaXAPI(classid, userid, traza) {
-  if(isCopying){
+  if (isCopying) {
     copyOfTraces.push({ classid, userid, traza });
-  }else{
+  } else {
     xapiTraces.push({ classid, userid, traza });
   }
-  
+
 }
 
 setInterval(() => {
-  
-  
+
+
   isCopying = true; // Establecer la variable de control en true para indicar que se está realizando el copiado y guardado
-  
+
   // Realizar el guardado en la tabla xapi
   guardarEnTablaXAPI(xapiTraces);
-  
+
   xapiTraces = [];
   isCopying = false; // Restablecer la variable de control en false para permitir el siguiente copiado y guardado
 
   // Realizar el guardado en la tabla xapi
   guardarEnTablaXAPI(copyOfTraces);
-  
+
   copyOfTraces = [];
 }, 1 * 60 * 1000); // 5 minutos en milisegundos
 
@@ -351,32 +351,32 @@ app.set("view engine", "ejs");
 io.on("connection", (socket) => {
   console.log("Nuevo usuario contado con ID: " + socket.id);
   //console.log(socket.request);
-  
+
   socket.on("start", function (data) {
 
-    let dtt= cache.get(data.user);
-    dtt.enJuego="si";
+    let dtt = cache.get(data.user);
+    dtt.enJuego = "si";
     cache.set(data.user, dtt);
     const myStatement = funciones.iniciaPartida({
       user: data.user,
       email: "mm@ucm.es",
-      sessionId : dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
-    });  
+    });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, data.user, myStatement);
   });
 
 
   socket.on("game_over", function (game) {
-    let dtt= cache.get(game.username);
-    dtt.enJuego="si";
+    let dtt = cache.get(game.username);
+    dtt.enJuego = "si";
     cache.set(game.username, dtt);
     const myStatement = funciones.resumePartida({
       user: game.username,
       email: "mm@ucm.es",
-      sessionId : dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
       puntosPartida: game.score,
@@ -385,7 +385,7 @@ io.on("connection", (socket) => {
       liness: game.liness,
       apmm: game.apm,
       timee: game.time
-    });  
+    });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, data.user, myStatement);
     database.query(
@@ -399,13 +399,13 @@ io.on("connection", (socket) => {
 
 
   socket.on("paused", function (game) {
-    let dtt= cache.get(game.username);
-    dtt.enJuego="no";
+    let dtt = cache.get(game.username);
+    dtt.enJuego = "no";
     cache.set(game.username, dtt);
     const myStatement = funciones.resumePartida({
       user: game.username,
       email: "mm@ucm.es",
-      sessionId : dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
       puntosPartida: game.score,
@@ -414,19 +414,19 @@ io.on("connection", (socket) => {
       liness: game.liness,
       apmm: game.apm,
       timee: game.time
-    });  
+    });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, data.user, myStatement);
-   
+
   });
   socket.on("reanudado", function (game) {
-    let dtt= cache.get(game.username);
-    dtt.enJuego="si";
+    let dtt = cache.get(game.username);
+    dtt.enJuego = "si";
     cache.set(game.username, dtt);
     const myStatement = funciones.resumePartida({
       user: game.username,
       email: "mm@ucm.es",
-      sessionId : dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
       puntosPartida: game.score,
@@ -435,19 +435,19 @@ io.on("connection", (socket) => {
       liness: game.liness,
       apmm: game.apm,
       timee: game.time
-    });  
+    });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, data.user, myStatement);
-   
+
   });
   socket.on("accessHighscore", function (game) {
-    let dtt= cache.get(game.username);
-    dtt.enJuego="no";
+    let dtt = cache.get(game.username);
+    dtt.enJuego = "no";
     cache.set(game.username, dtt);
     const myStatement = funciones.resumePartida({
       user: game.username,
       email: "mm@ucm.es",
-      sessionId : dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
       puntosPartida: game.score,
@@ -456,19 +456,19 @@ io.on("connection", (socket) => {
       liness: game.liness,
       apmm: game.apm,
       timee: game.time
-    });  
+    });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, data.user, myStatement);
-   
+
   });
   socket.on("about", function (game) {
-    let dtt= cache.get(game.username);
-    dtt.enJuego="no";
+    let dtt = cache.get(game.username);
+    dtt.enJuego = "no";
     cache.set(game.username, dtt);
     const myStatement = funciones.resumePartida({
       user: game.username,
       email: "mm@ucm.es",
-      sessionId : dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
       puntosPartida: game.score,
@@ -477,10 +477,10 @@ io.on("connection", (socket) => {
       liness: game.liness,
       apmm: game.apm,
       timee: game.time
-    });  
+    });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, data.user, myStatement);
-   
+
   });
   socket.on("disconnect", (response) => {
     //console.log(response);
@@ -560,7 +560,6 @@ app.get("/board", function (req, res) {
     });
   } else if (req.session.role === 2) {
     database.query("SELECT u.*, i.name AS institution_name, r.description AS role_description, g.name AS study_group_name FROM user u JOIN institution i ON u.institution_id = i.id JOIN role r ON u.role = r.id LEFT JOIN study_group g ON g.id = u.study_group_id WHERE u.institution_id = ?", [req.session.institution_id], function (error, user_data) {
-      console.log(user_data);
       if (error) throw error;
       else {
         database.query("SELECT * FROM study_group where institution_id = ?", [req.session.institution_id], function (error, group_data) {
@@ -596,6 +595,8 @@ app.get("/board", function (req, res) {
         });
       }
     });
+  } else {
+    res.status(403).send("Not found");
   }
 });
 
@@ -618,10 +619,10 @@ app.post("/tetris", function (req, res) {
     }
   );
   //mantener cache con los usuarios que tienen iniciado sesion
-  let dat= cache.get(req.session.username);
-  dat.niclaId=req.session.board;
-  cache.set(req.session.username,dat);
-  userNicla.set(req.session.board,req.session.username);
+  let dat = cache.get(req.session.username);
+  dat.niclaId = req.session.board;
+  cache.set(req.session.username, dat);
+  userNicla.set(req.session.board, req.session.username);
   res.render("tetris", {
     datos: { board: req.session.board, user: req.session.username },
   });
@@ -631,7 +632,8 @@ app.post("/delete_user", function (req, res) {
   const data = new URLSearchParams(req.body.data);
   const role = data.get('role');
   const username = data.get('username');
-  if (role === "admin" || role === "professor") {
+  const isadmin = data.get('admin');
+  if (role === "1" || (role === "2" && isadmin === 'false')) {
     res.status(200).json({ message: "Operation not allowed" });
   } else {
     database.query("DELETE from user WHERE username = ?", [username], function (error, result) {
@@ -663,7 +665,10 @@ app.post("/delete_institution", function (req, res) {
 app.post("/delete_group", function (req, res) {
   let id = req.body.group_id;
   database.query("DELETE from study_group WHERE id = ?", [id.trim()], function (error, result) {
-    if (error) throw error;
+    if (error) {
+      console.log(error.message);
+      res.status(500).send(error.message);
+    }
     else {
       res.redirect("/board");
     }
@@ -671,6 +676,7 @@ app.post("/delete_group", function (req, res) {
 });
 
 app.post("/update_user", function (req, res) {
+  let study_group = null;
   const data = new URLSearchParams(req.body.data);
   const name = data.get('name');
   const surname = data.get('surname');
@@ -678,7 +684,8 @@ app.post("/update_user", function (req, res) {
   const role = data.get('role');
   const institution = data.get('institution');
   const username = data.get('username');
-  database.query("UPDATE user SET name = ?, surname = ?, age = ?, role = ?, institution_id = ? WHERE username = ?", [name, surname, age, role, institution, username], function (error, result) {
+  study_group = data.get('study_group');
+  database.query("UPDATE user SET name = ?, surname = ?, age = ?, role = ?, institution_id = ?, study_group_id = ? WHERE username = ?", [name, surname, age, role, institution, study_group, username], function (error, result) {
     if (error) throw error;
     else {
       res.redirect("/board");
@@ -686,10 +693,23 @@ app.post("/update_user", function (req, res) {
   });
 });
 
-app.post("/auth", function (request, response) {
-  //recibir credenciales e iniciar sesion
-  let username = request.body.user;
-  let password = request.body.pass;
+app.post("/study_group", function (req, res) {
+  const data = new URLSearchParams(req.body.data);
+  const institution_id = data.get('institution');
+  database.query("SELECT id, name FROM study_group WHERE institution_id = ?", [institution_id], function (error, result) {
+    if (error) {
+      console.log(error.message);
+      res.status(500).send("Se ha producido un problema a la hora de buscar los grupos disponibles");
+    } else {
+      res.status(200).send(result);
+    }
+  });
+});
+
+app.post("/auth", function (req, res) {
+  const data = new URLSearchParams(req.body.data);
+  const username = data.get('user');
+  const password = data.get('pass');
   //board = request.body.board;
   //let ocupado = false;
   //comprobación de registro
@@ -699,33 +719,37 @@ app.post("/auth", function (request, response) {
       [username, password],
       function (error, result) {
         // If there is an issue with the query, output the error
-        if (error) throw error;
+        if (error) {
+          console.log(error.message);
+          res.status(500).send("No se ha encontrado en usuario con el username especificado");
+        }
         // If the account exists
         if (result.length > 0) {
           // Authenticate the user
-          request.session.loggedin = true;
-          request.session.username = result[0].username;
-          request.session.role = result[0].role;
-          request.session.institution_id = result[0].institution_id;
+          req.session.loggedin = true;
+          req.session.username = result[0].username;
+          req.session.role = result[0].role;
+          req.session.institution_id = result[0].institution_id;
           ///-----
-          cache.set(result[0].username, {sessionId: request.sessionID, classId: result[0].study_group_id , niclaId: "", enJuego: "no"});
-          
+          cache.set(result[0].username, { sessionId: req.sessionID, classId: result[0].study_group_id, niclaId: "", enJuego: "no" });
+
           //-------
-          response.redirect("/board");
+          res.status(200).send("/board");
         } else {
-          response.render("login_error");
+          console.log("User does not exist in the database");
+          res.status(500).send("Usuario erróneo o password incorrecto");
         }
-        response.end();
       }
     );
+  } else {
+    console.log("Usename or password fields not valid");
+    res.status(500).send("Uno de los campos introducidos no es válido");
   }
 });
 
 app.post("/new_institution", function (req, res) {
   const data = new URLSearchParams(req.body.data);
-  console.log(data);
   const institution = data.get('institution');
-  console.log(institution);
   database.query("SELECT id FROM institution", function (error, institutions_id) {
     if (error) throw error;
     else {
@@ -733,6 +757,7 @@ app.post("/new_institution", function (req, res) {
       while (institutions_id.some(e => e.id === val)) {
         val = Math.floor(1000 + Math.random() * 9000);
       }
+      console.log(val);
       database.query("INSERT INTO institution (id, name) VALUES (?, ?)", [val, institution], function (error, result) {
         if (error) {
           console.log(error.message);
@@ -746,17 +771,26 @@ app.post("/new_institution", function (req, res) {
 });
 
 app.post("/new_group", function (req, res) {
-  let institution_id = req.body.institution_id;
-  let group = req.body.group;
+  const data = new URLSearchParams(req.body.data);
+  const institution_id = data.get('institution_id');
+  const group = data.get('group');
+
   database.query("SELECT id FROM study_group", function (error, groups_id) {
-    if (error) throw error;
+    if (error) {
+      console.log(error.message);
+      res.status(500).send("Se ha producido un error al recuperar los ids de la base de datos");
+    }
     else {
-      let val = Math.floor(1000000000 + Math.random() * 9000000000);
+      let val = Math.floor(10000000 + Math.random() * 90000000);
+      console.log(val);
       while (groups_id.some(e => e.id === val)) {
-        val = Math.floor(1000000000 + Math.random() * 9000000000);
+        val = Math.floor(10000000 + Math.random() * 90000000);
       }
       database.query("INSERT INTO study_group (id, name, institution_id) VALUES (?, ?, ?)", [val, group, institution_id], function (error, result) {
-        if (error) throw error;
+        if (error) {
+          console.log(error.message);
+          res.status(500).send("El id del grupo ya existe, por favor, reintente de nuevo");
+        }
         else res.redirect("/board")
       });
     }
@@ -764,15 +798,17 @@ app.post("/new_group", function (req, res) {
 
 });
 
-app.post("/new", function (request, response) {
-  let username = request.body.username;
-  let name = request.body.name;
-  let surname = request.body.surname;
-  let age = request.body.age;
-  let password = request.body.pass;
-  let password_verification = request.body.pass2;
-  let admin = request.body.admin;
-  let institution = request.body.institution;
+app.post("/new", function (req, res) {
+  const data = new URLSearchParams(req.body.data);
+  const username = data.get('username');
+  const name = data.get('name');
+  const surname = data.get('surname');
+  const age = data.get('age');
+  const password = data.get('pass');
+  const password_verification = data.get('pass2');
+  const admin = data.get('admin');
+  const institution = data.get('institution');
+  const study_group_id = data.get('study_group_id');
 
   if (username && name && surname && age && password && password_verification && institution) {
     if (password === password_verification) {
@@ -781,34 +817,38 @@ app.post("/new", function (request, response) {
         "SELECT username FROM user WHERE username = ?",
         [username],
         function (error, result) {
-          if (error) throw error;
+          if (error) {
+            console.log(error.message);
+            res.status(500).send("El username ya existe");
+          }
           else {
-            if (result.length > 0) {
-              response.render("register_ko");
-            } else {
-              //insert the new username into the database
-              database.query(
-                "INSERT INTO user (username, name, surname, age, password, role, institution_id) VALUES (?, ?, ?, ?, ?,'3', ?)",
-                [username, name, surname, age, password, institution],
-                function (error) {
-                  // If there is an issue with the query, output the error
-                  if (error) throw error;
-                  else if (admin) {
-                    response.redirect("/board");
-                  } else {
-                    response.render("register_ok");
-                  }
+            //insert the new username into the database
+            database.query(
+              "INSERT INTO user (username, name, surname, age, password, role, institution_id, study_group_id) VALUES (?, ?, ?, ?, ?,'3', ?, ?)",
+              [username, name, surname, age, password, institution, study_group_id],
+              function (error) {
+                // If there is an issue with the query, output the error
+                if (error) {
+                  console.log(error.message);
+                  res.status(500).send("Se ha producido un error al insertar el usuario");
                 }
-              );
-            }
+                else if (admin) {
+                  res.redirect("/board");
+                } else {
+                  res.status(200).send("Usuario registrado con éxito");
+                }
+              }
+            );
           }
         }
       );
     } else {
-      response.render("password_error");
+      console.log("Password missmatch error");
+      res.status(500).send("Las contraseñas no coinciden");
     }
   } else {
-    response.end("Se ha producido un error en alguno de los campos introducidos");
+    console.log("Introduced fields not valid");
+    res.status(500).send("Se ha producido un error en alguno de los campos introducidos");
   }
 });
 
@@ -822,10 +862,10 @@ app.post("/logout", function (req, res) {
           if (error) throw error;
         }
       );
-      
+
     }
     cache.del(req.session.username);
-    
+
     req.session.destroy((err) => {
       if (err) {
         res.status(400).send("Unable to log out");
