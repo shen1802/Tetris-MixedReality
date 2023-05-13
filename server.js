@@ -387,7 +387,7 @@ io.on("connection", (socket) => {
       timee: game.time
     });  
     // Send your statement
-    guardarTrazaXAPI(dtt.classId, data.user, myStatement);
+    guardarTrazaXAPI(dtt.classId, game.username, myStatement);
     database.query(
       "INSERT INTO session (id, username, id_board, session_score) VALUES (NULL, ?, ?, ?)",
       [game.username, game.board, game.score]
@@ -416,7 +416,7 @@ io.on("connection", (socket) => {
       timee: game.time
     });  
     // Send your statement
-    guardarTrazaXAPI(dtt.classId, data.user, myStatement);
+    guardarTrazaXAPI(dtt.classId, game.username, myStatement);
    
   });
   socket.on("reanudado", function (game) {
@@ -437,7 +437,7 @@ io.on("connection", (socket) => {
       timee: game.time
     });  
     // Send your statement
-    guardarTrazaXAPI(dtt.classId, data.user, myStatement);
+    guardarTrazaXAPI(dtt.classId, game.username, myStatement);
    
   });
   socket.on("accessHighscore", function (game) {
@@ -458,7 +458,7 @@ io.on("connection", (socket) => {
       timee: game.time
     });  
     // Send your statement
-    guardarTrazaXAPI(dtt.classId, data.user, myStatement);
+    guardarTrazaXAPI(dtt.classId, game.username, myStatement);
    
   });
   socket.on("about", function (game) {
@@ -479,7 +479,7 @@ io.on("connection", (socket) => {
       timee: game.time
     });  
     // Send your statement
-    guardarTrazaXAPI(dtt.classId, data.user, myStatement);
+    guardarTrazaXAPI(dtt.classId, game.username, myStatement);
    
   });
   socket.on("disconnect", (response) => {
@@ -822,7 +822,7 @@ app.post("/logout", function (req, res) {
           if (error) throw error;
         }
       );
-      
+      userNicla.del(req.session.board);
     }
     cache.del(req.session.username);
     
