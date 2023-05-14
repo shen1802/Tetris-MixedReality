@@ -1,13 +1,9 @@
-html,
 body {
   margin: 0;
   padding: 0;
-}
-
-body {
   background: #e1d4c0;
-  padding-left: 1%;
-  padding-right: 1%;
+  padding-left: 0.5%;
+  padding-right: 0.5%;
 }
 
 body,
@@ -19,19 +15,143 @@ input {
   color: #826c55;
 }
 
-#header p, #header form {
+/*Header*/
+#header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+}
+
+#header p,
+#header form {
   display: inline-block;
   vertical-align: middle;
 }
 
-form#logout input {
-  width: 200%;
+#header form {
+  text-align: end;
 }
 
+/*Add user*/
 form#add_user {
-  margin-bottom: 1%;
+  margin-top: 1%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-div#user_wrapper {
-  margin-bottom: 1%;
+.text {
+  width: 100%;
+  height: 25px;
+  margin: 10px 0;
+  margin-right: 2px;
+  border-radius: 3px;
+  border: 1px solid rgb(179, 179, 179);
+  padding-left: 8px;
+  box-sizing: border-box;
+}
+
+form#add_user select {
+  font-size: 11px;
+  color: rgb(104, 104, 104);
+  line-height: 1.2em;
+  font-family: tahoma;
+  text-align: left;
+  content: '';
+}
+
+/*Delete and Update buttons*/
+hr {
+  border-color: rgb(179, 179, 179);
+  border-width: 0.2px;
+  margin-top: 0.5%;
+  margin-bottom: 0.5%;
+}
+
+.buttons {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: end;
+}
+
+/*Add Institution*/
+form#add_institution, form#add_group {
+  margin-top: 1%;
+  display: flex;
+  align-items: center;
+  width: 500px;
+}
+
+/*Buttons*/
+.button {
+  width: 100%;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 3px;
+  box-shadow: 1px 1px 10px #b3b3b3;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  box-sizing: border-box;
+}
+
+form#logout input,
+#add-user-button,
+#user_update_button,
+#add-institution-button,
+#institution_delete_button,
+#add-group-button,
+#group_update_button {
+  width: 60px;
+}
+
+#log-out-button {
+  background-color: #e2504c;
+}
+
+#log-out-button:hover {
+  background-color: #ce4a45;
+}
+
+#add-user-button,
+#add-institution-button,
+#add-group-button {
+  background-color: rgb(44, 200, 44);
+}
+
+#add-user-button:hover,
+#add-institution-button:hover,
+#add-group-button:hover {
+  background-color: rgb(40, 173, 40);
+}
+
+#user_delete_button, #institution_delete_button, #group_delete_button {
+  width: 150px;
+  background-color: orange;
+}
+
+#user_delete_button:hover, #institution_delete_button:hover, #group_delete_button:hover {
+  width: 150px;
+  background-color: rgb(235, 152, 0);
+}
+
+#user_update_button, #group_update_button {
+  background-color: #3366cc;
+}
+
+#user_update_button:hover, #group_update_button:hover {
+  background-color: #325aa9;
+}
+
+/*User DataTable*/
+table#user,
+.dataTables_wrapper select {
+  font-size: 11px;
+  color: rgb(104, 104, 104);
+  line-height: 1.2em;
+  font-family: tahoma;
+  text-align: left;
+
 }

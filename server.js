@@ -570,7 +570,7 @@ app.get("/board", function (req, res) {
       }
     });
   } else if (req.session.role === 1) {
-    database.query("SELECT u.*, i.name AS institution, r.description AS role_description FROM user u JOIN institution i ON u.institution_id = i.id JOIN role r ON u.role = r.id", function (error, user_data) {
+    database.query("SELECT u.*, i.name AS institution, r.description AS role_description, sg.name AS study_group_name FROM user u JOIN institution i ON u.institution_id = i.id JOIN role r ON u.role = r.id LEFT JOIN study_group sg ON sg.id = u.study_group_id AND sg.institution_id = u.institution_id", function (error, user_data) {
       if (error) throw error;
       else {
         database.query("SELECT * FROM board", function (error, board_data) {
@@ -599,12 +599,6 @@ app.get("/board", function (req, res) {
   } else {
     res.status(403).send("Not found");
   }
-});
-
-app.get("/user_error", function (req, res) {
-  //console.log(req);
-  res.render("user_error");
-  //res.sendFile(__dirname + "/public/user_error.html");
 });
 
 app.post("/tetris", function (req, res) {
@@ -677,7 +671,6 @@ app.post("/delete_group", function (req, res) {
 });
 
 app.post("/update_user", function (req, res) {
-  let study_group = null;
   const data = new URLSearchParams(req.body.data);
   const name = data.get('name');
   const surname = data.get('surname');
@@ -685,13 +678,28 @@ app.post("/update_user", function (req, res) {
   const role = data.get('role');
   const institution = data.get('institution');
   const username = data.get('username');
-  study_group = data.get('study_group');
-  database.query("UPDATE user SET name = ?, surname = ?, age = ?, role = ?, institution_id = ?, study_group_id = ? WHERE username = ?", [name, surname, age, role, institution, study_group, username], function (error, result) {
-    if (error) throw error;
-    else {
-      res.redirect("/board");
-    }
-  });
+  const study_group = data.get('study_group_id');
+  if (study_group === '') {
+    database.query("UPDATE user SET name = ?, surname = ?, age = ?, role = ?, institution_id = ? WHERE username = ?", [name, surname, age, role, institution, username], function (error, result) {
+      if (error) {
+        console.log(error.message);
+        res.status(500).send("Se ha producido un error al actualizar el usuario seleccionado");
+      }
+      else {
+        res.redirect("/board");
+      }
+    });
+  } else {
+    database.query("UPDATE user SET name = ?, surname = ?, age = ?, role = ?, institution_id = ?, study_group_id = ? WHERE username = ?", [name, surname, age, role, institution, study_group, username], function (error, result) {
+      if (error) {
+        console.log(error.message);
+        res.status(500).send("Se ha producido un error al actualizar el usuario seleccionado");
+      }
+      else {
+        res.redirect("/board");
+      }
+    });
+  }
 });
 
 app.post("/study_group", function (req, res) {
@@ -758,7 +766,6 @@ app.post("/new_institution", function (req, res) {
       while (institutions_id.some(e => e.id === val)) {
         val = Math.floor(1000 + Math.random() * 9000);
       }
-      console.log(val);
       database.query("INSERT INTO institution (id, name) VALUES (?, ?)", [val, institution], function (error, result) {
         if (error) {
           console.log(error.message);
@@ -768,14 +775,12 @@ app.post("/new_institution", function (req, res) {
       });
     }
   });
-
 });
 
 app.post("/new_group", function (req, res) {
   const data = new URLSearchParams(req.body.data);
   const institution_id = data.get('institution_id');
   const group = data.get('group');
-
   database.query("SELECT id FROM study_group", function (error, groups_id) {
     if (error) {
       console.log(error.message);
@@ -783,7 +788,6 @@ app.post("/new_group", function (req, res) {
     }
     else {
       let val = Math.floor(10000000 + Math.random() * 90000000);
-      console.log(val);
       while (groups_id.some(e => e.id === val)) {
         val = Math.floor(10000000 + Math.random() * 90000000);
       }
@@ -796,20 +800,22 @@ app.post("/new_group", function (req, res) {
       });
     }
   });
-
 });
 
 app.post("/new", function (req, res) {
   const data = new URLSearchParams(req.body.data);
+  const admin = data.get('admin');
+  let password_verification = data.get('pass2');
   const username = data.get('username');
   const name = data.get('name');
   const surname = data.get('surname');
   const age = data.get('age');
   const password = data.get('pass');
-  const password_verification = data.get('pass2');
-  const admin = data.get('admin');
   const institution = data.get('institution');
   const study_group_id = data.get('study_group_id');
+  if (admin === "true") {
+    password_verification = password;
+  }
 
   if (username && name && surname && age && password && password_verification && institution) {
     if (password === password_verification) {
@@ -831,9 +837,9 @@ app.post("/new", function (req, res) {
                 // If there is an issue with the query, output the error
                 if (error) {
                   console.log(error.message);
-                  res.status(500).send("Se ha producido un error al insertar el usuario");
+                  res.status(500).send("El nombre de usuario ya existe");
                 }
-                else if (admin) {
+                else if (admin === "true") {
                   res.redirect("/board");
                 } else {
                   res.status(200).send("Usuario registrado con éxito");

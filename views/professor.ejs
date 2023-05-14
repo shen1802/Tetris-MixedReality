@@ -8,6 +8,8 @@
     <link href="/css/admin.css" rel="stylesheet" type="text/css" />
     <!--DataTable-->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <title>Admin</title>
 </head>
 
@@ -16,19 +18,20 @@
         <p>Bienvenido <%= user %>
         </p>
         <form id="logout" action="/logout" method="POST">
-            <input type="submit" value="salir" />
+            <input id="log-out-button" class="button" type="submit" value="Log out" />
         </form>
     </div>
     <div>
         <div id="user_block">
             <h1 id="register">Add new user</h1>
-            <form id="add_user" action="/new" method="POST">
-                <input type="text" name="username" placeholder="Username" size="30" required />
-                <input type="text" name="name" placeholder="Name" size="30" required />
-                <input type="text" name="surname" placeholder="Surname" size="40" required />
-                <input type="number" name="age" placeholder="Age" min="1" max="150" required />
-                <input id="pass" type="password" name="pass" placeholder="Password" size="40" required />
-                <select name="group" required>
+            <form id="add_user">
+                <input class="text" type="text" name="username" placeholder="Username" size="30" required />
+                <input class="text" type="text" name="name" placeholder="Name" size="30" required />
+                <input class="text" type="text" name="surname" placeholder="Surname" size="40" required />
+                <input class="text" type="number" name="age" placeholder="Age" min="1" max="150" required />
+                <input class="text" id="pass" type="password" name="pass" placeholder="Password" size="40" required />
+                <select class="text" name="study_group_id" required>
+                    <option disabled selected hidden>Select Group</option>
                     <%for(var i=0; i < group_list.length; i++) { %>
                         <option value="<%= group_list[i].id %>">
                             <%=group_list[i].name %>
@@ -38,10 +41,13 @@
                 <input name="institution" value="<%=user_list[0].institution_id%>" hidden>
                 <input id="pass2" type="password" name="pass2" hidden size="40" />
                 <input type="text" name="admin" value="true" hidden>
-                <input type="submit" value="ADD" />
+                <input class="button" id="add-user-button" type="submit" value="Add" />
             </form>
-            <button id="user_delete_button">Delete selected row</button>
-            <button id="user_update_button">Update</button>
+            <hr>
+            <div class="buttons">
+                <button class="button" id="user_delete_button">Delete selected row</button>
+                <button class="button" id="user_update_button">Update</button>
+            </div>
             <table id="user">
                 <thead>
                     <tr>
@@ -59,7 +65,7 @@
                     <% for (let i=0; i < user_list.length; i++) { %>
                         <tr>
                             <td>
-                                <%= i + 1%>
+                                <%= i + 1 %>
                             </td>
                             <td>
                                 <input type="text" name="username" value="<%= user_list[i].username %>" readonly>
@@ -82,7 +88,7 @@
                                         hidden contenteditable="false">
                             </td>
                             <td>
-                                <select name="study_group">
+                                <select name="study_group_id">
                                     <option value="<%= user_list[i].study_group_id%>">
                                         <%= user_list[i].study_group_name%>
                                     </option>
@@ -106,12 +112,15 @@
         <div id="group_block">
             <h1 id="register">Add new group</h1>
             <form id="add_group">
-                <input type="text" name="group" placeholder="Group name" size="60" required />
-                <input type="text" name="institution_id" value="<%= user_list[0].institution_id%>" hidden>
-                <input type="submit" value="ADD" />
+                <input class="text" type="text" name="group" placeholder="Group name" size="60" required />
+                <input class="text" type="text" name="institution_id" value="<%= user_list[0].institution_id%>" hidden>
+                <input class="button" id="add-group-button" type="submit" value="Add" />
             </form>
-            <button id="group_delete_button">Delete selected row</button>
-            <button id="group_update_button">Update</button>
+            <hr>
+            <div class="buttons">
+                <button class="button" id="group_delete_button">Delete selected row</button>
+                <button class="button" id="group_update_button">Update</button>
+            </div>
             <table id="group">
                 <thead>
                     <tr>
@@ -137,13 +146,15 @@
                 </tbody>
             </table>
         </div>
+        <div>
+            <h1>Data Análisis</h1>
+        </div>
     </div>
-    <!--DataTable-->
-    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
     <script type="module">
         $(document).ready(function () {
-            let selected_row = '';
+            let selected_row_user = '';
+            let selected_row_group = '';
             let userTable = $('#user').DataTable({
                 order: [[0, 'asc']],
                 lengthMenu: [
@@ -159,12 +170,12 @@
                     userTable.$('tr.selected').removeClass('selected');
                     $(this).addClass('selected');
                 }
-                selected_row = $(this).find('td:eq(0)').text().trim();
+                selected_row_user = $(this).find('td:eq(0)').text().trim();
             });
 
             $('#user_delete_button').click(function () {
                 // Obtén la segunda fila de userTable
-                const selectedRow = userTable.row(selected_row - 1).node();
+                const selectedRow = userTable.row(selected_row_user - 1).node();
                 // Buscar los elementos <input> y <select> solo dentro de la fila seleccionada
                 const inputsAndSelects = $(selectedRow).find('input, select');
                 // Serializa los valores de los elementos seleccionados
@@ -177,22 +188,23 @@
                     data: { data: data },
                     success: function (response) {
                         // Handle successful response from server
-                        //window.alert(response.message);
+                        window.location.reload();
                     },
                     error: function (xhr, status, error) {
                         // Handle error from server
-                        console.log(error);
+                        alert(xhr.responseText);
                     }
                 });
             });
 
             $('#user_update_button').click(function () {
                 // Obtén la segunda fila de userTable
-                const selectedRow = userTable.row(selected_row - 1).node();
+                const selectedRow = userTable.row(selected_row_user - 1).node();
                 // Buscar los elementos <input> y <select> solo dentro de la fila seleccionada
                 const inputsAndSelects = $(selectedRow).find('input, select');
                 // Serializa los valores de los elementos seleccionados
                 const data = inputsAndSelects.serialize();
+                console.log(data);
                 // Send POST request to server
                 $.ajax({
                     url: '/update_user',
@@ -200,21 +212,38 @@
                     data: { data: data },
                     success: function (response) {
                         // Handle successful response from server
-                        //window.alert(response.message);
-                        console.log('Fila actualizada con éxito');
+                        window.location.reload();
                     },
                     error: function (xhr, status, error) {
                         // Handle error from server
-                        console.log(error);
+                        alert(xhr.responseText);
                     }
                 });
             });
 
-        });
+            $('#add_user').submit(function (event) {
+                // Evitar envío convencional del formulario
+                event.preventDefault();
+                // Obtener los datos del formulario
+                const formData = $(this).serialize();
+                // Realizar la solicitud Ajax
+                $.ajax({
+                    type: 'POST',
+                    url: '/new',
+                    data: { data: formData },
+                    success: function (response) {
+                        // Manejar la respuesta del servidor
+                        window.location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        // Manejar errores de la solicitud
+                        alert(xhr.responseText);
+                    }
+                });
+            });
 
-        $(document).ready(function () {
-            let selectedColumnValue = "";
-            let institutionTable = $('#group').DataTable({
+            //Group Board Info
+            let groupTable = $('#group').DataTable({
                 order: [[0, 'asc']],
                 lengthMenu: [
                     [5, 10, 25, -1],
@@ -226,10 +255,10 @@
                 if ($(this).hasClass('selected')) {
                     $(this).removeClass('selected');
                 } else {
-                    institutionTable.$('tr.selected').removeClass('selected');
+                    groupTable.$('tr.selected').removeClass('selected');
                     $(this).addClass('selected');
                 }
-                selectedColumnValue = $(this).find('td:eq(1)').text();
+                selected_row_group = $(this).find('td:eq(1)').text();
             });
 
             $('#group_delete_button').click(function () {
@@ -237,10 +266,10 @@
                 $.ajax({
                     url: '/delete_group',  // Replace with your server-side endpoint URL
                     method: 'POST',
-                    data: { group_id: selectedColumnValue },  // Replace with your data
+                    data: { group_id: selected_row_group },  // Replace with your data
                     success: function (response) {
                         // Handle successful response from server
-                        //window.alert(response.message);
+                        window.location.reload();
                     },
                     error: function (xhr, status, error) {
                         // Handle error from server
@@ -249,9 +278,6 @@
                 });
             });
 
-        });
-
-        $(document).ready(function () {
             $('#add_group').submit(function (event) {
                 // Evitar envío convencional del formulario
                 event.preventDefault();
@@ -267,8 +293,7 @@
                     data: { data: formData },
                     success: function (response) {
                         // Manejar la respuesta del servidor
-                        //alert("Institución insertada con éxito");
-                        // Aquí puedes actualizar la interfaz de usuario según la respuesta recibida
+                        window.location.reload();
                     },
                     error: function (xhr, status, error) {
                         // Manejar errores de la solicitud
@@ -285,9 +310,6 @@
             pass2Input.value = passInput.value;
         });
 
-        $(document).ajaxStop(function () {
-            window.location.reload();
-        });
     </script>
 </body>
 

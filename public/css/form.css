@@ -11,8 +11,8 @@ form hr {
 }
 
 /*register form*/
-body#register-body{
-margin-left: 0;
+body#register-body {
+    margin-left: 0;
 }
 
 #register-body {
@@ -33,7 +33,7 @@ form#register .registro {
     margin-bottom: 15px;
 }
 
-form#register select{
+form#register select {
     font-size: 11px;
     color: rgb(104, 104, 104);
     line-height: 1.2em;
@@ -41,6 +41,7 @@ form#register select{
     text-align: left;
     content: '';
 }
+
 /*common elements*/
 body {
     margin-left: 8%;
@@ -92,7 +93,16 @@ form {
     background-color: #3366cc;
 }
 
+#href-button:hover {
+    background-color: #325aa9;
+}
+
 #submit-button {
     margin-top: 20px;
     background-color: orange;
+}
+
+#submit-button:hover {
+    margin-top: 20px;
+    background-color: rgb(235, 152, 0);
 }
