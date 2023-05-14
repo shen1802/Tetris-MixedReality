@@ -645,7 +645,7 @@ function Tetris() {
       this.attempt= this.attempt+1;
     }
     this.getAttempt = function (){
-      this.attempt= this.attempt+1;
+      return this.attempt;
     }
     this.resetAttempt = function (){
       this.attempt= 0;

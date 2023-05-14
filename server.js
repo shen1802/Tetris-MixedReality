@@ -370,10 +370,11 @@ io.on("connection", (socket) => {
 
 
   socket.on("game_over", function (game) {
+    console.log("game_over");
     let dtt = cache.get(game.username);
     dtt.enJuego = "si";
     cache.set(game.username, dtt);
-    const myStatement = funciones.resumePartida({
+    const myStatement = funciones.finalizaPartida({
       user: game.username,
       email: "mm@ucm.es",
       sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
@@ -382,7 +383,7 @@ io.on("connection", (socket) => {
       puntosPartida: game.score,
       attemptt: game.attempt,
       levell: game.level,
-      liness: game.liness,
+      liness: game.lines,
       apmm: game.apm,
       timee: game.time
     });
@@ -402,7 +403,7 @@ io.on("connection", (socket) => {
     let dtt = cache.get(game.username);
     dtt.enJuego = "no";
     cache.set(game.username, dtt);
-    const myStatement = funciones.resumePartida({
+    const myStatement = funciones.pausaPartida({
       user: game.username,
       email: "mm@ucm.es",
       sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
@@ -411,7 +412,7 @@ io.on("connection", (socket) => {
       puntosPartida: game.score,
       attemptt: game.attempt,
       levell: game.level,
-      liness: game.liness,
+      liness: game.lines,
       apmm: game.apm,
       timee: game.time
     });
@@ -432,7 +433,7 @@ io.on("connection", (socket) => {
       puntosPartida: game.score,
       attemptt: game.attempt,
       levell: game.level,
-      liness: game.liness,
+      liness: game.lines,
       apmm: game.apm,
       timee: game.time
     });
@@ -444,7 +445,7 @@ io.on("connection", (socket) => {
     let dtt = cache.get(game.username);
     dtt.enJuego = "no";
     cache.set(game.username, dtt);
-    const myStatement = funciones.resumePartida({
+    const myStatement = funciones.accessHighscore({
       user: game.username,
       email: "mm@ucm.es",
       sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
@@ -453,7 +454,7 @@ io.on("connection", (socket) => {
       puntosPartida: game.score,
       attemptt: game.attempt,
       levell: game.level,
-      liness: game.liness,
+      liness: game.lines,
       apmm: game.apm,
       timee: game.time
     });
@@ -465,7 +466,7 @@ io.on("connection", (socket) => {
     let dtt = cache.get(game.username);
     dtt.enJuego = "no";
     cache.set(game.username, dtt);
-    const myStatement = funciones.resumePartida({
+    const myStatement = funciones.accessAbout({
       user: game.username,
       email: "mm@ucm.es",
       sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
@@ -474,7 +475,7 @@ io.on("connection", (socket) => {
       puntosPartida: game.score,
       attemptt: game.attempt,
       levell: game.level,
-      liness: game.liness,
+      liness: game.lines,
       apmm: game.apm,
       timee: game.time
     });
