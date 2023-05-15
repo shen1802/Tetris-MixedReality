@@ -35,6 +35,7 @@ const xapi = new XAPI({
 
 function guardarTrazaXAPI(classid, userid, traza) {
   if (isCopying) {
+    console.log("usando array de copia trazas xapi");
     copyOfTraces.push({ classid, userid, traza });
   } else {
     xapiTraces.push({ classid, userid, traza });
@@ -67,7 +68,7 @@ function guardarEnTablaXAPI(xapiArray) {
     });
     // Consulta SQL para insertar los valores en la tabla xapi
     const query = 'INSERT INTO xapi (userId, classId, traza) VALUES (?, ?, ?)';
-    const values = [classid, userid, JSON.stringify(traza)];
+    const values = [userid, classid, JSON.stringify(traza)];
 
     // Ejecutar la consulta
     database.query(query, values, (error, result) => {
@@ -346,6 +347,32 @@ init();
 //View engine setup
 app.set("view engine", "ejs");
 
+//----get maxima puntuacion user
+function getHighscore() {
+  const query = "SELECT username, SUM(session_score) AS total_score FROM session GROUP BY username ORDER BY total_score DESC LIMIT 1";
+
+  return new Promise((resolve, reject) => {
+    database.query(query, [], function (error, result) {
+      if (error) {
+        console.log(error.message);
+        reject(error);
+      } else {
+        const highscore = {
+          username: result[0].username,
+          puntos: result[0].total_score
+        };
+        resolve(highscore);
+      }
+    });
+  });
+}
+
+
+
+//-----------------------
+
+
+
 //socket.io
 
 io.on("connection", (socket) => {
@@ -355,7 +382,9 @@ io.on("connection", (socket) => {
   socket.on("start", function (data) {
 
     let dtt = cache.get(data.user);
-    dtt.enJuego = "si";
+    if(dtt!=undefined){
+      dtt.enJuego = "si";
+    }
     cache.set(data.user, dtt);
     const myStatement = funciones.iniciaPartida({
       user: data.user,
@@ -372,7 +401,10 @@ io.on("connection", (socket) => {
   socket.on("game_over", function (game) {
     console.log("game_over");
     let dtt = cache.get(game.username);
-    dtt.enJuego = "si";
+    if(dtt!=undefined){
+      dtt.enJuego = "si";
+    }
+    
     cache.set(game.username, dtt);
     const myStatement = funciones.finalizaPartida({
       user: game.username,
@@ -401,7 +433,9 @@ io.on("connection", (socket) => {
 
   socket.on("paused", function (game) {
     let dtt = cache.get(game.username);
-    dtt.enJuego = "no";
+    if(dtt!=undefined){
+      dtt.enJuego = "si";
+    }
     cache.set(game.username, dtt);
     const myStatement = funciones.pausaPartida({
       user: game.username,
@@ -422,7 +456,9 @@ io.on("connection", (socket) => {
   });
   socket.on("reanudado", function (game) {
     let dtt = cache.get(game.username);
-    dtt.enJuego = "si";
+    if(dtt!=undefined){
+      dtt.enJuego = "si";
+    }
     cache.set(game.username, dtt);
     const myStatement = funciones.resumePartida({
       user: game.username,
@@ -443,8 +479,7 @@ io.on("connection", (socket) => {
   });
   socket.on("accessHighscore", function (game) {
     let dtt = cache.get(game.username);
-    dtt.enJuego = "no";
-    cache.set(game.username, dtt);
+
     const myStatement = funciones.accessHighscore({
       user: game.username,
       email: "mm@ucm.es",
@@ -464,8 +499,8 @@ io.on("connection", (socket) => {
   });
   socket.on("about", function (game) {
     let dtt = cache.get(game.username);
-    dtt.enJuego = "no";
-    cache.set(game.username, dtt);
+    
+   
     const myStatement = funciones.accessAbout({
       user: game.username,
       email: "mm@ucm.es",
@@ -483,6 +518,101 @@ io.on("connection", (socket) => {
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
    
   });
+
+  socket.on("fichaGenerada", function (game) {
+    let dtt = cache.get(game.username);
+    fichasTrazaComun(game,dtt,"generated");
+   
+  });
+  socket.on("fichaColocada", function (game) {
+    let dtt = cache.get(game.username);
+    fichasTrazaComun(game,dtt,"released");
+   
+  });
+  socket.on("fichaIzq", function (game) {
+    let dtt = cache.get(game.username);
+    fichasTrazaComun(game,dtt,"left");
+   
+  });
+  socket.on("fichaDer", function (game) {
+    let dtt = cache.get(game.username);
+    fichasTrazaComun(game,dtt,"right");
+   
+  });
+  socket.on("fichaAbajo", function (game) {
+    let dtt = cache.get(game.username);
+    fichasTrazaComun(game,dtt,"down");
+   
+  });
+  socket.on("fichaRotar", function (game) {
+    let dtt = cache.get(game.username);
+    fichasTrazaComun(game,dtt,"rotate");
+   
+  });
+  socket.on("fichaEspacioAbajo", function (game) {
+    let dtt = cache.get(game.username);
+    fichasTrazaComun(game,dtt,"forcedown");
+   
+  });
+  function fichasTrazaComun(game,dtt, accionn){
+    getHighscore().then((highscore) => {
+      const maxPuntos = highscore;
+  
+      const myStatement = funciones.ficha({
+        user: game.username,
+        email: "mm@ucm.es",
+        sessionId: dtt.sessionId,
+        classId: dtt.classId,
+        niclaId: dtt.niclaId,
+        puntosPartida: game.score,
+        attemptt: game.attempt,
+        levell: game.level,
+        liness: game.lines,
+        apmm: game.apm,
+        timee: game.time,
+        ficha: game.ficha,
+        accion: accionn,
+        iduser: maxPuntos.username,
+        puntosMAx: maxPuntos.puntos
+      });
+  
+      guardarTrazaXAPI(dtt.classId, game.username, myStatement);
+      
+    }).catch((error) => {
+      console.error(error);
+    });
+  }
+  socket.on("removelines", function (game) {
+    let dtt = cache.get(game.username);
+    getHighscore().then((highscore) => {
+      const maxPuntos = highscore;
+  
+      const myStatement = funciones.destruyeFila({
+        user: game.username,
+        email: "mm@ucm.es",
+        sessionId: dtt.sessionId,
+        classId: dtt.classId,
+        niclaId: dtt.niclaId,
+        puntosPartida: game.score,
+        attemptt: game.attempt,
+        levell: game.level,
+        liness: game.lines,
+        apmm: game.apm,
+        timee: game.time,
+        roww: game.removedRow,
+        iduser: maxPuntos.username,
+        puntosMAx: maxPuntos.puntos
+      });
+  
+      guardarTrazaXAPI(dtt.classId, game.username, myStatement);
+      
+    }).catch((error) => {
+      console.error(error);
+    });
+   
+   
+  });
+
   socket.on("disconnect", (response) => {
     //console.log(response);
     /*database.query(

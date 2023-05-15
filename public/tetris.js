@@ -160,7 +160,7 @@ function Tetris() {
 
    //-----------
 
-   const nombresPiezas = ["T", "L", "S", "Z", "J", "O", "I"];
+   
 
 
 
@@ -193,10 +193,11 @@ function Tetris() {
     self.area = new Area(self.unit, self.areaX, self.areaY, "tetris-area");
     self.puzzle = new Puzzle(self, self.area);
     if (self.puzzle.mayPlace()) {
-      self.puzzle.place();
       let data =new Object();
       data.user = user;
       socket.emit("start", data);
+      self.puzzle.place();
+     
     } else {
       self.gameOver();
     }
@@ -366,25 +367,12 @@ function Tetris() {
   var helpwindow = new Window("tetris-help");
   var highscores = new Window("tetris-highscores");
 
-  window.onbeforeunload = function () {
-   self.stats.resetAttempt();
-   
-  };
+ 
   
 
 
   // game menu
   document.getElementById("tetris-menu-start").onclick = function () {
-    let game = new Object();
-    game.username = user;
-    game.score = self.stats.getScore();
-    game.board = id;
-    game.attempt= self.stats.getAttempt();
-    game.level=self.stats.getLevel();
-    game.time=self.stats.getTime();
-    game.apm=self.stats.getApm();
-    game.lines=self.stats.getLines();
-    socket.emit("about", game);
     helpwindow.close();
     highscores.close();
     self.start();
@@ -404,6 +392,16 @@ function Tetris() {
 
   // help
   document.getElementById("tetris-menu-help").onclick = function () {
+    let game = new Object();
+    game.username = user;
+    game.score = self.stats.getScore();
+    game.board = id;
+    game.attempt= self.stats.getAttempt();
+    game.level=self.stats.getLevel();
+    game.time=self.stats.getTime();
+    game.apm=self.stats.getApm();
+    game.lines=self.stats.getLines();
+    socket.emit("about", game);
     highscores.close();
     helpwindow.activate();
     this.blur();
@@ -477,7 +475,7 @@ function Tetris() {
      */
     this.close = function () {
       self.el.style.display = "none";
-      console.log("cerrado");
+    
      
     };
 
@@ -544,7 +542,7 @@ function Tetris() {
    * Updating html
    */
   function Stats() {
-    this.attempt;
+    this.attempt=0;
     this.level;
     this.time;
     this.apm;
@@ -775,15 +773,17 @@ function Tetris() {
      * @access public
      */
     this.removeFullLines = function () {
-      var lines = 0;
+      var liness = 0;
+      let rowss =[];
       for (var y = this.y - 1; y > 0; y--) {
         if (this.isLineFull(y)) {
           this.removeLine(y);
-          lines++;
+          rowss.push(y);
+          liness++;
           y++;
         }
       }
-      return lines;
+      return {lines:liness, rows: rowss};
     };
 
     /**
@@ -869,7 +869,7 @@ function Tetris() {
     var self = this;
     this.tetris = tetris;
     this.area = area;
-
+    const nombresPiezas = ["T", "L", "S", "Z", "J", "O", "I"];
     // timeout ids
     this.fallDownID = null;
     this.forceMoveDownID = null;
@@ -959,6 +959,7 @@ function Tetris() {
     };
 
     this.nextType = random(this.puzzles.length);
+   
     this.reset();
 
     /**
@@ -1009,6 +1010,20 @@ function Tetris() {
      */
     this.mayPlace = function () {
       var puzzle = this.puzzles[this.type];
+      //------emit 
+      let game = new Object();
+      game.username = user;
+      game.score = this.tetris.stats.getScore();
+      game.board = id;
+      game.attempt= this.tetris.stats.getAttempt();
+      game.level=this.tetris.stats.getLevel();
+      game.time=this.tetris.stats.getTime();
+      game.apm=this.tetris.stats.getApm();
+      game.lines=this.tetris.stats.getLines();
+      game.ficha= nombresPiezas[this.type];
+      
+      socket.emit("fichaGenerada", game);
+      //----
       var areaStartX = parseInt((this.area.x - puzzle[0].length) / 2);
       var areaStartY = 1;
       var lineFound = false;
@@ -1057,6 +1072,19 @@ function Tetris() {
       this.x = areaStartX;
       this.y = 1;
       this.board = this.createEmptyPuzzle(puzzle.length, puzzle[0].length);
+      //------emit 
+      let game = new Object();
+      game.username = user;
+      game.score = this.tetris.stats.getScore();
+      game.board = id;
+      game.attempt= this.tetris.stats.getAttempt();
+      game.level=this.tetris.stats.getLevel();
+      game.time=this.tetris.stats.getTime();
+      game.apm=this.tetris.stats.getApm();
+      game.lines=this.tetris.stats.getLines();
+      game.ficha= nombresPiezas[this.type];
+      
+      socket.emit("fichaColocada", game);
       // create puzzle
       for (var y = puzzle.length - 1; y >= 0; y--) {
         for (var x = 0; x < puzzle[y].length; x++) {
@@ -1146,7 +1174,27 @@ function Tetris() {
             self.area.addElement(self.elements[i]);
           }
           // stats
-          var lines = self.area.removeFullLines();
+          let linedata=self.area.removeFullLines();
+          //------emit 
+          for (let i = 0; i < linedata.rows.length; i++) {
+            let game = {
+              username: user,
+              score: this.tetris.stats.getScore(),
+              board: id,
+              attempt: this.tetris.stats.getAttempt(),
+              level: this.tetris.stats.getLevel(),
+              time: this.tetris.stats.getTime(),
+              apm: this.tetris.stats.getApm(),
+              lines: this.tetris.stats.getLines(),
+              ficha: nombresPiezas[this.type],
+              removedRow: linedata.rows[i]
+            };
+          
+            socket.emit("removelines", game);
+          }
+          
+          var lines = linedata.lines;
+          
           if (lines) {
             self.tetris.stats.setLines(self.tetris.stats.getLines() + lines);
             self.tetris.stats.setScore(
@@ -1174,6 +1222,19 @@ function Tetris() {
      * @access public event
      */
     this.forceMoveDown = function () {
+       //------emit 
+       let game = new Object();
+       game.username = user;
+       game.score = this.tetris.stats.getScore();
+       game.board = id;
+       game.attempt= this.tetris.stats.getAttempt();
+       game.level=this.tetris.stats.getLevel();
+       game.time=this.tetris.stats.getTime();
+       game.apm=this.tetris.stats.getApm();
+       game.lines=this.tetris.stats.getLines();
+       game.ficha= nombresPiezas[this.type];
+       
+       socket.emit("fichaEspacioAbajo", game);
       if (!self.isRunning() && !self.isStopped()) {
         if (self.mayMoveDown()) {
           // stats: score, actions
@@ -1188,8 +1249,26 @@ function Tetris() {
           for (var i = 0; i < self.elements.length; i++) {
             self.area.addElement(self.elements[i]);
           }
-          // stats: lines
-          var lines = self.area.removeFullLines();
+          let linedata=self.area.removeFullLines();
+          //------emit 
+          for (let i = 0; i < linedata.rows.length; i++) {
+            let game = {
+              username: user,
+              score: this.tetris.stats.getScore(),
+              board: id,
+              attempt: this.tetris.stats.getAttempt(),
+              level: this.tetris.stats.getLevel(),
+              time: this.tetris.stats.getTime(),
+              apm: this.tetris.stats.getApm(),
+              lines: this.tetris.stats.getLines(),
+              ficha: nombresPiezas[this.type],
+              removedRow: linedata.rows[i]
+            };
+          
+            socket.emit("removelines", game);
+          }
+          
+          var lines = linedata.lines;
           if (lines) {
             self.tetris.stats.setLines(self.tetris.stats.getLines() + lines);
             self.tetris.stats.setScore(
@@ -1253,6 +1332,19 @@ function Tetris() {
      * @access public
      */
     this.rotate = function () {
+       //------emit 
+       let game = new Object();
+       game.username = user;
+       game.score = this.tetris.stats.getScore();
+       game.board = id;
+       game.attempt= this.tetris.stats.getAttempt();
+       game.level=this.tetris.stats.getLevel();
+       game.time=this.tetris.stats.getTime();
+       game.apm=this.tetris.stats.getApm();
+       game.lines=this.tetris.stats.getLines();
+       game.ficha= nombresPiezas[this.type];
+       
+       socket.emit("fichaRotar", game);
       var puzzle = this.createEmptyPuzzle(
         this.board.length,
         this.board[0].length
@@ -1307,6 +1399,19 @@ function Tetris() {
      * @access public
      */
     this.moveDown = function () {
+      //------emit 
+      let game = new Object();
+      game.username = user;
+      game.score = this.tetris.stats.getScore();
+      game.board = id;
+      game.attempt= this.tetris.stats.getAttempt();
+      game.level=this.tetris.stats.getLevel();
+      game.time=this.tetris.stats.getTime();
+      game.apm=this.tetris.stats.getApm();
+      game.lines=this.tetris.stats.getLines();
+      game.ficha= nombresPiezas[this.type];
+      
+      socket.emit("fichaAbajo", game);
       for (var i = 0; i < this.elements.length; i++) {
         this.elements[i].style.top =
           this.elements[i].offsetTop + this.area.unit + "px";
@@ -1343,6 +1448,19 @@ function Tetris() {
      * @access public
      */
     this.moveLeft = function () {
+      //------emit 
+      let game = new Object();
+      game.username = user;
+      game.score = this.tetris.stats.getScore();
+      game.board = id;
+      game.attempt= this.tetris.stats.getAttempt();
+      game.level=this.tetris.stats.getLevel();
+      game.time=this.tetris.stats.getTime();
+      game.apm=this.tetris.stats.getApm();
+      game.lines=this.tetris.stats.getLines();
+      game.ficha= nombresPiezas[this.type];
+      
+      socket.emit("fichaIzq", game);
       for (var i = 0; i < this.elements.length; i++) {
         this.elements[i].style.left =
           this.elements[i].offsetLeft - this.area.unit + "px";
@@ -1379,6 +1497,19 @@ function Tetris() {
      * @access public
      */
     this.moveRight = function () {
+      //------emit 
+      let game = new Object();
+      game.username = user;
+      game.score = this.tetris.stats.getScore();
+      game.board = id;
+      game.attempt= this.tetris.stats.getAttempt();
+      game.level=this.tetris.stats.getLevel();
+      game.time=this.tetris.stats.getTime();
+      game.apm=this.tetris.stats.getApm();
+      game.lines=this.tetris.stats.getLines();
+      game.ficha= nombresPiezas[this.type];
+      
+      socket.emit("fichaDer", game);
       for (var i = 0; i < this.elements.length; i++) {
         this.elements[i].style.left =
           this.elements[i].offsetLeft + this.area.unit + "px";
