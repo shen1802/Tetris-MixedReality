@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 12, 2023 at 06:48 PM
+-- Generation Time: May 15, 2023 at 05:22 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -32,13 +32,6 @@ CREATE TABLE `board` (
   `taken` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `board`
---
-
-INSERT INTO `board` (`id`, `taken`) VALUES
-(0, 'no');
-
 -- --------------------------------------------------------
 
 --
@@ -56,9 +49,11 @@ CREATE TABLE `institution` (
 
 INSERT INTO `institution` (`id`, `name`) VALUES
 (0, 'admin'),
+(4637, 'Universidad Autónoma de Madrid'),
+(6512, 'Universidad Católica de Murcia'),
 (4203, 'Universidad Complutense de Madrid'),
-(5522, 'Universidad Politécnica de Madrid'),
-(5812, 'Universidad Rey Juan Carlos');
+(6273, 'Universidad de Nebrija'),
+(5522, 'Universidad Politécnica de Madrid');
 
 -- --------------------------------------------------------
 
@@ -93,6 +88,15 @@ CREATE TABLE `session` (
   `session_score` int(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `session`
+--
+
+INSERT INTO `session` (`id`, `username`, `id_board`, `session_score`) VALUES
+(4, 'siao', 0, 654),
+(5, 'siao', 0, 438),
+(6, 'siao', 0, 2549);
+
 -- --------------------------------------------------------
 
 --
@@ -100,7 +104,7 @@ CREATE TABLE `session` (
 --
 
 CREATE TABLE `study_group` (
-  `id` int(10) NOT NULL,
+  `id` int(8) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `institution_id` int(4) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -110,7 +114,12 @@ CREATE TABLE `study_group` (
 --
 
 INSERT INTO `study_group` (`id`, `name`, `institution_id`) VALUES
-(2147483647, '1ro de Carrera', 4203);
+(17981968, '1ro de Carrera', 5522),
+(24301829, '1ro de Carrera B', 5522),
+(42525681, '3º Carrera B', 4637),
+(52414390, '5º Carrera', 4637),
+(59221986, '1ro de Carrera C', 5522),
+(64280786, '1º Carrera A', 4637);
 
 -- --------------------------------------------------------
 
@@ -126,7 +135,7 @@ CREATE TABLE `user` (
   `password` varchar(255) NOT NULL,
   `role` int(10) DEFAULT NULL,
   `institution_id` int(11) DEFAULT NULL,
-  `study_group_id` int(10) DEFAULT NULL
+  `study_group_id` int(8) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -134,9 +143,39 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`username`, `name`, `surname`, `age`, `password`, `role`, `institution_id`, `study_group_id`) VALUES
-('admin', 'admin', 'admin', 0, 'admin', 1, 0, NULL),
-('profe', 'Tamayo', 'Martín', 43, '1234', 2, 4203, NULL),
-('prueba', 'prueba', 'prueba', 23, '1234', 3, 5522, NULL);
+('admin', 'admin', 'admin', 0, '$2b$10$CZKZvRcGvBFS9H53z.NeI.WgxsxgK948YpB54Ao8IgPBcFC.veF3m', 1, 4203, NULL),
+('profe', 'Tamayo', 'Martín', 34, '$2b$10$KnonSY.xyYt9SbacfVUPx.yCBedXlj5lecEjegCGpB1hLly6uV4e6', 2, 4637, 64280786),
+('siao', 'siao', 'shen', 23, '$2b$10$lRSg8142HbZGpcxl4LvPK.CQWBHqOhbDbU1tPqF94rTprpR3q19i6', 3, 4637, 64280786);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `xapi`
+--
+
+CREATE TABLE `xapi` (
+  `userId` varchar(50) NOT NULL,
+  `classId` varchar(50) NOT NULL,
+  `traza` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`traza`))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `xapi`
+--
+
+INSERT INTO `xapi` (`userId`, `classId`, `traza`) VALUES
+('52414390', 'siao', '{\"actor\":{\"objectType\":\"Agent\",\"name\":\"siao\",\"mbox\":\"mailto:mm@ucm.es\"},\"verb\":{\"id\":\"https://w3id.org/xapi/seriousgames/verbs/accessed\",\"display\":{\"en-US\":\"accessed\"}},\"object\":{\"id\":\"http://adlnet.gov/expapi/activities/about\",\"definition\":{\"name\":{\"en-US\":\"about\"},\"type\":\"http://www.example.com/types/screen\"},\"objectType\":\"Activity\"},\"result\":{\"score\":{},\"extensions\":{}},\"context\":{\"registration\":\"b2ebe144-884a-8434-4be5-4548275b8b3c\",\"contextActivities\":{\"parent\":[{\"id\":\"https://www.tetris.com//class/52414390\",\"objectType\":\"Activity\"},{\"id\":\"http://adlnet.gov/expapi/activities/about\",\"definition\":{\"name\":{\"en-US\":\"about\"},\"type\":\"http://www.example.com/types/screen\"},\"objectType\":\"Activity\"}]},\"extensions\":{\"https://example.com/niclaID\":\"0\"}},\"timestamp\":\"2023-05-15T09:34:09.176Z\"}'),
+('52414390', 'siao', '{\"actor\":{\"objectType\":\"Agent\",\"name\":\"siao\",\"mbox\":\"mailto:mm@ucm.es\"},\"verb\":{\"id\":\"http://adlnet.gov/expapi/verbs/initialized\",\"display\":{\"en-US\":\"initialized\"}},\"object\":{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"},\"result\":{\"score\":{\"raw\":0},\"extensions\":{\"https://www.tetris.com/attempt\":1,\"https://www.tetris.com/level\":1,\"https://www.tetris.com/lines\":0,\"https://www.tetris.com/apm\":0,\"https://www.tetris.com/time\":0}},\"context\":{\"registration\":\"b2ebe144-884a-8434-4be5-4548275b8b3c\",\"contextActivities\":{\"parent\":[{\"id\":\"https://www.tetris.com//class/52414390\",\"objectType\":\"Activity\"},{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"}]},\"extensions\":{\"https://example.com/niclaID\":\"0\"}},\"timestamp\":\"2023-05-15T09:34:09.177Z\"}'),
+('52414390', 'siao', '{\"actor\":{\"objectType\":\"Agent\",\"name\":\"siao\",\"mbox\":\"mailto:mm@ucm.es\"},\"verb\":{\"id\":\"http://adlnet.gov/expapi/verbs/completed\",\"display\":{\"en-US\":\"completed\"}},\"object\":{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"},\"result\":{\"score\":{\"raw\":654},\"extensions\":{\"https://www.tetris.com/attempt\":null,\"https://www.tetris.com/level\":1,\"https://www.tetris.com/lines\":0,\"https://www.tetris.com/apm\":865,\"https://www.tetris.com/time\":7}},\"context\":{\"registration\":\"b2ebe144-884a-8434-4be5-4548275b8b3c\",\"contextActivities\":{\"parent\":[{\"id\":\"https://www.tetris.com//class/52414390\",\"objectType\":\"Activity\"},{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"}]},\"extensions\":{\"https://example.com/niclaID\":\"0\"}},\"timestamp\":\"2023-05-15T09:34:19.333Z\"}'),
+('52414390', 'siao', '{\"actor\":{\"objectType\":\"Agent\",\"name\":\"siao\",\"mbox\":\"mailto:mm@ucm.es\"},\"verb\":{\"id\":\"https://w3id.org/xapi/seriousgames/verbs/accessed\",\"display\":{\"en-US\":\"accessed\"}},\"object\":{\"id\":\"http://adlnet.gov/expapi/activities/about\",\"definition\":{\"name\":{\"en-US\":\"about\"},\"type\":\"http://www.example.com/types/screen\"},\"objectType\":\"Activity\"},\"result\":{\"score\":{\"raw\":654},\"extensions\":{\"https://www.tetris.com/attempt\":null,\"https://www.tetris.com/level\":1,\"https://www.tetris.com/lines\":0,\"https://www.tetris.com/apm\":865,\"https://www.tetris.com/time\":7}},\"context\":{\"registration\":\"b2ebe144-884a-8434-4be5-4548275b8b3c\",\"contextActivities\":{\"parent\":[{\"id\":\"https://www.tetris.com//class/52414390\",\"objectType\":\"Activity\"},{\"id\":\"http://adlnet.gov/expapi/activities/about\",\"definition\":{\"name\":{\"en-US\":\"about\"},\"type\":\"http://www.example.com/types/screen\"},\"objectType\":\"Activity\"}]},\"extensions\":{\"https://example.com/niclaID\":\"0\"}},\"timestamp\":\"2023-05-15T09:34:31.010Z\"}'),
+('52414390', 'siao', '{\"actor\":{\"objectType\":\"Agent\",\"name\":\"siao\",\"mbox\":\"mailto:mm@ucm.es\"},\"verb\":{\"id\":\"http://adlnet.gov/expapi/verbs/initialized\",\"display\":{\"en-US\":\"initialized\"}},\"object\":{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"},\"result\":{\"score\":{\"raw\":0},\"extensions\":{\"https://www.tetris.com/attempt\":1,\"https://www.tetris.com/level\":1,\"https://www.tetris.com/lines\":0,\"https://www.tetris.com/apm\":0,\"https://www.tetris.com/time\":0}},\"context\":{\"registration\":\"b2ebe144-884a-8434-4be5-4548275b8b3c\",\"contextActivities\":{\"parent\":[{\"id\":\"https://www.tetris.com//class/52414390\",\"objectType\":\"Activity\"},{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"}]},\"extensions\":{\"https://example.com/niclaID\":\"0\"}},\"timestamp\":\"2023-05-15T09:34:32.069Z\"}'),
+('52414390', 'siao', '{\"actor\":{\"objectType\":\"Agent\",\"name\":\"siao\",\"mbox\":\"mailto:mm@ucm.es\"},\"verb\":{\"id\":\"http://adlnet.gov/expapi/verbs/completed\",\"display\":{\"en-US\":\"completed\"}},\"object\":{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"},\"result\":{\"score\":{\"raw\":438},\"extensions\":{\"https://www.tetris.com/attempt\":null,\"https://www.tetris.com/level\":1,\"https://www.tetris.com/lines\":0,\"https://www.tetris.com/apm\":668,\"https://www.tetris.com/time\":7}},\"context\":{\"registration\":\"b2ebe144-884a-8434-4be5-4548275b8b3c\",\"contextActivities\":{\"parent\":[{\"id\":\"https://www.tetris.com//class/52414390\",\"objectType\":\"Activity\"},{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"}]},\"extensions\":{\"https://example.com/niclaID\":\"0\"}},\"timestamp\":\"2023-05-15T09:34:41.464Z\"}'),
+('52414390', 'siao', '{\"actor\":{\"objectType\":\"Agent\",\"name\":\"siao\",\"mbox\":\"mailto:mm@ucm.es\"},\"verb\":{\"id\":\"https://w3id.org/xapi/seriousgames/verbs/accessed\",\"display\":{\"en-US\":\"accessed\"}},\"object\":{\"id\":\"http://adlnet.gov/expapi/activities/about\",\"definition\":{\"name\":{\"en-US\":\"about\"},\"type\":\"http://www.example.com/types/screen\"},\"objectType\":\"Activity\"},\"result\":{\"score\":{},\"extensions\":{}},\"context\":{\"registration\":\"8d90a974-3eed-1809-6bb6-69a82dc53c2d\",\"contextActivities\":{\"parent\":[{\"id\":\"https://www.tetris.com//class/52414390\",\"objectType\":\"Activity\"},{\"id\":\"http://adlnet.gov/expapi/activities/about\",\"definition\":{\"name\":{\"en-US\":\"about\"},\"type\":\"http://www.example.com/types/screen\"},\"objectType\":\"Activity\"}]},\"extensions\":{\"https://example.com/niclaID\":\"0\"}},\"timestamp\":\"2023-05-15T09:41:49.156Z\"}'),
+('52414390', 'siao', '{\"actor\":{\"objectType\":\"Agent\",\"name\":\"siao\",\"mbox\":\"mailto:mm@ucm.es\"},\"verb\":{\"id\":\"http://adlnet.gov/expapi/verbs/initialized\",\"display\":{\"en-US\":\"initialized\"}},\"object\":{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"},\"result\":{\"score\":{\"raw\":0},\"extensions\":{\"https://www.tetris.com/attempt\":1,\"https://www.tetris.com/level\":1,\"https://www.tetris.com/lines\":0,\"https://www.tetris.com/apm\":0,\"https://www.tetris.com/time\":0}},\"context\":{\"registration\":\"8d90a974-3eed-1809-6bb6-69a82dc53c2d\",\"contextActivities\":{\"parent\":[{\"id\":\"https://www.tetris.com//class/52414390\",\"objectType\":\"Activity\"},{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"}]},\"extensions\":{\"https://example.com/niclaID\":\"0\"}},\"timestamp\":\"2023-05-15T09:41:49.158Z\"}'),
+('52414390', 'siao', '{\"actor\":{\"objectType\":\"Agent\",\"name\":\"siao\",\"mbox\":\"mailto:mm@ucm.es\"},\"verb\":{\"id\":\"http://adlnet.gov/expapi/verbs/suspended\",\"display\":{\"en-US\":\"suspended\"}},\"object\":{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"},\"result\":{\"score\":{\"raw\":0},\"extensions\":{\"https://www.tetris.com/attempt\":null,\"https://www.tetris.com/level\":1,\"https://www.tetris.com/lines\":0,\"https://www.tetris.com/apm\":0,\"https://www.tetris.com/time\":1}},\"context\":{\"registration\":\"8d90a974-3eed-1809-6bb6-69a82dc53c2d\",\"contextActivities\":{\"parent\":[{\"id\":\"https://www.tetris.com//class/52414390\",\"objectType\":\"Activity\"},{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"}]},\"extensions\":{\"https://example.com/niclaID\":\"0\"}},\"timestamp\":\"2023-05-15T09:41:50.730Z\"}'),
+('64280786', 'siao', '{\"actor\":{\"objectType\":\"Agent\",\"name\":\"siao\",\"mbox\":\"mailto:mm@ucm.es\"},\"verb\":{\"id\":\"https://w3id.org/xapi/seriousgames/verbs/accessed\",\"display\":{\"en-US\":\"accessed\"}},\"object\":{\"id\":\"http://adlnet.gov/expapi/activities/about\",\"definition\":{\"name\":{\"en-US\":\"about\"},\"type\":\"http://www.example.com/types/screen\"},\"objectType\":\"Activity\"},\"result\":{\"score\":{},\"extensions\":{}},\"context\":{\"registration\":\"9cc68a86-d249-e476-df45-3344ed5376c0\",\"contextActivities\":{\"parent\":[{\"id\":\"https://www.tetris.com//class/64280786\",\"objectType\":\"Activity\"},{\"id\":\"http://adlnet.gov/expapi/activities/about\",\"definition\":{\"name\":{\"en-US\":\"about\"},\"type\":\"http://www.example.com/types/screen\"},\"objectType\":\"Activity\"}]},\"extensions\":{\"https://example.com/niclaID\":\"0\"}},\"timestamp\":\"2023-05-15T11:47:35.408Z\"}'),
+('64280786', 'siao', '{\"actor\":{\"objectType\":\"Agent\",\"name\":\"siao\",\"mbox\":\"mailto:mm@ucm.es\"},\"verb\":{\"id\":\"http://adlnet.gov/expapi/verbs/initialized\",\"display\":{\"en-US\":\"initialized\"}},\"object\":{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"},\"result\":{\"score\":{\"raw\":0},\"extensions\":{\"https://www.tetris.com/attempt\":1,\"https://www.tetris.com/level\":1,\"https://www.tetris.com/lines\":0,\"https://www.tetris.com/apm\":0,\"https://www.tetris.com/time\":0}},\"context\":{\"registration\":\"9cc68a86-d249-e476-df45-3344ed5376c0\",\"contextActivities\":{\"parent\":[{\"id\":\"https://www.tetris.com//class/64280786\",\"objectType\":\"Activity\"},{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"}]},\"extensions\":{\"https://example.com/niclaID\":\"0\"}},\"timestamp\":\"2023-05-15T11:47:35.409Z\"}'),
+('64280786', 'siao', '{\"actor\":{\"objectType\":\"Agent\",\"name\":\"siao\",\"mbox\":\"mailto:mm@ucm.es\"},\"verb\":{\"id\":\"http://adlnet.gov/expapi/verbs/completed\",\"display\":{\"en-US\":\"completed\"}},\"object\":{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"},\"result\":{\"score\":{\"raw\":2549},\"extensions\":{\"https://www.tetris.com/attempt\":null,\"https://www.tetris.com/level\":2,\"https://www.tetris.com/lines\":1,\"https://www.tetris.com/apm\":586,\"https://www.tetris.com/time\":27}},\"context\":{\"registration\":\"9cc68a86-d249-e476-df45-3344ed5376c0\",\"contextActivities\":{\"parent\":[{\"id\":\"https://www.tetris.com//class/64280786\",\"objectType\":\"Activity\"},{\"id\":\"http://adlnet.gov/expapi/activities/tetris\",\"definition\":{\"name\":{\"en-US\":\"Tetris\"},\"type\":\"http://www.example.com/types/game\"},\"objectType\":\"Activity\"}]},\"extensions\":{\"https://example.com/niclaID\":\"0\"}},\"timestamp\":\"2023-05-15T11:48:05.017Z\"}');
 
 --
 -- Indexes for dumped tables
@@ -167,7 +206,6 @@ ALTER TABLE `role`
 --
 ALTER TABLE `session`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `id_board` (`id_board`),
   ADD KEY `username` (`username`);
 
 --
@@ -195,7 +233,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `session`
 --
 ALTER TABLE `session`
-  MODIFY `id` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Constraints for dumped tables
@@ -205,7 +243,6 @@ ALTER TABLE `session`
 -- Constraints for table `session`
 --
 ALTER TABLE `session`
-  ADD CONSTRAINT `session_ibfk_1` FOREIGN KEY (`id_board`) REFERENCES `board` (`id`),
   ADD CONSTRAINT `session_ibfk_2` FOREIGN KEY (`username`) REFERENCES `user` (`username`);
 
 --
