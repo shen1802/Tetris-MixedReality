@@ -5,6 +5,7 @@
     <title>Tetris</title>
     <meta http-equiv="Content-Type" content="text/html;	charset=utf-8" />
     <link href="/css/tetris.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="/css/admin.css" type="text/css">
     <link href="/images/tetris.ico" rel="shortcut icon" />
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="tetris.js">
@@ -21,11 +22,13 @@
     </style>
   </head>
   <body>
-    <p id="tetris_id" style="display: none"><%= datos.board %></p>
-    <p>Bienvenido <span id="username"><%= datos.user %></span></p>
-    <form action="/logout" method="POST">
-      <input type="submit" value="salir" />
-    </form>
+    <div id="header">
+      <p id="tetris_id" style="display: none"><%= datos.board %></p>
+      <p>Bienvenido <span id="username"><%= datos.user %></span></p>
+      <form action="/logout" method="POST">
+        <input id="log-out-button" class="button" type="submit" value="Log out" />
+      </form>
+    </div>
     <table style="width: 100%; height: 100%" cellspacing="0" cellpadding="0">
       <tr>
         <td style="vertical-align: middle">
@@ -87,7 +90,7 @@
                   <tr>
                     <td>Fall:</td>
                     <td colspan="3">
-                      <img src="/images/  key-space.gif" width="44" height="13" alt="" />
+                      <img src="/images/key-space.gif" width="44" height="13" alt="" />
                     </td>
                   </tr>
                 </table>

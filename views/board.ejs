@@ -7,37 +7,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="/images/tetris.ico" rel="shortcut icon" />
   <link href="/css/tetris.css" rel="stylesheet" type="text/css" />
-  <title>Sync</title>
+  <link href="/css/admin.css" rel="stylesheet" type="text/css">
+  <title>Board Sync</title>
 </head>
-<script>
-  setInterval(function () {
-    if (<%= boards.length === 0 %>) {
-    location.reload();
-  }
-  }, 10000); // Recarga la página cada 10 segundos
-</script>
 
 <body id="board">
-  <p>Bienvenido <%= user %>
-  </p>
-  <form action="/logout" method="POST">
-    <input type="submit" value="salir" />
-  </form>
-  <form action="/tetris" method="POST">
-    <div id="board">
+  <div id="header">
+    <p>Bienvenido <%= user %>
+    </p>
+    <form id="logout" action="/logout" method="POST">
+      <input id="log-out-button" class="button" type="submit" value="Log out" />
+    </form>
+  </div>
+  <!-- this will show our spinner -->
+  <div id="spinner">
+    <p>Buscando placa</p>
+  </div>
+  <form id="board" action="/tetris" method="POST">
+    <div>
       <label>Selecciona una placa para jugar</label>
-      <select name="board" required>
-        <option value="">---</option>
-        <% if(boards.length){ for(var i=0; i < boards.length; i++) { %>
-          <option value="<%= boards[i].id %>" "<% if (boards[i].taken === "si") { %> disabled <% } %> > <%=
-                boards[i].id%><% if (boards[i].taken=="si" ) {%> - Placa en uso <% } else { %> - Disponible <% } %>
-          </option>
-          <% } } %>
+      <select class="text" id="board-select" name="board" required>
+        <option disabled selected hidden>Select Board</option>
       </select>
-      <label>Si la lista esta vacia espera a que se detecten automaticamente las placas</label>
+      <input class="button" id="board-button" type="submit" value="Aceptar" />
     </div>
-    <input id="button" type="submit" value="Aceptar" />
   </form>
 </body>
+
+<style>
+
+  #spinner:not([hidden]) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5); 
+  }
+
+  #spinner::after {
+    content: "";
+    width: 80px;
+    height: 80px;
+    border: 2px solid #f3f3f3;
+    border-top: 3px solid orange;
+    border-radius: 100%;
+    will-change: transform;
+    animation: spin 1s infinite linear
+  }
+
+  #spinner p {
+    position: absolute;
+    top: 250px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+<script>
+  const spinner = document.getElementById("spinner");
+
+  document.addEventListener('DOMContentLoaded', function () {
+    fetch('/get_boards')
+      .then(response => response.json())
+      .then(data => {
+        spinner.setAttribute('hidden', '');
+        const boards = data;
+        console.log(data);
+        let options = '';
+        if (boards.length) {
+          for (let i = 0; i < boards.length; i++) {
+            options += `<option value="${boards[i].id}" ${boards[i].taken === "si" ? 'disabled' : ''}>${boards[i].id} ${boards[i].taken === "si" ? '- Placa en uso' : '- Disponbile'}</option>`;
+          }
+        }
+        const selectElement = document.querySelector('select[id="board-select"]');
+        selectElement.innerHTML = options;
+      });
+  });
+
+</script>
 
 </html>

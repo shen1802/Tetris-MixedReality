@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const express = require("express");
 const database = require("./database");
 const session = require("express-session");
@@ -656,7 +657,7 @@ app.use(express.static(__dirname + "/public"));
 
 app.get("/", function (req, res) {
   //si ya habíamos iniciado sesión redireccionar a la pantalla correspondiente
-  if (req.session.loggedin && req.session) {
+  if (req.session.loggedin && req.session.role === 3) { //si es el usuario, vamos al juego
     if (req.session.board === undefined) {
       database.query("SELECT * FROM board", function (error, data) {
         if (error) throw error;
@@ -670,26 +671,7 @@ app.get("/", function (req, res) {
         datos: { board: req.session.board, user: req.session.username },
       });
     }
-  } else {
-    //si no hemos iniciado sesion redireccionar a login
-    res.render("login");
-  }
-});
-
-app.get("/register", function (req, res) {
-  database.query("SELECT * FROM institution", function (error, data) {
-    if (error) throw error;
-    else res.render("register", { institution_list: data });
-  });
-});
-
-app.get("/board", function (req, res) {
-  if (req.session.role === 3) {
-    database.query("SELECT * FROM board", function (error, data) {
-      if (error) throw error;
-      else res.render("board", { boards: data, user: req.session.username });
-    });
-  } else if (req.session.role === 2) {
+  } else if (req.session.loggedin && req.session.role === 2) { //si es el profesor, vamos al panel del profesor
     database.query("SELECT u.*, i.name AS institution_name, r.description AS role_description, g.name AS study_group_name FROM user u JOIN institution i ON u.institution_id = i.id JOIN role r ON u.role = r.id LEFT JOIN study_group g ON g.id = u.study_group_id WHERE u.institution_id = ?", [req.session.institution_id], function (error, user_data) {
       if (error) throw error;
       else {
@@ -699,7 +681,75 @@ app.get("/board", function (req, res) {
         });
       }
     });
-  } else if (req.session.role === 1) {
+  }
+  else if (req.session.loggedin && req.session.role === 1) { //si es el admin, vamos al panel de admin
+    database.query("SELECT u.*, i.name AS institution, r.description AS role_description, sg.name AS study_group_name FROM user u JOIN institution i ON u.institution_id = i.id JOIN role r ON u.role = r.id LEFT JOIN study_group sg ON sg.id = u.study_group_id AND sg.institution_id = u.institution_id", function (error, user_data) {
+      if (error) throw error;
+      else {
+        database.query("SELECT * FROM board", function (error, board_data) {
+          if (error) throw error;
+          else {
+            database.query("SELECT institution.*, COUNT(study_group.id) as num_group FROM institution LEFT JOIN study_group ON institution.id = study_group.institution_id GROUP BY institution.id", function (error, institution_data) {
+              if (error) throw error;
+              else {
+                database.query("SELECT * FROM role", function (error, role_data) {
+                  if (error) throw error;
+                  else {
+                    database.query("SELECT * FROM study_group", function (error, group_data) {
+                      if (error) throw error;
+                      else {
+                        res.render("admin", { user: req.session.username, user_list: user_data, board_list: board_data, institution_list: institution_data, role_list: role_data, group_list: group_data });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+  else { //si no hemos iniciado sesion redireccionar a login
+    res.render("login");
+  }
+});
+
+//muestra la lista de instituciones disponibles a la hora de registrarse
+app.get("/register", function (req, res) {
+  if (req.session.loggedin) { //si ya he iniciado sesión, redirigir a la pantalla correspondiente
+    res.redirect("/board");
+  } else { //sino, redirigir a la pantalla del registro
+    database.query("SELECT * FROM institution", function (error, data) {
+      if (error) throw error;
+      else res.render("register", { institution_list: data });
+    });
+  }
+});
+
+app.get("/board", function (req, res) {
+  if (req.session.role === 3) { //si soy usuario redirigir al juego
+    if (req.session.board === undefined) {
+      database.query("SELECT * FROM board", function (error, data) {
+        if (error) throw error;
+        res.render("board", { boards: data, user: req.session.username });
+      });
+    } else {
+      res.render("tetris", {
+        datos: { board: req.session.board, user: req.session.username },
+      });
+    }
+  } else if (req.session.role === 2) { //si soy profesor, mostrar panel de profesor
+    database.query("SELECT u.*, i.name AS institution_name, r.description AS role_description, g.name AS study_group_name FROM user u JOIN institution i ON u.institution_id = i.id JOIN role r ON u.role = r.id LEFT JOIN study_group g ON g.id = u.study_group_id WHERE u.institution_id = ?", [req.session.institution_id], function (error, user_data) {
+      if (error) throw error;
+      else {
+        database.query("SELECT * FROM study_group where institution_id = ?", [req.session.institution_id], function (error, group_data) {
+          if (error) throw error;
+          else res.render("professor", { user_list: user_data, user: req.session.username, group_list: group_data });
+        });
+      }
+    });
+  } else if (req.session.role === 1) { //si soy admin, mostrar panel del admin
     database.query("SELECT u.*, i.name AS institution, r.description AS role_description, sg.name AS study_group_name FROM user u JOIN institution i ON u.institution_id = i.id JOIN role r ON u.role = r.id LEFT JOIN study_group sg ON sg.id = u.study_group_id AND sg.institution_id = u.institution_id", function (error, user_data) {
       if (error) throw error;
       else {
@@ -727,10 +777,45 @@ app.get("/board", function (req, res) {
       }
     });
   } else {
-    res.status(403).send("Not found");
+    res.render("login");
   }
 });
 
+//endpoint que recupera las placas
+app.get("/get_boards", function (req, res) {
+  if (req.session.loggedin && req.session.role === 3 && req.session.board === undefined) {
+    searchForBoard(res);
+  }else {
+    res.redirect("/board");
+  }
+});
+
+function searchForBoard(res) {
+  database.query("SELECT * FROM board", function (error, result) {
+    if (error) throw error;
+    else {
+      if (result.length > 0) {
+        res.status(200).send(result);
+      } else {
+        // Si no se encuentra ningún elemento, esperar 1 segundo y realizar otra búsqueda
+        setTimeout(function() {
+          searchForBoard(res);
+        }, 1000);
+      }
+    }
+  });
+}
+//endpoint que sirve para redirigir al la pantalla correspondiente en caso de que el usuario quiera hacer bypass con la URI
+app.get("/tetris", function (req, res) {
+  res.redirect("/board");
+});
+
+//endpoint para las peticiones GET que no existen
+app.get('*', function (req, res) {
+  res.render("404");
+});
+
+//endpoint que sirve para actualizar el estado de una placa
 app.post("/tetris", function (req, res) {
   //mostrar tetris
   req.session.board = req.body.board;
@@ -788,11 +873,27 @@ app.post("/delete_institution", function (req, res) {
 });
 
 app.post("/delete_group", function (req, res) {
-  let id = req.body.group_id;
-  database.query("DELETE from study_group WHERE id = ?", [id.trim()], function (error, result) {
+  const data = new URLSearchParams(req.body.data);
+  const id = data.get('study_group_id');
+  database.query("DELETE from study_group WHERE id = ?", [id], function (error, result) {
     if (error) {
       console.log(error.message);
-      res.status(500).send(error.message);
+      res.status(500).send("No se puede borrar el grupo porque hay usuarios pertenencientes a el");
+    }
+    else {
+      res.redirect("/board");
+    }
+  });
+});
+
+app.post("/update_group", function (req, res) {
+  const data = new URLSearchParams(req.body.data);
+  const id = data.get('study_group_id');
+  const name = data.get('study_group_name');
+  database.query("UPDATE study_group SET name = ? WHERE id = ?", [name, id], function (error, result) {
+    if (error) {
+      console.log(error.message);
+      res.status(500).send("Se ha producido un error al actualizar el nombre del grupo");
     }
     else {
       res.redirect("/board");
@@ -854,8 +955,8 @@ app.post("/auth", function (req, res) {
   //comprobación de registro
   if (username && password) {
     database.query(
-      "SELECT * FROM user WHERE username = ? and password = ?",
-      [username, password],
+      "SELECT * FROM user WHERE username = ?",
+      [username],
       function (error, result) {
         // If there is an issue with the query, output the error
         if (error) {
@@ -864,16 +965,24 @@ app.post("/auth", function (req, res) {
         }
         // If the account exists
         if (result.length > 0) {
-          // Authenticate the user
-          req.session.loggedin = true;
-          req.session.username = result[0].username;
-          req.session.role = result[0].role;
-          req.session.institution_id = result[0].institution_id;
-          ///-----
-          cache.set(result[0].username, { sessionId: req.sessionID, classId: result[0].study_group_id, niclaId: "", enJuego: "no" });
+          //[Bcrypt] Comprobamos si las contraseñas coinciden
+          bcrypt.compare(password, result[0].password, function (error) {
+            if (error) {
+              console.log(error.message);
+              res.status(500).send("La contraseña es errónea");
+            } else {
+              // password is valid => Authenticate the user
+              req.session.loggedin = true; //existe una sesión iniciada
+              req.session.username = result[0].username; //nombre del usuario
+              req.session.role = result[0].role; //role del usuario
+              req.session.institution_id = result[0].institution_id; //institutción del usuario
+              ///-----
+              cache.set(result[0].username, { sessionId: req.sessionID, classId: result[0].study_group_id, niclaId: "", enJuego: "no" });
 
-          //-------
-          res.status(200).send("/board");
+              //-------
+              res.status(200).send("/board");
+            }
+          });
         } else {
           console.log("User does not exist in the database");
           res.status(500).send("Usuario erróneo o password incorrecto");
@@ -959,39 +1068,47 @@ app.post("/new", function (req, res) {
             res.status(500).send("El username ya existe");
           }
           else {
-            //insert the new username into the database
-            database.query(
-              "INSERT INTO user (username, name, surname, age, password, role, institution_id, study_group_id) VALUES (?, ?, ?, ?, ?,'3', ?, ?)",
-              [username, name, surname, age, password, institution, study_group_id],
-              function (error) {
-                // If there is an issue with the query, output the error
-                if (error) {
-                  console.log(error.message);
-                  res.status(500).send("El nombre de usuario ya existe");
-                }
-                else if (admin === "true") {
-                  res.redirect("/board");
-                } else {
-                  res.status(200).send("Usuario registrado con éxito");
-                }
+            //[Bycript] Ciframos la contraseña con un salt=10
+            bcrypt.hash(password, 10, function (error, hash) {
+              if (error) {
+                console.log(error.message);
+                res.status(500).send("Se ha producido un error al cifrar la contraseña");
+              } else {
+                //insert the new username into the database
+                database.query(
+                  "INSERT INTO user (username, name, surname, age, password, role, institution_id, study_group_id) VALUES (?, ?, ?, ?, ?,'3', ?, ?)",
+                  [username, name, surname, age, hash, institution, study_group_id],
+                  function (error) {
+                    // If there is an issue with the query, output the error
+                    if (error) {
+                      console.log(error.message);
+                      res.status(500).send("El nombre de usuario ya existe");
+                    }
+                    else if (admin === "true") {
+                      res.redirect("/board");
+                    } else {
+                      res.status(200).send("Usuario registrado con éxito");
+                    }
+                  }
+                );
               }
-            );
+            });
           }
         }
       );
     } else {
-      console.log("Password missmatch error");
+      console.log("Las contraseñas no coinciden");
       res.status(500).send("Las contraseñas no coinciden");
     }
   } else {
-    console.log("Introduced fields not valid");
+    console.log("Alguno de los campos introducidos no es válido");
     res.status(500).send("Se ha producido un error en alguno de los campos introducidos");
   }
 });
 
 app.post("/logout", function (req, res) {
   if (req.session) {
-    if (req.session?.board) {
+    if (req.session.board) {
       database.query(
         "UPDATE board SET taken = 'no' WHERE id = ?",
         [req.session.board],

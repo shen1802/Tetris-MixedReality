@@ -3,6 +3,7 @@
     "@tensorflow/tfjs": "^4.2.0",
     "@tensorflow/tfjs-node": "^4.2.0",
     "@xapi/xapi": "^2.2.0",
+    "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.9",

@@ -51,7 +51,8 @@ form#add_user {
   box-sizing: border-box;
 }
 
-form#add_user select {
+form#add_user,
+form#board select {
   font-size: 11px;
   color: rgb(104, 104, 104);
   line-height: 1.2em;
@@ -75,7 +76,8 @@ hr {
 }
 
 /*Add Institution*/
-form#add_institution, form#add_group {
+form#add_institution,
+form#add_group {
   margin-top: 1%;
   display: flex;
   align-items: center;
@@ -103,7 +105,9 @@ form#logout input,
 #add-institution-button,
 #institution_delete_button,
 #add-group-button,
-#group_update_button {
+#group_update_button,
+#log-out-button,
+#board-button {
   width: 60px;
 }
 
@@ -127,21 +131,29 @@ form#logout input,
   background-color: rgb(40, 173, 40);
 }
 
-#user_delete_button, #institution_delete_button, #group_delete_button {
+#user_delete_button,
+#institution_delete_button,
+#group_delete_button {
   width: 150px;
   background-color: orange;
 }
 
-#user_delete_button:hover, #institution_delete_button:hover, #group_delete_button:hover {
+#user_delete_button:hover,
+#institution_delete_button:hover,
+#group_delete_button:hover {
   width: 150px;
   background-color: rgb(235, 152, 0);
 }
 
-#user_update_button, #group_update_button {
+#user_update_button,
+#group_update_button,
+#board-button {
   background-color: #3366cc;
 }
 
-#user_update_button:hover, #group_update_button:hover {
+#user_update_button:hover,
+#group_update_button:hover,
+#board-button:hover {
   background-color: #325aa9;
 }
 
@@ -154,4 +166,24 @@ table#user,
   font-family: tahoma;
   text-align: left;
 
+}
+
+/*Board*/
+form#board {
+  margin-left: 500px;
+  margin-right: 500px;
+  border-radius: 15px;
+  box-shadow: 1px 1px 10px #b3b3b3;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+form#board #board-button {
+  margin-top: 20px;
+  width: 100%;
+  height: 35px;
 }
