@@ -162,11 +162,24 @@
         </div>
         <div id="stats">
             <h1>Estadísticas</h1>
-            <div style="width:100%">
-                <canvas id="myChart"></canvas>
-            </div>
+            <form id="select_group">
+                <select class="text" name="study_group_id" required>
+                    <option disabled selected hidden>Select Group</option>
+                    <option value="all">Todos</option>
+                    <%for(var i=0; i < group_list.length; i++) { %>
+                        <option value="<%= group_list[i].id %>">
+                            <%=group_list[i].name %>
+                        </option>
+                        <% }%>
+                </select>
+                <select class="text" name="type_stats" required>
+                    <option disabled selected hidden>Select Type of stats</option>
+
+                </select>
+                <input class="button" id="select-group-button" type="submit" value="Show" />
+            </form>
+            <canvas id="myChart"></canvas>
         </div>
     </div>
 </body>
-
 </html>
