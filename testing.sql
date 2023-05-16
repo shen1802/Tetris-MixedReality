@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 15, 2023 at 05:22 PM
+-- Generation Time: May 16, 2023 at 06:57 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -50,9 +50,7 @@ CREATE TABLE `institution` (
 INSERT INTO `institution` (`id`, `name`) VALUES
 (0, 'admin'),
 (4637, 'Universidad Autónoma de Madrid'),
-(6512, 'Universidad Católica de Murcia'),
 (4203, 'Universidad Complutense de Madrid'),
-(6273, 'Universidad de Nebrija'),
 (5522, 'Universidad Politécnica de Madrid');
 
 -- --------------------------------------------------------
@@ -88,15 +86,6 @@ CREATE TABLE `session` (
   `session_score` int(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `session`
---
-
-INSERT INTO `session` (`id`, `username`, `id_board`, `session_score`) VALUES
-(4, 'siao', 0, 654),
-(5, 'siao', 0, 438),
-(6, 'siao', 0, 2549);
-
 -- --------------------------------------------------------
 
 --
@@ -114,12 +103,8 @@ CREATE TABLE `study_group` (
 --
 
 INSERT INTO `study_group` (`id`, `name`, `institution_id`) VALUES
-(17981968, '1ro de Carrera', 5522),
-(24301829, '1ro de Carrera B', 5522),
-(42525681, '3º Carrera B', 4637),
-(52414390, '5º Carrera', 4637),
-(59221986, '1ro de Carrera C', 5522),
-(64280786, '1º Carrera A', 4637);
+(42525681, '3º Carrera A', 4637),
+(52414390, '5º Carrera B', 4637);
 
 -- --------------------------------------------------------
 
@@ -129,6 +114,7 @@ INSERT INTO `study_group` (`id`, `name`, `institution_id`) VALUES
 
 CREATE TABLE `user` (
   `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
   `name` varchar(255) NOT NULL,
   `surname` varchar(255) NOT NULL,
   `age` int(10) NOT NULL,
@@ -142,10 +128,9 @@ CREATE TABLE `user` (
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`username`, `name`, `surname`, `age`, `password`, `role`, `institution_id`, `study_group_id`) VALUES
-('admin', 'admin', 'admin', 0, '$2b$10$CZKZvRcGvBFS9H53z.NeI.WgxsxgK948YpB54Ao8IgPBcFC.veF3m', 1, 4203, NULL),
-('profe', 'Tamayo', 'Martín', 34, '$2b$10$KnonSY.xyYt9SbacfVUPx.yCBedXlj5lecEjegCGpB1hLly6uV4e6', 2, 4637, 64280786),
-('siao', 'siao', 'shen', 23, '$2b$10$lRSg8142HbZGpcxl4LvPK.CQWBHqOhbDbU1tPqF94rTprpR3q19i6', 3, 4637, 64280786);
+INSERT INTO `user` (`username`, `email`, `name`, `surname`, `age`, `password`, `role`, `institution_id`, `study_group_id`) VALUES
+('admin', 'admin@admin.com', 'admin', 'admin', 0, '$2b$10$CZKZvRcGvBFS9H53z.NeI.WgxsxgK948YpB54Ao8IgPBcFC.veF3m', 1, 4203, NULL),
+('profe', 'profe@ucm.es', 'Tamasho', 'Martín', 34, '$2b$10$VelIoF12aM0oDtdIDZ25Y.YGvlFqorzDWlSKZ9K7Ug2ryme39MPMi', 2, 4637, 42525681);
 
 -- --------------------------------------------------------
 
@@ -221,6 +206,7 @@ ALTER TABLE `study_group`
 ALTER TABLE `user`
   ADD PRIMARY KEY (`username`),
   ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `email` (`email`),
   ADD KEY `institution_id` (`institution_id`),
   ADD KEY `study_group_id` (`study_group_id`),
   ADD KEY `role` (`role`);
