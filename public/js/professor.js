@@ -177,17 +177,19 @@ $(document).ready(function () {
         });
     });
 
+    //Stats Panel
     $('#select_group').submit(function (event) {
         console.log("entro en select group");
         // Evitar envío convencional del formulario
         event.preventDefault();
         // Obtener los datos del formulario
         const formData = $(this).serialize();
-        console.log(formData);
+        const typeStat = $(this).find('[name="type_stats"]').val();
         // Realizar la solicitud Ajax
+        console.log(formData);
         $.ajax({
-            type: 'GET',
-            url: '',
+            type: 'POST',
+            url: '/stats',
             data: { data: formData },
             success: function (response) {
                 // Manejar la respuesta del servidor

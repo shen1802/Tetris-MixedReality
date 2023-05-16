@@ -1077,6 +1077,34 @@ app.post("/study_group", function (req, res) {
   });
 });
 
+app.post("/stats", function (req, res) {
+  if (req.session.loggedin && req.session.role === 2){
+    const data = new URLSearchParams(req.body.data);
+    const study_group_id = data.get('study_group_id');
+    if (study_group_id.length > 4) {
+      database.query("SELECT * FROM xapi WHERE classId = ?", [study_group_id], function (error, result) {
+        if (error) {
+          console.log(error.message);
+          res.status(500).send("Se ha producido un problema a la hora de recuperar datos xApi");
+        } else {
+          res.status(200).send(result);
+        }
+      });
+    } else {
+      database.query("SELECT * FROM xapi WHERE ", [study_group_id], function (error, result) {
+        if (error) {
+          console.log(error.message);
+          res.status(500).send("Se ha producido un problema a la hora de recuperar datos xApi");
+        } else {
+          res.status(200).send(result);
+        }
+      });
+    }
+  }else {
+    res.redirect("/board");
+  }
+});
+
 app.post("/auth", function (req, res) {
   const data = new URLSearchParams(req.body.data);
   const username = data.get('user');

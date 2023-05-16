@@ -165,17 +165,19 @@
             <form id="select_group">
                 <select class="text" name="study_group_id" required>
                     <option value="" disabled selected hidden>Select Group</option>
-                    <option label="Todos" value="all"></option>
                     <%for(var i=0; i < group_list.length; i++) { %>
                         <option label="<%=group_list[i].name %>" value="<%= group_list[i].id %>">
                         </option>
-                        <% }%>
+                        <% if (i===(group_list.length - 1)) {%>
+                            <option label="Todos" value="<%= user_list[i].institution_id %>"></option>
+                            <% } %>
+                                <% }%>
                 </select>
                 <select class="text" name="type_stats" required>
                     <option value="" disabled selected hidden>Select type of stats</option>
                     <option label="Figures Count" value="figures_count"></option>
                 </select>
-                <input class="button" id="select-group-button" type="submit" value="Show"/>
+                <input class="button" id="select-group-button" type="submit" value="Show" />
             </form>
             <div>
                 <canvas id="myChart"></canvas>
@@ -183,4 +185,5 @@
         </div>
     </div>
 </body>
+
 </html>
