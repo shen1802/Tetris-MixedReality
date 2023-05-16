@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/css/tetris.css" type="text/css">
   <link rel="stylesheet" href="/css/form.css" type="text/css">
   <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script type="module" src="/js/login.js"></script>
   <title>Login</title>
 </head>
 
@@ -22,31 +23,4 @@
     <a id="href-button" class="button" href="register">REGISTER</a>
   </form>
 </body>
-
-<script>
-  $(document).ready(function () {
-    $('#login').submit(function (event) {
-      // Evitar envío convencional del formulario
-      event.preventDefault();
-      // Obtener los datos del formulario
-      let formData = $(this).serialize();
-      // Realizar la solicitud Ajax
-      $.ajax({
-        type: 'POST',
-        url: '/auth',
-        data: { data: formData },
-        success: function (response) {
-          // Manejar la respuesta del servidor
-          window.location.href = response;
-        },
-        error: function (xhr, status, error) {
-          // Manejar errores de la solicitud
-          alert(xhr.responseText);
-        }
-      });
-    });
-  });
-
-</script>
-
 </html>

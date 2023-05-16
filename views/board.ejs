@@ -30,55 +30,10 @@
         <option disabled selected hidden>Select Board</option>
       </select>
       <input class="button" id="board-button" type="submit" value="Aceptar" />
+      <p style="font-size: 8px;">(*) La página se recarga cada 20s para buscar nuevas placas</p>
     </div>
   </form>
 </body>
-
-<style>
-
-  #spinner:not([hidden]) {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.5); 
-  }
-
-  #spinner::after {
-    content: "";
-    width: 80px;
-    height: 80px;
-    border: 2px solid #f3f3f3;
-    border-top: 3px solid orange;
-    border-radius: 100%;
-    will-change: transform;
-    animation: spin 1s infinite linear
-  }
-
-  #spinner p {
-    position: absolute;
-    top: 250px;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 20px;
-    font-weight: bold;
-    color: white;
-  }
-
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-
-    to {
-      transform: rotate(360deg);
-    }
-  }
-</style>
 
 <script>
   const spinner = document.getElementById("spinner");
@@ -100,6 +55,11 @@
         selectElement.innerHTML = options;
       });
   });
+
+  // Recargar la página después de un cierto tiempo
+  setTimeout(function () {
+    location.reload();
+  }, 20000);
 
 </script>
 
