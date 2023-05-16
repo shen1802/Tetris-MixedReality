@@ -177,8 +177,30 @@ $(document).ready(function () {
         });
     });
 
-    //submenu de estadisticas
-    TODO
+    $('#select_group').submit(function (event) {
+        console.log("entro en select group");
+        // Evitar envío convencional del formulario
+        event.preventDefault();
+        // Obtener los datos del formulario
+        const formData = $(this).serialize();
+        console.log(formData);
+        // Realizar la solicitud Ajax
+        $.ajax({
+            type: 'GET',
+            url: '',
+            data: { data: formData },
+            success: function (response) {
+                // Manejar la respuesta del servidor
+
+            },
+            error: function (xhr, status, error) {
+                // Manejar errores de la solicitud
+                alert(xhr.responseText);
+            }
+        });
+    });
+
+    //submenu de estadisticas - TODO
     $('ul.submenu li a:first').addClass('admin_active');
     $('.sub_paginas .pagina').hide();
     $('.sub_paginas .pagina:first').show();

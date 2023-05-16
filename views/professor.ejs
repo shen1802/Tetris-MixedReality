@@ -37,7 +37,7 @@
                 <input class="text" type="number" name="age" placeholder="Age" min="1" max="150" required />
                 <input class="text" id="pass" type="password" name="pass" placeholder="Password" size="40" required />
                 <select class="text" name="study_group_id" required>
-                    <option disabled selected hidden>Select Group</option>
+                    <option value="" disabled selected hidden>Select Group</option>
                     <%for(var i=0; i < group_list.length; i++) { %>
                         <option value="<%= group_list[i].id %>">
                             <%=group_list[i].name %>
@@ -161,24 +161,25 @@
             </table>
         </div>
         <div id="stats">
-            <h1>Estadísticas</h1>
+            <h1>Stats</h1>
             <form id="select_group">
                 <select class="text" name="study_group_id" required>
-                    <option disabled selected hidden>Select Group</option>
-                    <option value="all">Todos</option>
+                    <option value="" disabled selected hidden>Select Group</option>
+                    <option label="Todos" value="all"></option>
                     <%for(var i=0; i < group_list.length; i++) { %>
-                        <option value="<%= group_list[i].id %>">
-                            <%=group_list[i].name %>
+                        <option label="<%=group_list[i].name %>" value="<%= group_list[i].id %>">
                         </option>
                         <% }%>
                 </select>
                 <select class="text" name="type_stats" required>
-                    <option disabled selected hidden>Select Type of stats</option>
-
+                    <option value="" disabled selected hidden>Select type of stats</option>
+                    <option label="Figures Count" value="figures_count"></option>
                 </select>
-                <input class="button" id="select-group-button" type="submit" value="Show" />
+                <input class="button" id="select-group-button" type="submit" value="Show"/>
             </form>
-            <canvas id="myChart"></canvas>
+            <div>
+                <canvas id="myChart"></canvas>
+            </div>
         </div>
     </div>
 </body>
