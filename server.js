@@ -59,7 +59,7 @@ setInterval(() => {
   guardarEnTablaXAPI(copyOfTraces);
 
   copyOfTraces = [];
-}, 1 * 60*100); 
+}, 1 * 60 * 100);
 
 function guardarEnTablaXAPI(xapiArray) {
   for (let i = 0; i < xapiArray.length; i++) {
@@ -119,124 +119,124 @@ client.on("connect", () => {
 client.on("message", (topic, message) => {
   if (topic === "sensorData") {
     const sensorData = JSON.parse(message.toString());
-    let userr= userNicla.get(sensorData.id);
-    if(userr!= null && userr!=undefined){
-    let dtt=cache.get(userr);
-    if(dtt.enJuego=="si"){
-    console.log("datos gyroaccel asociados a user");
-    let dataAvailable = sensorData;
-    if (dataAvailable && !started) {
-      console.log("ready");
-    }
+    let userr = userNicla.get(sensorData.id);
+    if (userr != null && userr != undefined) {
+      let dtt = cache.get(userr);
+      if (dtt.enJuego == "si") {
+        console.log("datos gyroaccel asociados a user");
+        let dataAvailable = sensorData;
+        if (dataAvailable && !started) {
+          console.log("ready");
+        }
 
-    let data = {
-      xAcc: sensorData.accelerometer.x,
-      yAcc: sensorData.accelerometer.y,
-      zAcc: sensorData.accelerometer.z,
-      xGyro: sensorData.gyroscope.x,
-      yGyro: sensorData.gyroscope.y,
-      zGyro: sensorData.gyroscope.z,
-    };
-    //---generacion traza xapi
-
-   
-    const myStatement = funciones.gyroAndAccel({
-      user: userr,
-      email: "mm@ucm.es",
-      sessionId: dtt.sessionId, 
-      classId: dtt.classId, 
-      niclaId: dtt.niclaId, 
-      gyrox: data.xGyro,
-      gyroy: data.yGyro,
-      gyroz: data.zGyro,
-      accx: data.xAcc,
-      accy: data.yAcc ,
-      accz: data.zAcc
-      
-    });
-    // Send your statement
-    //guardarTrazaXAPI(dtt.classId, userr, myStatement);
-    //--------------------------
+        let data = {
+          xAcc: sensorData.accelerometer.x,
+          yAcc: sensorData.accelerometer.y,
+          zAcc: sensorData.accelerometer.z,
+          xGyro: sensorData.gyroscope.x,
+          yGyro: sensorData.gyroscope.y,
+          zGyro: sensorData.gyroscope.z,
+        };
+        //---generacion traza xapi
 
 
+        const myStatement = funciones.gyroAndAccel({
+          user: userr,
+          email: "mm@ucm.es",
+          sessionId: dtt.sessionId,
+          classId: dtt.classId,
+          niclaId: dtt.niclaId,
+          gyrox: data.xGyro,
+          gyroy: data.yGyro,
+          gyroz: data.zGyro,
+          accx: data.xAcc,
+          accy: data.yAcc,
+          accz: data.zAcc
 
-    if (liveData.has(sensorData.id)) {
-    } else {
-      let content = {
-        values: [],
-        predictionDone: false,
-        numLinesRead: 35,
-      };
-      liveData.set(sensorData.id, content);
-    }
-    // sum up the absolutes
-    if (liveData.get(sensorData.id).numLinesRead == numLinesPerFile) {
-      let aSum_G =
-        Math.abs(data.xGyro) + Math.abs(data.yGyro) + Math.abs(data.zGyro);
-      let aSum_A =
-        Math.abs(data.xAcc) + Math.abs(data.yAcc) + Math.abs(data.zAcc);
+        });
+        // Send your statement
+        //guardarTrazaXAPI(dtt.classId, userr, myStatement);
+        //--------------------------
 
-      // check of it's above the threshold
-      if (aSum_G >= threshold_gyro || aSum_A >= threshold_acc) {
-        let content = liveData.get(sensorData.id);
-        content.numLinesRead = 0;
-        liveData.set(sensorData.id, content);
-        //console.log("suma absoluto : "+aSum+" xG:"+data.xGyro+"  yG"+data.yGyro+"  zG"+data.zGyro);
-        datafile =
-          "sequence,AccelerometerX,AccelerometerY,AccelerometerZ,GyroscopeX,GyroscopeY,GyroscopeZ\n";
+
+
+        if (liveData.has(sensorData.id)) {
+        } else {
+          let content = {
+            values: [],
+            predictionDone: false,
+            numLinesRead: 35,
+          };
+          liveData.set(sensorData.id, content);
+        }
+        // sum up the absolutes
+        if (liveData.get(sensorData.id).numLinesRead == numLinesPerFile) {
+          let aSum_G =
+            Math.abs(data.xGyro) + Math.abs(data.yGyro) + Math.abs(data.zGyro);
+          let aSum_A =
+            Math.abs(data.xAcc) + Math.abs(data.yAcc) + Math.abs(data.zAcc);
+
+          // check of it's above the threshold
+          if (aSum_G >= threshold_gyro || aSum_A >= threshold_acc) {
+            let content = liveData.get(sensorData.id);
+            content.numLinesRead = 0;
+            liveData.set(sensorData.id, content);
+            //console.log("suma absoluto : "+aSum+" xG:"+data.xGyro+"  yG"+data.yGyro+"  zG"+data.zGyro);
+            datafile =
+              "sequence,AccelerometerX,AccelerometerY,AccelerometerZ,GyroscopeX,GyroscopeY,GyroscopeZ\n";
+          }
+        }
+
+        if (liveData.get(sensorData.id).numLinesRead < numLinesPerFile) {
+          if (liveData.get(sensorData.id).values.length < numValuesExpected) {
+            // rellenar liveData[] hasta recopilar todos los valores de un gesto
+            let content = liveData.get(sensorData.id);
+            content.values.push(
+              data.xAcc,
+              data.yAcc,
+              data.zAcc,
+              data.xGyro,
+              data.yGyro,
+              data.zGyro
+            );
+            content.predictionDone = false;
+
+            datafile +=
+              numLinesRead +
+              "," +
+              data.xAcc +
+              "," +
+              data.yAcc +
+              "," +
+              data.zAcc +
+              "," +
+              data.xGyro +
+              "," +
+              data.yGyro +
+              "," +
+              data.zGyro +
+              "\n";
+            content.numLinesRead++;
+            liveData.set(sensorData.id, content);
+            //console.log("leyendo lineas: "+numLinesRead);
+          }
+
+          if (liveData.get(sensorData.id).values.length == numValuesExpected) {
+            //console.log(liveData.get(sensorData.id));
+            //console.log("liveData: "+liveData);
+            /*let gesto = "izquierda";
+                  let filename = "./txt/prueba2_"+gesto+"_"+numFileWrite+".csv";
+                  //const writeStream = fs.createWriteStream('data.csv');
+                  const writeStream = fs.createWriteStream(filename);
+                  writeStream.write(datafile);
+                  numFileWrite++;*/
+            processSensorData(sensorData.id);
+          }
+        }
+
+        started = true;
       }
     }
-
-    if (liveData.get(sensorData.id).numLinesRead < numLinesPerFile) {
-      if (liveData.get(sensorData.id).values.length < numValuesExpected) {
-        // rellenar liveData[] hasta recopilar todos los valores de un gesto
-        let content = liveData.get(sensorData.id);
-        content.values.push(
-          data.xAcc,
-          data.yAcc,
-          data.zAcc,
-          data.xGyro,
-          data.yGyro,
-          data.zGyro
-        );
-        content.predictionDone = false;
-
-        datafile +=
-          numLinesRead +
-          "," +
-          data.xAcc +
-          "," +
-          data.yAcc +
-          "," +
-          data.zAcc +
-          "," +
-          data.xGyro +
-          "," +
-          data.yGyro +
-          "," +
-          data.zGyro +
-          "\n";
-        content.numLinesRead++;
-        liveData.set(sensorData.id, content);
-        //console.log("leyendo lineas: "+numLinesRead);
-      }
-
-      if (liveData.get(sensorData.id).values.length == numValuesExpected) {
-        //console.log(liveData.get(sensorData.id));
-        //console.log("liveData: "+liveData);
-        /*let gesto = "izquierda";
-              let filename = "./txt/prueba2_"+gesto+"_"+numFileWrite+".csv";
-              //const writeStream = fs.createWriteStream('data.csv');
-              const writeStream = fs.createWriteStream(filename);
-              writeStream.write(datafile);
-              numFileWrite++;*/
-        processSensorData(sensorData.id);
-      }
-    }
-
-    started = true;
-  }
-  }
   }
   if (topic === "Scanned") {
     const str = message.toString();
@@ -420,7 +420,7 @@ io.on("connection", (socket) => {
   socket.on("start", function (data) {
 
     let dtt = cache.get(data.user);
-    if(dtt!=undefined){
+    if (dtt != undefined) {
       dtt.enJuego = "si";
     }
     cache.set(data.user, dtt);
@@ -454,10 +454,10 @@ io.on("connection", (socket) => {
   socket.on("game_over", function (game) {
     console.log("game_over");
     let dtt = cache.get(game.username);
-    if(dtt!=undefined){
+    if (dtt != undefined) {
       dtt.enJuego = "no";
     }
-    
+
     cache.set(game.username, dtt);
     const myStatement = funciones.finalizaPartida({
       user: game.username,
@@ -486,7 +486,7 @@ io.on("connection", (socket) => {
 
   socket.on("paused", function (game) {
     let dtt = cache.get(game.username);
-    if(dtt!=undefined){
+    if (dtt != undefined) {
       dtt.enJuego = "no";
     }
     cache.set(game.username, dtt);
@@ -505,11 +505,11 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-   
+
   });
   socket.on("reanudado", function (game) {
     let dtt = cache.get(game.username);
-    if(dtt!=undefined){
+    if (dtt != undefined) {
       dtt.enJuego = "si";
     }
     cache.set(game.username, dtt);
@@ -528,7 +528,7 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-   
+
   });
   socket.on("accessHighscore", function (game) {
     let dtt = cache.get(game.username);
@@ -548,7 +548,7 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-   
+
   });
 
   socket.on("volverAjuego", function (game) {
@@ -568,7 +568,7 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-   
+
   });
 
 
@@ -590,15 +590,15 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-   
+
   });
 
 
 
   socket.on("key", function (game) {
     let dtt = cache.get(game.username);
-    
-   
+
+
     const myStatement = funciones.arrow({
       user: game.username,
       email: "mm@ucm.es",
@@ -615,47 +615,47 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-   
+
   });
 
 
 
   socket.on("fichaGenerada", function (game) {
     let dtt = cache.get(game.username);
-    fichasTrazaComun(game,dtt,"generated");
-   
+    fichasTrazaComun(game, dtt, "generated");
+
   });
   socket.on("fichaColocada", function (game) {
     let dtt = cache.get(game.username);
-    fichasTrazaComun(game,dtt,"released");
-   
+    fichasTrazaComun(game, dtt, "released");
+
   });
   socket.on("fichaIzq", function (game) {
     let dtt = cache.get(game.username);
-    fichasTrazaComun(game,dtt,"left");
-   
+    fichasTrazaComun(game, dtt, "left");
+
   });
   socket.on("fichaDer", function (game) {
     let dtt = cache.get(game.username);
-    fichasTrazaComun(game,dtt,"right");
-   
+    fichasTrazaComun(game, dtt, "right");
+
   });
   socket.on("fichaAbajo", function (game) {
     let dtt = cache.get(game.username);
-    fichasTrazaComun(game,dtt,"down");
-   
+    fichasTrazaComun(game, dtt, "down");
+
   });
   socket.on("fichaRotar", function (game) {
     let dtt = cache.get(game.username);
-    fichasTrazaComun(game,dtt,"rotate");
-   
+    fichasTrazaComun(game, dtt, "rotate");
+
   });
   socket.on("fichaEspacioAbajo", function (game) {
     let dtt = cache.get(game.username);
-    fichasTrazaComun(game,dtt,"forcedown");
-   
+    fichasTrazaComun(game, dtt, "forcedown");
+
   });
-  function fichasTrazaComun(game,dtt, accionn){
+  function fichasTrazaComun(game, dtt, accionn) {
     getHighscore().then((highscore) => {
       const maxPuntos = highscore;
       
@@ -676,9 +676,9 @@ io.on("connection", (socket) => {
         iduser: maxPuntos.username,
         puntosMAx: maxPuntos.puntos
       });
-  
+
       guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-      
+
     }).catch((error) => {
       console.error(error);
     });
@@ -705,14 +705,14 @@ io.on("connection", (socket) => {
         iduser: maxPuntos.username,
         puntosMAx: maxPuntos.puntos
       });
-  
+
       guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-      
+
     }).catch((error) => {
       console.error(error);
     });
-   
-   
+
+
   });
 
   socket.on("disconnect", (response) => {
@@ -821,8 +821,11 @@ app.get("/register", function (req, res) {
   if (req.session.loggedin) { //si ya he iniciado sesión, redirigir a la pantalla correspondiente
     res.redirect("/board");
   } else { //sino, redirigir a la pantalla del registro
-    database.query("SELECT * FROM institution", function (error, data) {
-      if (error) throw error;
+    database.query("SELECT institution.*, COUNT(study_group.id) AS num_group FROM institution JOIN study_group ON institution.id = study_group.institution_id GROUP BY institution.id HAVING COUNT(study_group.id) > 0;", function (error, data) {
+      if (error) {
+        console.log(error.message);
+        res.status(500).send('Se ha producido un error al recuperar las instituciones de la base de datos');
+      }
       else res.render("register", { institution_list: data });
     });
   }
@@ -886,7 +889,7 @@ app.get("/board", function (req, res) {
 app.get("/get_boards", function (req, res) {
   if (req.session.loggedin && req.session.role === 3 && req.session.board === undefined) {
     searchForBoard(res);
-  }else {
+  } else {
     res.redirect("/board");
   }
 });
@@ -899,7 +902,7 @@ function searchForBoard(res) {
         res.status(200).send(result);
       } else {
         // Si no se encuentra ningún elemento, esperar 1 segundo y realizar otra búsqueda
-        setTimeout(function() {
+        setTimeout(function () {
           searchForBoard(res);
         }, 1000);
       }
@@ -1145,6 +1148,7 @@ app.post("/new_group", function (req, res) {
 app.post("/new", function (req, res) {
   const data = new URLSearchParams(req.body.data);
   const admin = data.get('admin');
+  const email = data.get('email');
   let password_verification = data.get('pass2');
   const username = data.get('username');
   const name = data.get('name');
@@ -1157,7 +1161,7 @@ app.post("/new", function (req, res) {
     password_verification = password;
   }
 
-  if (username && name && surname && age && password && password_verification && institution) {
+  if (username && name && surname && age && password && password_verification && institution && email) {
     if (password === password_verification) {
       //check if username is already taken or exist on the database
       database.query(
@@ -1177,8 +1181,8 @@ app.post("/new", function (req, res) {
               } else {
                 //insert the new username into the database
                 database.query(
-                  "INSERT INTO user (username, name, surname, age, password, role, institution_id, study_group_id) VALUES (?, ?, ?, ?, ?,'3', ?, ?)",
-                  [username, name, surname, age, hash, institution, study_group_id],
+                  "INSERT INTO user (username, email, name, surname, age, password, role, institution_id, study_group_id) VALUES (?, ?, ?, ?, ?, ?,'3', ?, ?)",
+                  [username, email, name, surname, age, hash, institution, study_group_id],
                   function (error) {
                     // If there is an issue with the query, output the error
                     if (error) {

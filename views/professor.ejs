@@ -12,6 +12,9 @@
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script type="module" src="/js/professor.js"></script>
+    <!--Chart.js-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script type="module" src="/js/chart.js"></script>
     <title>Admin</title>
 </head>
 
@@ -28,6 +31,7 @@
             <h1 id="register">Add new user</h1>
             <form id="add_user">
                 <input class="text" type="text" name="username" placeholder="Username" size="30" required />
+                <input class="text" type="email" name="email" placeholder="Email" size="150" required>
                 <input class="text" type="text" name="name" placeholder="Name" size="30" required />
                 <input class="text" type="text" name="surname" placeholder="Surname" size="40" required />
                 <input class="text" type="number" name="age" placeholder="Age" min="1" max="150" required />
@@ -55,6 +59,7 @@
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Username</th>
+                        <th scope="col">Email</th>
                         <th scope="col">Name</th>
                         <th scope="col">Surname</th>
                         <th scope="col">Age</th>
@@ -71,6 +76,11 @@
                             </td>
                             <td>
                                 <input type="text" name="username" value="<%= user_list[i].username %>" readonly>
+                            </td>
+                            <td>
+                                <%= user_list[i].email %>
+                                    <input type="text" name="email" value="<%= user_list[i].email %>" hidden
+                                        contenteditable="false">
                             </td>
                             <td>
                                 <input type="text" name="name" value="<%= user_list[i].name %>" <%
@@ -152,11 +162,9 @@
         </div>
         <div id="stats">
             <h1>Estadísticas</h1>
-            <!-- <div style="width: 500px;"><canvas id="dimensions"></canvas></div><br/> -->
-            <div style="width: 800px;"><canvas id="acquisitions"></canvas></div>
-
-            <!-- <script type="module" src="dimensions.js"></script> -->
-            <script type="module" src="acquisitions.js"></script>
+            <div style="width:100%">
+                <canvas id="myChart"></canvas>
+            </div>
         </div>
     </div>
 </body>

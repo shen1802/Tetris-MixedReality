@@ -21,11 +21,11 @@ body#register-body {
 }
 
 form#register {
-    height: 600px;
+    height: 620px;
 }
 
 form#register #href-button {
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 form#register .registro {
