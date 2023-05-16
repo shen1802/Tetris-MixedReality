@@ -175,6 +175,16 @@ const Activities = {
         },
         objectType: "Activity"
       },
+      SPACE_ARROW: {
+        id: "https://w3id.org/xapi/seriousgames/activity-types/space_arrow",
+        definition: {
+          name: {
+            "en-US": "space_arrow"
+          },
+          type: "https://w3id.org/xapi/seriousgames/activity-types/keyboard"
+        },
+        objectType: "Activity"
+      },
      NEW_GAME_BUTTON : {
         id: "https://w3id.org/xapi/seriousgames/activity-types/new_game",
         definition: {

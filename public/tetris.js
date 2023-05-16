@@ -320,7 +320,7 @@ function Tetris() {
     if (self.puzzle && self.puzzle.isRunning() && !self.puzzle.isStopped()) {
       if (self.puzzle.mayMoveDown()) {
         self.stats.setScore(self.stats.getScore() + 5 + self.stats.getLevel());
-        self.puzzle.moveDown();
+        self.puzzle.moveDown(1);
         self.stats.setActions(self.stats.getActions() + 1);
       }
     }
@@ -358,8 +358,10 @@ function Tetris() {
    */
   this.space = function () {
     if (self.puzzle && self.puzzle.isRunning() && !self.puzzle.isStopped()) {
+     
       self.puzzle.stop();
       self.puzzle.forceMoveDown();
+
     }
   };
 
@@ -436,7 +438,48 @@ function Tetris() {
 
   // keyboard
   
-  
+  this.keyup = function (){
+    console.log("up");
+    let game = keyComun();
+    game.key="up";
+    socket.emit("key",game);
+  }
+   this.keydown = function (){
+    console.log("down");
+    let game = keyComun();
+    game.key="down";
+    socket.emit("key",game);
+  }
+  this.keyleft = function (){
+    console.log("left");
+    let game = keyComun();
+    game.key="left";
+    socket.emit("key",game);
+  }
+  this.keyright  = function (){
+    console.log("right");
+    let game = keyComun();
+    game.key="right";
+    socket.emit("key",game);
+  }
+  this.keyspace = function(){
+    console.log("space");
+    let game = keyComun();
+    game.key="space";
+    socket.emit("key",game);
+  }
+  function keyComun(){
+    let game = new Object();
+    game.username = user;
+    game.score = self.stats.getScore();
+    game.board = id;
+    game.attempt= self.stats.getAttempt();
+    game.level=self.stats.getLevel();
+    game.time=self.stats.getTime();
+    game.apm=self.stats.getApm();
+    game.lines=self.stats.getLines();
+    return game;
+  }
   var keyboard = new Keyboard();
   keyboard.set(keyboard.n, this.start);
   keyboard.set(keyboard.r, this.reset);
@@ -446,8 +489,16 @@ function Tetris() {
   keyboard.set(keyboard.left, this.left);
   keyboard.set(keyboard.right, this.right);
   keyboard.set(keyboard.space, this.space);
+  
+  //---------------------------------------
+  keyboard.set(keyboard.up, this.keyup);
+  keyboard.set(keyboard.down, this.keydown);
+  keyboard.set(keyboard.left, this.keyleft);
+  keyboard.set(keyboard.right, this.keyright);
+  keyboard.set(keyboard.space, this.keyspace);
   document.onkeydown = keyboard.event;
 
+ 
   /**
    * Window replaces game area, for example help window
    * @param string id
@@ -1072,6 +1123,7 @@ function Tetris() {
       this.x = areaStartX;
       this.y = 1;
       this.board = this.createEmptyPuzzle(puzzle.length, puzzle[0].length);
+      espacioAbajoEmitido = false;
       //------emit 
       let game = new Object();
       game.username = user;
@@ -1166,9 +1218,11 @@ function Tetris() {
     this.fallDown = function () {
       if (self.isRunning()) {
         if (self.mayMoveDown()) {
-          self.moveDown();
+          
+          self.moveDown(0);
           self.fallDownID = setTimeout(self.fallDown, self.speed);
         } else {
+          
           // move blocks into area board
           for (var i = 0; i < self.elements.length; i++) {
             self.area.addElement(self.elements[i]);
@@ -1186,7 +1240,7 @@ function Tetris() {
               time: this.tetris.stats.getTime(),
               apm: this.tetris.stats.getApm(),
               lines: this.tetris.stats.getLines(),
-              ficha: nombresPiezas[this.type],
+              
               removedRow: linedata.rows[i]
             };
           
@@ -1221,28 +1275,36 @@ function Tetris() {
      * @return void
      * @access public event
      */
+    let espacioAbajoEmitido = false;
+
     this.forceMoveDown = function () {
-       //------emit 
-       let game = new Object();
-       game.username = user;
-       game.score = this.tetris.stats.getScore();
-       game.board = id;
-       game.attempt= this.tetris.stats.getAttempt();
-       game.level=this.tetris.stats.getLevel();
-       game.time=this.tetris.stats.getTime();
-       game.apm=this.tetris.stats.getApm();
-       game.lines=this.tetris.stats.getLines();
-       game.ficha= nombresPiezas[this.type];
        
-       socket.emit("fichaEspacioAbajo", game);
       if (!self.isRunning() && !self.isStopped()) {
         if (self.mayMoveDown()) {
+          if (!espacioAbajoEmitido) {
+          // Realizar la emisión solo si no se ha emitido antes
+          let game = new Object();
+          game.username = user;
+          game.score = this.tetris.stats.getScore();
+          game.board = id;
+          game.attempt = this.tetris.stats.getAttempt();
+          game.level = this.tetris.stats.getLevel();
+          game.time = this.tetris.stats.getTime();
+          game.apm = this.tetris.stats.getApm();
+          game.lines = this.tetris.stats.getLines();
+          game.ficha = nombresPiezas[this.type];
+          console.log("espacio   " + game);
+          socket.emit("fichaEspacioAbajo", game);
+
+          // Marcar la emisión como realizada
+          espacioAbajoEmitido = true;
+          }
           // stats: score, actions
           self.tetris.stats.setScore(
             self.tetris.stats.getScore() + 5 + self.tetris.stats.getLevel()
           );
           self.tetris.stats.setActions(self.tetris.stats.getActions() + 1);
-          self.moveDown();
+          self.moveDown(0);
           self.forceMoveDownID = setTimeout(self.forceMoveDown, 30);
         } else {
           // move blocks into area board
@@ -1261,7 +1323,6 @@ function Tetris() {
               time: this.tetris.stats.getTime(),
               apm: this.tetris.stats.getApm(),
               lines: this.tetris.stats.getLines(),
-              ficha: nombresPiezas[this.type],
               removedRow: linedata.rows[i]
             };
           
@@ -1398,8 +1459,9 @@ function Tetris() {
      * @return void
      * @access public
      */
-    this.moveDown = function () {
+    this.moveDown = function (accion) {
       //------emit 
+      if(accion==1){
       let game = new Object();
       game.username = user;
       game.score = this.tetris.stats.getScore();
@@ -1410,8 +1472,8 @@ function Tetris() {
       game.apm=this.tetris.stats.getApm();
       game.lines=this.tetris.stats.getLines();
       game.ficha= nombresPiezas[this.type];
-      
       socket.emit("fichaAbajo", game);
+      }
       for (var i = 0; i < this.elements.length; i++) {
         this.elements[i].style.top =
           this.elements[i].offsetTop + this.area.unit + "px";
@@ -1459,7 +1521,7 @@ function Tetris() {
       game.apm=this.tetris.stats.getApm();
       game.lines=this.tetris.stats.getLines();
       game.ficha= nombresPiezas[this.type];
-      
+      console.log(game);
       socket.emit("fichaIzq", game);
       for (var i = 0; i < this.elements.length; i++) {
         this.elements[i].style.left =

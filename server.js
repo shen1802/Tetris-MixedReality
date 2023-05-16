@@ -520,6 +520,33 @@ io.on("connection", (socket) => {
    
   });
 
+
+
+  socket.on("key", function (game) {
+    let dtt = cache.get(game.username);
+    
+   
+    const myStatement = funciones.arrow({
+      user: game.username,
+      email: "mm@ucm.es",
+      sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
+      niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
+      puntosPartida: game.score,
+      attemptt: game.attempt,
+      levell: game.level,
+      liness: game.lines,
+      apmm: game.apm,
+      timee: game.time,
+      movimiento: game.key
+    });
+    // Send your statement
+    guardarTrazaXAPI(dtt.classId, game.username, myStatement);
+   
+  });
+
+
+
   socket.on("fichaGenerada", function (game) {
     let dtt = cache.get(game.username);
     fichasTrazaComun(game,dtt,"generated");

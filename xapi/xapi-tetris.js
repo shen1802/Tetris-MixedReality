@@ -40,10 +40,10 @@ function actividadFicha(ficha){
 function actividadMovimientoArrow(movimiento){
     let fichaId;
     switch(movimiento) {
-        case 'izq':
+        case 'left':
             fichaId = Activities.LEFT_ARROW;
             break;
-        case 'der':
+        case 'right':
             fichaId = Activities.RIGHT_ARROW;
             break;
         case 'down':
@@ -52,6 +52,9 @@ function actividadMovimientoArrow(movimiento){
         case 'up':
             fichaId = Activities.UP_ARROW;
             break;
+        case 'space':
+            fichaId = Activities.SPACE_ARROW;
+            break;    
         default:
             fichaId = null;
     }
@@ -420,7 +423,7 @@ function destruyeFila({user, email, sessionId, classId, niclaId, puntosPartida,a
 
 
 
-function arrow({user, email, sessionId, classId, niclaId, puntosPartida,attemptt,levell,liness,apmm,timee,movimiento, iduser,puntosMAx}) {
+function arrow({user, email, sessionId, classId, niclaId, puntosPartida,attemptt,levell,liness,apmm,timee,movimiento}) {
     const myStatement = {
         actor: agent(user, email),
         verb: Verbs.PRESSED,
@@ -434,11 +437,7 @@ function arrow({user, email, sessionId, classId, niclaId, puntosPartida,attemptt
             level: levell,
             lines: liness,
             apm: apmm,
-            time: timee ,
-            highscore : [{
-                "id": iduser,
-                "score": puntosMAx
-            }]
+            time: timee
             
           }),
         },
