@@ -142,7 +142,7 @@ client.on("message", (topic, message) => {
 
         const myStatement = funciones.gyroAndAccel({
           user: userr,
-          email: "mm@ucm.es",
+          email: dtt.email,
           sessionId: dtt.sessionId,
           classId: dtt.classId,
           niclaId: dtt.niclaId,
@@ -426,7 +426,7 @@ io.on("connection", (socket) => {
     cache.set(data.user, dtt);
     const myStatement = funciones.iniciaPartida({
       user: data.user,
-      email: "mm@ucm.es",
+      email: dtt.email,
       sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
@@ -441,7 +441,7 @@ io.on("connection", (socket) => {
     let dtt = cache.get(data.user);
     const myStatement = funciones.interfaz({
       user: data.user,
-      email: "mm@ucm.es",
+      email: dtt.email,
       sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
@@ -461,7 +461,7 @@ io.on("connection", (socket) => {
     cache.set(game.username, dtt);
     const myStatement = funciones.finalizaPartida({
       user: game.username,
-      email: "mm@ucm.es",
+      email: dtt.email,
       sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
@@ -492,7 +492,7 @@ io.on("connection", (socket) => {
     cache.set(game.username, dtt);
     const myStatement = funciones.pausaPartida({
       user: game.username,
-      email: "mm@ucm.es",
+      email: dtt.email,
       sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
@@ -515,7 +515,7 @@ io.on("connection", (socket) => {
     cache.set(game.username, dtt);
     const myStatement = funciones.resumePartida({
       user: game.username,
-      email: "mm@ucm.es",
+      email: dtt.email,
       sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
@@ -535,7 +535,7 @@ io.on("connection", (socket) => {
 
     const myStatement = funciones.accessHighscore({
       user: game.username,
-      email: "mm@ucm.es",
+      email: dtt.email,
       sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
@@ -555,7 +555,7 @@ io.on("connection", (socket) => {
     let dtt = cache.get(game.username);
     const myStatement = funciones.iraJuego({
       user: game.username,
-      email: "mm@ucm.es",
+      email: dtt.email,
       sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
@@ -577,7 +577,7 @@ io.on("connection", (socket) => {
     let dtt = cache.get(game.username);
     const myStatement = funciones.accessAbout({
       user: game.username,
-      email: "mm@ucm.es",
+      email: dtt.email,
       sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
@@ -601,7 +601,7 @@ io.on("connection", (socket) => {
 
     const myStatement = funciones.arrow({
       user: game.username,
-      email: "mm@ucm.es",
+      email: dtt.email,
       sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
       classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
       niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
@@ -661,7 +661,7 @@ io.on("connection", (socket) => {
       
       const myStatement = funciones.ficha({
         user: game.username,
-        email: "mm@ucm.es",
+        email: dtt.email,
         sessionId: dtt.sessionId,
         classId: dtt.classId,
         niclaId: dtt.niclaId,
@@ -691,7 +691,7 @@ io.on("connection", (socket) => {
       
       const myStatement = funciones.destruyeFila({
         user: game.username,
-        email: "mm@ucm.es",
+        email: dtt.email,
         sessionId: dtt.sessionId,
         classId: dtt.classId,
         niclaId: dtt.niclaId,
@@ -928,7 +928,7 @@ app.post("/tetris", function (req, res) {
   database.query(
     "UPDATE board SET taken = 'si' WHERE id = ?",
     [req.body.board],
-    function (error, result) {
+    function (error, result) { 
       if (error) throw error;
     }
   );
@@ -1080,8 +1080,9 @@ app.post("/auth", function (req, res) {
               req.session.username = result[0].username; //nombre del usuario
               req.session.role = result[0].role; //role del usuario
               req.session.institution_id = result[0].institution_id; //institutción del usuario
+              
               ///-----
-              cache.set(result[0].username, { sessionId: req.sessionID, classId: result[0].study_group_id, niclaId: "", enJuego: "no" });
+              cache.set(result[0].username, { sessionId: req.sessionID, classId: result[0].study_group_id, niclaId: "", enJuego: "no" ,email: result[0].email});
 
               //-------
               res.status(200).send("/board");

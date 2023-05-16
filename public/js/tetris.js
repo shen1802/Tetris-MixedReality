@@ -412,21 +412,24 @@ function Tetris() {
     data.button= "about";
     socket.emit("button-menu", data);
 
-    let game = new Object();
-    game.username = user;
-    game.score = self.stats.getScore();
-    game.board = id;
-    game.attempt= self.stats.getAttempt();
-    game.level=self.stats.getLevel();
-    game.time=self.stats.getTime();
-    game.apm=self.stats.getApm();
-    game.lines=self.stats.getLines();
-    socket.emit("about", game);
-
+    
     highscores.close();
     let activ=helpwindow.activate();
+    if(activ=="activaVentana"){
+      let game = new Object();
+      game.username = user;
+      game.score = self.stats.getScore();
+      game.board = id;
+      game.attempt= self.stats.getAttempt(); 
+      game.level=self.stats.getLevel();
+      game.time=self.stats.getTime();
+      game.apm=self.stats.getApm();
+      game.lines=self.stats.getLines();
+      socket.emit("about", game);
+  
+    }
     if(activ=="vueltaAjuego"){
-      if(self.puzzle.isRunning()){
+      if(self.puzzle!=null){
         let game = new Object();
         game.username = user;
         game.score = self.stats.getScore();
@@ -442,7 +445,7 @@ function Tetris() {
     this.blur();
   };
   document.getElementById("tetris-help-close").onclick = function (){
-    if(self.puzzle.isRunning()){
+    if(self.puzzle!=null){
     let game = new Object();
     game.username = user;
     game.score = self.stats.getScore();
@@ -455,7 +458,7 @@ function Tetris() {
     socket.emit("volverAjuego", game);
     }
     console.log("closed about");
-    helpwindow.close;
+    helpwindow.close();
   }
   // highscores
   document.getElementById("tetris-menu-highscores").onclick = function () {
@@ -464,16 +467,6 @@ function Tetris() {
     data.button= "highscore";
     socket.emit("button-menu", data);
     
-    let game = new Object();
-    game.username = user;
-    game.score = self.stats.getScore();
-    game.board = id;
-    game.attempt= self.stats.getAttempt();
-    game.level=self.stats.getLevel();
-    game.time=self.stats.getTime();
-    game.apm=self.stats.getApm();
-    game.lines=self.stats.getLines();
-    socket.emit("accessHighscore", game);
 
    
     helpwindow.close();
@@ -481,8 +474,20 @@ function Tetris() {
       self.highscores.toHtml();
     
     let activ=highscores.activate();
+    if(activ=="activaVentana"){
+      let game = new Object();
+      game.username = user;
+      game.score = self.stats.getScore();
+      game.board = id;
+      game.attempt= self.stats.getAttempt();
+      game.level=self.stats.getLevel();
+      game.time=self.stats.getTime();
+      game.apm=self.stats.getApm();
+      game.lines=self.stats.getLines();
+      socket.emit("accessHighscore", game);
+    }
     if(activ=="vueltaAjuego"){
-      if(self.puzzle.isRunning()){
+      if(self.puzzle!=null ){
         let game = new Object();
         game.username = user;
         game.score = self.stats.getScore();
@@ -498,7 +503,7 @@ function Tetris() {
     this.blur();
   };
   document.getElementById("tetris-highscores-close").onclick = function (){
-    if(self.puzzle.isRunning()){
+    if(self.puzzle!=null ){
     let game = new Object();
     game.username = user;
     game.score = self.stats.getScore();
@@ -511,7 +516,7 @@ function Tetris() {
     socket.emit("volverAjuego", game);
     }
     console.log("closed highscore");
-    highscores.close;
+    highscores.close();
   }
   // keyboard - buttons
   //document.getElementById("tetris-keyboard-up").onclick = function() { self.up(); this.blur(); };
