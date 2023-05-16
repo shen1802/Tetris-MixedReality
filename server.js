@@ -387,10 +387,18 @@ function getHighscore() {
         console.log(error.message);
         reject(error);
       } else {
-        const highscore = {
-          username: result[0].username,
-          puntos: result[0].total_score
-        };
+        let highscore;
+        if (result.length > 0) {
+          highscore = {
+            username: result[0].username,
+            puntos: result[0].total_score
+          };
+        } else {
+          highscore = {
+            username: "",
+            puntos: 0
+          };
+        }
         resolve(highscore);
       }
     });
@@ -650,10 +658,7 @@ io.on("connection", (socket) => {
   function fichasTrazaComun(game,dtt, accionn){
     getHighscore().then((highscore) => {
       const maxPuntos = highscore;
-      if (maxPuntos==undefined){
-        maxPuntos.username=".";
-        maxPuntos.puntos=0;
-      }
+      
       const myStatement = funciones.ficha({
         user: game.username,
         email: "mm@ucm.es",
@@ -683,10 +688,7 @@ io.on("connection", (socket) => {
     getHighscore().then((highscore) => {
       const maxPuntos = highscore;
   
-      if (maxPuntos==undefined){
-        maxPuntos.username=".";
-        maxPuntos.puntos=0;
-      }
+      
       const myStatement = funciones.destruyeFila({
         user: game.username,
         email: "mm@ucm.es",
