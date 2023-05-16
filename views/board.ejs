@@ -8,6 +8,7 @@
   <link href="/images/tetris.ico" rel="shortcut icon" />
   <link href="/css/tetris.css" rel="stylesheet" type="text/css" />
   <link href="/css/admin.css" rel="stylesheet" type="text/css">
+  <script type="module" src="/js/board.js"></script>
   <title>Board Sync</title>
 </head>
 
@@ -21,7 +22,7 @@
   </div>
   <!-- this will show our spinner -->
   <div id="spinner">
-    <p>Buscando placa</p>
+    <p id="countdown">Buscando placa</p>
   </div>
   <form id="board" action="/tetris" method="POST">
     <div>
@@ -34,33 +35,5 @@
     </div>
   </form>
 </body>
-
-<script>
-  const spinner = document.getElementById("spinner");
-
-  document.addEventListener('DOMContentLoaded', function () {
-    fetch('/get_boards')
-      .then(response => response.json())
-      .then(data => {
-        spinner.setAttribute('hidden', '');
-        const boards = data;
-        console.log(data);
-        let options = '';
-        if (boards.length) {
-          for (let i = 0; i < boards.length; i++) {
-            options += `<option value="${boards[i].id}" ${boards[i].taken === "si" ? 'disabled' : ''}>${boards[i].id} ${boards[i].taken === "si" ? '- Placa en uso' : '- Disponbile'}</option>`;
-          }
-        }
-        const selectElement = document.querySelector('select[id="board-select"]');
-        selectElement.innerHTML = options;
-      });
-  });
-
-  // Recargar la página después de un cierto tiempo
-  setTimeout(function () {
-    location.reload();
-  }, 20000);
-
-</script>
 
 </html>

@@ -170,6 +170,7 @@ table#user,
 
 /*Board*/
 form#board {
+  width: 400px;
   margin-left: 500px;
   margin-right: 500px;
   border-radius: 15px;
