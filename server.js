@@ -395,7 +395,7 @@ function getHighscore() {
           };
         } else {
           highscore = {
-            username: "",
+            username: ".",
             puntos: 0
           };
         }
