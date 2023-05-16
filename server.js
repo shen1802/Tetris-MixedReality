@@ -14,9 +14,9 @@ const { count, group } = require("console");
 const fs = require("fs");
 require("@tensorflow/tfjs-node");
 const NodeCache = require('node-cache');
-const cache = new NodeCache();
-const userNicla = new NodeCache();
-
+let cache = new NodeCache();
+let userNicla = new NodeCache();
+let socketUser = new NodeCache();
 //--------XAPI----------------------------------
 let xapiTraces = []; // Array principal para almacenar las trazas xAPI
 let copyOfTraces = []; // Array secundario para la copia y guardado en la base de datos
@@ -416,6 +416,19 @@ function getHighscore() {
 io.on("connection", (socket) => {
   console.log("Nuevo usuario contado con ID: " + socket.id);
   //console.log(socket.request);
+  socket.on("abrirWeb", function (data) {
+    let dtt = cache.get(data.user);
+    if(dtt!=undefined){
+    socketUser.set(socket.id, data.user);
+    const myStatement = funciones.abrirWeb({
+      user: data.user,
+      email: dtt.email,
+      });
+    // Send your statement
+    guardarTrazaXAPI(dtt.classId, data.user, myStatement);
+    }
+
+  });
 
   socket.on("start", function (data) {
 
@@ -724,6 +737,20 @@ io.on("connection", (socket) => {
         if (error) throw error;
       }
     );*/
+    
+    let usuarioname= socketUser.get(socket.id);
+    if(usuarioname!=undefined){
+    let dtt = cache.get(usuarioname);
+    if(dtt!=undefined){
+    
+    const myStatement = funciones.salirPaginaWeb({
+      user: usuarioname,
+      email: dtt.email,
+      });
+    // Send your statement
+    guardarTrazaXAPI(dtt.classId,usuarioname, myStatement);
+    }
+    }
     console.log(socket.id + " has disconnected");
   });
 
