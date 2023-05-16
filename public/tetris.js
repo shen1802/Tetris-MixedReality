@@ -375,6 +375,10 @@ function Tetris() {
 
   // game menu
   document.getElementById("tetris-menu-start").onclick = function () {
+    let data =new Object();
+    data.user = user;
+    data.button= "new_game";
+    socket.emit("button-menu", data);
     helpwindow.close();
     highscores.close();
     self.start();
@@ -384,16 +388,30 @@ function Tetris() {
   // document.getElementById("tetris-menu-reset").onclick = function() { helpwindow.close(); highscores.close(); self.reset(); this.blur(); };
 
   document.getElementById("tetris-menu-pause").onclick = function () {
+    let data =new Object();
+    data.user = user;
+    data.button= "pause";
+    socket.emit("button-menu", data);
     self.pause();
     this.blur();
   };
   document.getElementById("tetris-menu-resume").onclick = function () {
+    let data =new Object();
+    data.user = user;
+    data.button= "resume";
+    socket.emit("button-menu", data);
     self.pause();
     this.blur();
   };
 
   // help
   document.getElementById("tetris-menu-help").onclick = function () {
+    
+    let data =new Object();
+    data.user = user;
+    data.button= "about";
+    socket.emit("button-menu", data);
+
     let game = new Object();
     game.username = user;
     game.score = self.stats.getScore();
@@ -404,14 +422,48 @@ function Tetris() {
     game.apm=self.stats.getApm();
     game.lines=self.stats.getLines();
     socket.emit("about", game);
+
     highscores.close();
-    helpwindow.activate();
+    let activ=helpwindow.activate();
+    if(activ=="vueltaAjuego"){
+      if(self.puzzle.isRunning()){
+        let game = new Object();
+        game.username = user;
+        game.score = self.stats.getScore();
+        game.board = id;
+        game.attempt= self.stats.getAttempt();
+        game.level=self.stats.getLevel();
+        game.time=self.stats.getTime();
+        game.apm=self.stats.getApm();
+        game.lines=self.stats.getLines();
+        socket.emit("volverAjuego", game);
+        }
+    }
     this.blur();
   };
-  document.getElementById("tetris-help-close").onclick = helpwindow.close;
-
+  document.getElementById("tetris-help-close").onclick = function (){
+    if(self.puzzle.isRunning()){
+    let game = new Object();
+    game.username = user;
+    game.score = self.stats.getScore();
+    game.board = id;
+    game.attempt= self.stats.getAttempt();
+    game.level=self.stats.getLevel();
+    game.time=self.stats.getTime();
+    game.apm=self.stats.getApm();
+    game.lines=self.stats.getLines();
+    socket.emit("volverAjuego", game);
+    }
+    console.log("closed about");
+    helpwindow.close;
+  }
   // highscores
   document.getElementById("tetris-menu-highscores").onclick = function () {
+    let data =new Object();
+    data.user = user;
+    data.button= "highscore";
+    socket.emit("button-menu", data);
+    
     let game = new Object();
     game.username = user;
     game.score = self.stats.getScore();
@@ -422,14 +474,45 @@ function Tetris() {
     game.apm=self.stats.getApm();
     game.lines=self.stats.getLines();
     socket.emit("accessHighscore", game);
+
+   
     helpwindow.close();
     document.getElementById("tetris-highscores-content").innerHTML =
       self.highscores.toHtml();
-    highscores.activate();
+    
+    let activ=highscores.activate();
+    if(activ=="vueltaAjuego"){
+      if(self.puzzle.isRunning()){
+        let game = new Object();
+        game.username = user;
+        game.score = self.stats.getScore();
+        game.board = id;
+        game.attempt= self.stats.getAttempt();
+        game.level=self.stats.getLevel();
+        game.time=self.stats.getTime();
+        game.apm=self.stats.getApm();
+        game.lines=self.stats.getLines();
+        socket.emit("volverAjuego", game);
+        }
+    }
     this.blur();
   };
-  document.getElementById("tetris-highscores-close").onclick = highscores.close;
-
+  document.getElementById("tetris-highscores-close").onclick = function (){
+    if(self.puzzle.isRunning()){
+    let game = new Object();
+    game.username = user;
+    game.score = self.stats.getScore();
+    game.board = id;
+    game.attempt= self.stats.getAttempt();
+    game.level=self.stats.getLevel();
+    game.time=self.stats.getTime();
+    game.apm=self.stats.getApm();
+    game.lines=self.stats.getLines();
+    socket.emit("volverAjuego", game);
+    }
+    console.log("closed highscore");
+    highscores.close;
+  }
   // keyboard - buttons
   //document.getElementById("tetris-keyboard-up").onclick = function() { self.up(); this.blur(); };
   //document.getElementById("tetris-keyboard-down").onclick = function() { self.down(); this.blur(); };
@@ -515,8 +598,13 @@ function Tetris() {
      */
     this.activate = function () {
      
-      self.el.style.display =
-        self.el.style.display == "block" ? "none" : "block";
+      if (self.el.style.display == "block") {
+        self.el.style.display = "none";
+        return "vueltaAjuego";
+      } else {
+        self.el.style.display = "block";
+        return "activaVentana";
+      }
     };
 
     /**

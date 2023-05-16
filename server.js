@@ -59,7 +59,7 @@ setInterval(() => {
   guardarEnTablaXAPI(copyOfTraces);
 
   copyOfTraces = [];
-}, 1 * 60 * 1000); // 5 minutos en milisegundos
+}, 1 * 60*100); 
 
 function guardarEnTablaXAPI(xapiArray) {
   for (let i = 0; i < xapiArray.length; i++) {
@@ -119,7 +119,11 @@ client.on("connect", () => {
 client.on("message", (topic, message) => {
   if (topic === "sensorData") {
     const sensorData = JSON.parse(message.toString());
-
+    let userr= userNicla.get(sensorData.id);
+    if(userr!= null && userr!=undefined){
+    let dtt=cache.get(userr);
+    if(dtt.enJuego=="si"){
+    console.log("datos gyroaccel asociados a user");
     let dataAvailable = sensorData;
     if (dataAvailable && !started) {
       console.log("ready");
@@ -133,6 +137,29 @@ client.on("message", (topic, message) => {
       yGyro: sensorData.gyroscope.y,
       zGyro: sensorData.gyroscope.z,
     };
+    //---generacion traza xapi
+
+   
+    const myStatement = funciones.gyroAndAccel({
+      user: userr,
+      email: "mm@ucm.es",
+      sessionId: dtt.sessionId, 
+      classId: dtt.classId, 
+      niclaId: dtt.niclaId, 
+      gyrox: data.xGyro,
+      gyroy: data.yGyro,
+      gyroz: data.zGyro,
+      accx: data.xAcc,
+      accy: data.yAcc ,
+      accz: data.zAcc
+      
+    });
+    // Send your statement
+    //guardarTrazaXAPI(dtt.classId, userr, myStatement);
+    //--------------------------
+
+
+
     if (liveData.has(sensorData.id)) {
     } else {
       let content = {
@@ -208,6 +235,8 @@ client.on("message", (topic, message) => {
     }
 
     started = true;
+  }
+  }
   }
   if (topic === "Scanned") {
     const str = message.toString();
@@ -399,11 +428,26 @@ io.on("connection", (socket) => {
   });
 
 
+  socket.on("button-menu", function (data) {
+
+    let dtt = cache.get(data.user);
+    const myStatement = funciones.interfaz({
+      user: data.user,
+      email: "mm@ucm.es",
+      sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
+      niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
+      boton: data.button
+    });
+    // Send your statement
+    guardarTrazaXAPI(dtt.classId, data.user, myStatement);
+  });
+
   socket.on("game_over", function (game) {
     console.log("game_over");
     let dtt = cache.get(game.username);
     if(dtt!=undefined){
-      dtt.enJuego = "si";
+      dtt.enJuego = "no";
     }
     
     cache.set(game.username, dtt);
@@ -435,7 +479,7 @@ io.on("connection", (socket) => {
   socket.on("paused", function (game) {
     let dtt = cache.get(game.username);
     if(dtt!=undefined){
-      dtt.enJuego = "si";
+      dtt.enJuego = "no";
     }
     cache.set(game.username, dtt);
     const myStatement = funciones.pausaPartida({
@@ -498,10 +542,31 @@ io.on("connection", (socket) => {
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
    
   });
+
+  socket.on("volverAjuego", function (game) {
+    let dtt = cache.get(game.username);
+    const myStatement = funciones.iraJuego({
+      user: game.username,
+      email: "mm@ucm.es",
+      sessionId: dtt.sessionId, // Esto es de ejemplo, tendréis que ver cuando se crea y cuando se reutiliza el id de la sesión actual del usuario 
+      classId: dtt.classId, // Esto es un ejemplo, debería de venir directamente de la clase en la que haya entrado el usuario. 
+      niclaId: dtt.niclaId, // Esto es un ejemplo, debe de sustituirse por el ID real (del tipo que sea) de la nicla que sostiene el usuario
+      puntosPartida: game.score,
+      attemptt: game.attempt,
+      levell: game.level,
+      liness: game.lines,
+      apmm: game.apm,
+      timee: game.time
+    });
+    // Send your statement
+    guardarTrazaXAPI(dtt.classId, game.username, myStatement);
+   
+  });
+
+
+
   socket.on("about", function (game) {
     let dtt = cache.get(game.username);
-    
-   
     const myStatement = funciones.accessAbout({
       user: game.username,
       email: "mm@ucm.es",
@@ -585,7 +650,10 @@ io.on("connection", (socket) => {
   function fichasTrazaComun(game,dtt, accionn){
     getHighscore().then((highscore) => {
       const maxPuntos = highscore;
-  
+      if (maxPuntos==undefined){
+        maxPuntos.username=".";
+        maxPuntos.puntos=0;
+      }
       const myStatement = funciones.ficha({
         user: game.username,
         email: "mm@ucm.es",
@@ -615,6 +683,10 @@ io.on("connection", (socket) => {
     getHighscore().then((highscore) => {
       const maxPuntos = highscore;
   
+      if (maxPuntos==undefined){
+        maxPuntos.username=".";
+        maxPuntos.puntos=0;
+      }
       const myStatement = funciones.destruyeFila({
         user: game.username,
         email: "mm@ucm.es",
