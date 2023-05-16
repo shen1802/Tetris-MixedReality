@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 16, 2023 at 06:57 PM
+-- Generation Time: May 16, 2023 at 09:03 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -130,7 +130,8 @@ CREATE TABLE `user` (
 
 INSERT INTO `user` (`username`, `email`, `name`, `surname`, `age`, `password`, `role`, `institution_id`, `study_group_id`) VALUES
 ('admin', 'admin@admin.com', 'admin', 'admin', 0, '$2b$10$CZKZvRcGvBFS9H53z.NeI.WgxsxgK948YpB54Ao8IgPBcFC.veF3m', 1, 4203, NULL),
-('profe', 'profe@ucm.es', 'Tamasho', 'Martín', 34, '$2b$10$VelIoF12aM0oDtdIDZ25Y.YGvlFqorzDWlSKZ9K7Ug2ryme39MPMi', 2, 4637, 42525681);
+('profe', 'profe@ucm.es', 'Tamasho', 'Martín', 34, '$2b$10$VelIoF12aM0oDtdIDZ25Y.YGvlFqorzDWlSKZ9K7Ug2ryme39MPMi', 2, 4637, 42525681),
+('siao', 'siao@ucm.es', 'siao', 'shen', 23, '$2b$10$oUbRiM1YwBVfo0vUwWSVleSbClg/h5Q0vFyRa6SemvmFj7agMhwwC', 3, 4637, 52414390);
 
 -- --------------------------------------------------------
 
@@ -224,12 +225,6 @@ ALTER TABLE `session`
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `session`
---
-ALTER TABLE `session`
-  ADD CONSTRAINT `session_ibfk_2` FOREIGN KEY (`username`) REFERENCES `user` (`username`);
 
 --
 -- Constraints for table `study_group`
