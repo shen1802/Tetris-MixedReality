@@ -176,6 +176,42 @@ $(document).ready(function () {
             }
         });
     });
+
+    //submenu de estadisticas
+    TODO
+    $('ul.submenu li a:first').addClass('admin_active');
+    $('.sub_paginas .pagina').hide();
+    $('.sub_paginas .pagina:first').show();
+    $('div.overlay div#form_estudiante').hide();
+    $('div.overlay div#form_empresa').hide();
+    $('div.overlay div#form_universidad').hide();
+
+    $('ul.submenu li a').click(function () {
+        $('ul.submenu li a').removeClass('admin_active');
+        $(this).addClass('admin_active');
+        $('.sub_paginas .pagina').hide();
+
+        var activeTab = $(this).attr('href');
+        $(activeTab).show();
+        return false;
+    });
+
+    $('#admin_add').click(function () {
+        $('#overlay').addClass('active');
+    });
+
+    $('a#cerrar_pop_up').click(function () {
+        $('#overlay').removeClass('active');
+    });
+
+    $('select#tipo_user').click(function () {
+        $('div.overlay div#form_estudiante').hide();
+        $('div.overlay div#form_empresa').hide();
+        $('div.overlay div#form_universidad').hide();
+        var tipo = document.getElementById("tipo_user").value;
+        var seleccion = '#form_' + tipo;
+        $(seleccion).show();
+    });
 });
 
 var passInput = document.getElementById('pass');

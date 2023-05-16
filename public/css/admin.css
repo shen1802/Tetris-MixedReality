@@ -52,7 +52,8 @@ form#add_user {
 }
 
 form#add_user,
-form#board select {
+form#board,
+form#select_group select {
   font-size: 11px;
   color: rgb(104, 104, 104);
   line-height: 1.2em;
@@ -77,7 +78,8 @@ hr {
 
 /*Add Institution*/
 form#add_institution,
-form#add_group {
+form#add_group,
+form#select_group {
   margin-top: 1%;
   display: flex;
   align-items: center;
@@ -107,7 +109,8 @@ form#logout input,
 #add-group-button,
 #group_update_button,
 #log-out-button,
-#board-button {
+#board-button,
+#select-group-button {
   width: 60px;
 }
 
@@ -147,13 +150,15 @@ form#logout input,
 
 #user_update_button,
 #group_update_button,
-#board-button {
+#board-button,
+#select-group-button {
   background-color: #3366cc;
 }
 
 #user_update_button:hover,
 #group_update_button:hover,
-#board-button:hover {
+#board-button:hover,
+#select-group-button:hover {
   background-color: #325aa9;
 }
 
