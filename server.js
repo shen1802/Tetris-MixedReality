@@ -1091,7 +1091,7 @@ app.post("/stats", function (req, res) {
         }
       });
     } else {
-      database.query("SELECT * FROM xapi WHERE ", [study_group_id], function (error, result) {
+      database.query("SELECT * FROM xapi WHERE classid IN (SELECT DISTINCT id FROM study_group WHERE study_group.institution_id = ?)", [study_group_id], function (error, result) {
         if (error) {
           console.log(error.message);
           res.status(500).send("Se ha producido un problema a la hora de recuperar datos xApi");
