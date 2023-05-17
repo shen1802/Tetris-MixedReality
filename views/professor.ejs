@@ -13,8 +13,8 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script type="module" src="/js/professor.js"></script>
     <!--Chart.js-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
-    <script type="module" src="/js/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- <script type="module" src="/js/chart.js"></script> -->
     <title>Admin</title>
 </head>
 
@@ -37,7 +37,7 @@
                 <input class="text" type="number" name="age" placeholder="Age" min="1" max="150" required />
                 <input class="text" id="pass" type="password" name="pass" placeholder="Password" size="40" required />
                 <select class="text" name="study_group_id" required>
-                    <option disabled selected hidden>Select Group</option>
+                    <option value="" disabled selected hidden>Select Group</option>
                     <%for(var i=0; i < group_list.length; i++) { %>
                         <option value="<%= group_list[i].id %>">
                             <%=group_list[i].name %>
@@ -161,25 +161,29 @@
             </table>
         </div>
         <div id="stats">
-            <h1>Estadísticas</h1>
+            <h1>Stats</h1>
             <form id="select_group">
                 <select class="text" name="study_group_id" required>
-                    <option disabled selected hidden>Select Group</option>
-                    <option value="all">Todos</option>
+                    <option value="" disabled selected hidden>Select Group</option>
                     <%for(var i=0; i < group_list.length; i++) { %>
-                        <option value="<%= group_list[i].id %>">
-                            <%=group_list[i].name %>
+                        <option label="<%=group_list[i].name %>" value="<%= group_list[i].id %>">
                         </option>
-                        <% }%>
+                        <% if (i===(group_list.length - 1)) {%>
+                            <option label="Todos" value="<%= user_list[i].institution_id %>"></option>
+                            <% } %>
+                                <% }%>
                 </select>
                 <select class="text" name="type_stats" required>
-                    <option disabled selected hidden>Select Type of stats</option>
-
+                    <option value="" disabled selected hidden>Select type of stats</option>
+                    <option label="Figures Count" value="figures_count"></option>
                 </select>
                 <input class="button" id="select-group-button" type="submit" value="Show" />
             </form>
-            <canvas id="myChart"></canvas>
+            <div>
+                <canvas id="myChart"></canvas>
+            </div>
         </div>
     </div>
 </body>
+
 </html>

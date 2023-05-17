@@ -35,7 +35,7 @@
                 <input class="text" type="number" name="age" placeholder="Age" min="1" max="150" required />
                 <input class="text" id="pass" type="password" name="pass" placeholder="Password" size="40" required />
                 <select class="text" id="institution_selected" name="institution" required>
-                    <option disabled selected hidden>Select Institution</option>
+                    <option value="" disabled selected hidden>Select Institution</option>
                     <% if(institution_list.length){ for(var i=0; i < institution_list.length; i++) { %>
                         <% if(institution_list[i].name !=="admin") {%>
                             <option value="<%= institution_list[i].id %>">
@@ -45,7 +45,7 @@
                                 <% } %>
                 </select>
                 <select class="text" name="study_group_id">
-                    <option disabled selected hidden>Select Group</option>
+                    <option value="" disabled selected hidden>Select Group</option>
                 </select>
                 <input type="password" name="pass2" hidden size="40" />
                 <input type="text" name="admin" value="true" hidden>

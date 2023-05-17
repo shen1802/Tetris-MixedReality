@@ -177,8 +177,76 @@ $(document).ready(function () {
         });
     });
 
-    //submenu de estadisticas
-    TODO
+    //Stats Panel
+    $('#select_group').submit(function (event) {
+        // Evitar envío convencional del formulario
+        event.preventDefault();
+        // Obtener los datos del formulario
+        const formData = $(this).serialize();
+        const typeStat = $(this).find('[name="type_stats"]').val();
+        // Realizar la solicitud Ajax
+        $.ajax({
+            type: 'POST',
+            url: '/stats',
+            data: { data: formData },
+            success: function (response) {
+                // Manejar la respuesta del servidor
+                const figuras = [];
+                let traza = '';
+                let ficha = '';
+                let valor = '';
+                for (let i in response) {
+                    traza = JSON.parse(response[i].traza); // recuperamos la traza
+                    ficha = traza.object.definition.name; // recuperamos la ficha
+                    valor = Object.values(ficha); // obtenemos el valor de la ficha
+                    if (figuras.some(item => Object.keys(item)[0] === valor[0])) { // si lo encuentra
+                        let figura = figuras.find(objeto => Object.keys(objeto)[0] === valor[0]);
+                        figura[valor[0]]++;
+                    } else if (valor[0].includes('ficha')) {
+                        const figura = {
+                            [valor[0]]: 1
+                        }
+                        figuras.push(figura);
+                    }
+                }
+
+                const canvas = document.getElementById('myChart');
+                const ctx = canvas.getContext('2d');
+
+                // Verificar si existe una instancia de Chart en el lienzo y destruirla si es necesario
+                if (canvas.chart !== undefined) {
+                    canvas.chart.destroy();
+                }
+
+                canvas.chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: figuras.map(obj => Object.keys(obj)[0]),
+                        datasets: [{
+                            label: 'Fichas',
+                            data: figuras.map(obj => Object.values(obj)[0]),
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                // Manejar errores de la solicitud
+                alert(xhr.responseText);
+            }
+        });
+    });
+
+    //submenu de estadisticas - TODO
     $('ul.submenu li a:first').addClass('admin_active');
     $('.sub_paginas .pagina').hide();
     $('.sub_paginas .pagina:first').show();

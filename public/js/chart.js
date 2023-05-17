@@ -124,5 +124,6 @@ const myChart = new Chart(ctx, {
         beginAtZero: true
       }
     }
+    
   }
 });
