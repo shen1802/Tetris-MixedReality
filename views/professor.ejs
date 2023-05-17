@@ -175,15 +175,48 @@
                 </select>
                 <select class="text" name="type_stats" required>
                     <option value="" disabled selected hidden>Select type of stats</option>
-                    <option label="Figures Count" value="figures_count"></option>
+                    <option label="Tetris Stats" value="tetris"></option>
+                    <option label="Player Stats" value="player_stats"></option>
+                </select>
+                <select class="text" name="type_user">
+                    <option value="" disabled selected hidden>Select Player</option>
+                    <%for(var i=0; i < group_list.length; i++) { %>
+                        <option value="<%= user_list[i].id %>">
+                            <%=user_list[i].name %>
+                        </option>
+                        <% }%>
                 </select>
                 <input class="button" id="select-group-button" type="submit" value="Show" />
             </form>
-            <div>
-                <canvas id="myChart"></canvas>
+            <div id="charts" style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 20px;">
+                <div style="width: 600px; height: 400px;">
+                    <canvas id="chart-0"></canvas>
+                </div>
+                <div style="width: 600px; height: 400px;">
+                    <canvas id="chart-1"></canvas>
+                </div>
+                <div style="width: 600px; height: 400px;">
+                    <canvas id="chart-2"></canvas>
+                </div>
+                <div style="width: 600px; height: 400px;">
+                    <canvas id="chart-3"></canvas>
+                </div>
             </div>
         </div>
     </div>
 </body>
+
+<style>
+    #charts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-gap: 20px;
+    }
+
+    #charts canvas {
+        width: 10%;
+        height: 10%;
+    }
+</style>
 
 </html>

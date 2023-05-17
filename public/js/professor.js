@@ -191,94 +191,112 @@ $(document).ready(function () {
             data: { data: formData },
             success: function (response) {
                 // Manejar la respuesta del servidor
-                const figuras = [];
-                let traza = '';
-                let ficha = '';
-                let valor = '';
-                for (let i in response) {
-                    traza = JSON.parse(response[i].traza); // recuperamos la traza
-                    ficha = traza.object.definition.name; // recuperamos la ficha
-                    valor = Object.values(ficha); // obtenemos el valor de la ficha
-                    if (figuras.some(item => Object.keys(item)[0] === valor[0])) { // si lo encuentra
-                        let figura = figuras.find(objeto => Object.keys(objeto)[0] === valor[0]);
-                        figura[valor[0]]++;
-                    } else if (valor[0].includes('ficha')) {
-                        const figura = {
-                            [valor[0]]: 1
+                if (typeStat === 'tetris_stats') {
+                    const figuras = [];
+                    const title = 'FIGURAS GENERADAS';
+                    const label = 'Figuras';
+                    for (let i in response) {
+                        const traza = JSON.parse(response[i].traza); // recuperamos la traza
+                        const ficha = traza.object.definition.name; // recuperamos la ficha
+                        const valor = Object.values(ficha); // obtenemos el valor de la ficha
+                        if (figuras.some(item => Object.keys(item)[0] === valor[0])) { // si lo encuentra
+                            let figura = figuras.find(objeto => Object.keys(objeto)[0] === valor[0]);
+                            figura[valor[0]]++;
+                        } else if (valor[0].includes('ficha')) {
+                            const figura = {
+                                [valor[0]]: 1
+                            }
+                            figuras.push(figura);
                         }
-                        figuras.push(figura);
                     }
-                }
-
-                const canvas = document.getElementById('myChart');
-                const ctx = canvas.getContext('2d');
-
-                // Verificar si existe una instancia de Chart en el lienzo y destruirla si es necesario
-                if (canvas.chart !== undefined) {
-                    canvas.chart.destroy();
-                }
-
-                canvas.chart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: figuras.map(obj => Object.keys(obj)[0]),
-                        datasets: [{
-                            label: 'Fichas',
-                            data: figuras.map(obj => Object.values(obj)[0]),
-                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
+                    generateCharts(figuras, 'bar', label, title);
+                } else if (typeStat === 'move_count') {
+                    const title = 'MOVIMIENTOS REALIZADOS'
+                    const label = 'Tipo de movimiento'
+                    for (let i in response) {
+                        const traza = JSON.parse(response[i].traza); // recuperamos la traza
+                        const ficha = traza.object.definition.name; // recuperamos la ficha
+                        const valor = Object.values(ficha); // obtenemos el valor de la ficha
+                        if (figuras.some(item => Object.keys(item)[0] === valor[0])) { // si lo encuentra
+                            let figura = figuras.find(objeto => Object.keys(objeto)[0] === valor[0]);
+                            figura[valor[0]]++;
+                        } else if (valor[0].includes('arrow')) {
+                            const figura = {
+                                [valor[0]]: 1
+                            }
+                            figuras.push(figura);
+                        }
+                    }
+                } else if (typeStat === 'player_stats') {
+                    const figuras = [];
+                    const time_array = [];
+                    const apm_array = [];
+                    const level_array = [];
+                    const attempt_array = [];
+                    const title = ['TEMPO TOTAL POR JUGADOR (s)', 'ACCIONES/MIN POR JUGADOR', 'MÁXIMO NIVEL ALCANZADO', 'MÁXIMOS INTENTOS POR JUGADOR'];
+                    const label = ['Jugador', 'Jugador', 'Jugador', 'Jugador'];
+                    const chartType = ['pie', 'bar', 'bar', 'bar'];
+                    for (let i in response) {
+                        const traza = JSON.parse(response[i].traza); // recuperamos la traza
+                        const valor = Object.values(traza.verb.display); // obtenemos el valor de la ficha
+                        if (valor[0] === "completed") {
+                            const player_name = traza.actor.name;
+                            const object = Object.values(traza.result);
+                            const time = object[1]["https://www.tetris.com/time"];
+                            const apm = object[1]["https://www.tetris.com/apm"];
+                            const level = object[1]["https://www.tetris.com/level"];
+                            const attempt = object[1]["https://www.tetris.com/attempt"];
+                            console.log("El attempt de " + player_name + " es de: " + attempt);
+                            if (time_array.some(item => Object.keys(item)[0] === player_name)) {
+                                time_array[player_name] += time;
+                            } else {
+                                const figura = { [player_name]: time }
+                                time_array.push(figura);
+                            }
+                            if (apm_array.some(item => Object.keys(item)[0] === player_name)) {
+                                let player = apm_array.find(objeto => Object.keys(objeto)[0] === player_name);
+                                if (player[player_name] < apm) {
+                                    player[player_name] = apm;
+                                }
+                            } else {
+                                const figura = { [player_name]: apm }
+                                apm_array.push(figura);
+                            }
+                            if (level_array.some(item => Object.keys(item)[0] === player_name)) {
+                                let player = level_array.find(objeto => Object.keys(objeto)[0] === player_name);
+                                if (player[player_name] < level) {
+                                    player[player_name] = level;
+                                }
+                            } else {
+                                const figura = { [player_name]: level }
+                                level_array.push(figura);
+                            }
+                            if (attempt_array.some(item => Object.keys(item)[0] === player_name)) {
+                                let player = attempt_array.find(objeto => Object.keys(objeto)[0] === player_name);
+                                if (player[player_name] < attempt) {
+                                    player[player_name] = attempt;
+                                }
+                                attempt_array[player_name] += attempt;
+                            } else {
+                                const figura = { [player_name]: attempt }
+                                attempt_array.push(figura);
                             }
                         }
                     }
-                });
+                    figuras.push(time_array);
+                    figuras.push(apm_array);
+                    figuras.push(level_array);
+                    figuras.push(attempt_array);
+                    for (let i in figuras) {
+                        generateCharts(figuras[i], chartType[i], label[i], title[i], i);
+                    }
+                }
             },
             error: function (xhr, status, error) {
                 // Manejar errores de la solicitud
                 alert(xhr.responseText);
             }
         });
-    });
-
-    //submenu de estadisticas - TODO
-    $('ul.submenu li a:first').addClass('admin_active');
-    $('.sub_paginas .pagina').hide();
-    $('.sub_paginas .pagina:first').show();
-    $('div.overlay div#form_estudiante').hide();
-    $('div.overlay div#form_empresa').hide();
-    $('div.overlay div#form_universidad').hide();
-
-    $('ul.submenu li a').click(function () {
-        $('ul.submenu li a').removeClass('admin_active');
-        $(this).addClass('admin_active');
-        $('.sub_paginas .pagina').hide();
-
-        var activeTab = $(this).attr('href');
-        $(activeTab).show();
-        return false;
-    });
-
-    $('#admin_add').click(function () {
-        $('#overlay').addClass('active');
-    });
-
-    $('a#cerrar_pop_up').click(function () {
-        $('#overlay').removeClass('active');
-    });
-
-    $('select#tipo_user').click(function () {
-        $('div.overlay div#form_estudiante').hide();
-        $('div.overlay div#form_empresa').hide();
-        $('div.overlay div#form_universidad').hide();
-        var tipo = document.getElementById("tipo_user").value;
-        var seleccion = '#form_' + tipo;
-        $(seleccion).show();
     });
 });
 
@@ -290,3 +308,39 @@ passInput.addEventListener('input', function () {
 });
 
 
+function generateCharts(figuras, chartType, label, title, index = 0) {
+    const canvas = document.getElementById(`chart-${index}`);
+    const ctx = canvas.getContext('2d');
+
+    // Verificar si existe una instancia de Chart en el lienzo y destruirla si es necesario
+    if (canvas.chart !== undefined) {
+        canvas.chart.destroy();
+    }
+
+    canvas.chart = new Chart(ctx, {
+        type: chartType,
+        data: {
+            labels: figuras.map(obj => Object.keys(obj)[0]),
+            datasets: [{
+                label: label,
+                data: figuras.map(obj => Object.values(obj)[0]),
+                backgroundColor: ['rgb(0, 18, 25, 0.7)', 'rgb(0, 95, 115, 0.7)', 'rgb(10, 147, 150, 0.7)', 'rgb(148, 210, 0.7)', 'rgb(238, 155, 0, 0.7)', 'rgb(202, 103, 2, 0.7)', 'rgb(187, 62, 3, 0.7)', 'rgb(174, 32, 18, 0.7)', 'rgb(155, 34, 38, 0.7)'], // Array de colores para las barras
+                borderColor: ['rgb(0, 18, 25, 1)', 'rgb(0, 95, 115, 1)', 'rgb(10, 147, 150, 1)', 'rgb(148, 210, 189, 1)', 'rgb(238, 155, 0, 1)', 'rgb(202, 103, 2, 1)', 'rgb(187, 62, 3, 1)', 'rgb(174, 32, 18, 1)', 'rgb(155, 34, 38, 1)'], // Array de colores para los bordes de las barras
+                borderWidth: 1
+            }]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: title
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+        }
+    });
+}
