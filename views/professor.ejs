@@ -173,18 +173,57 @@
                             <% } %>
                                 <% }%>
                 </select>
-                <select class="text" name="type_stats" required>
-                    <option value="" disabled selected hidden>Select type of stats</option>
-                    <option label="Tetris Stats" value="tetris"></option>
-                    <option label="Player Stats" value="player_stats"></option>
-                </select>
                 <select class="text" name="type_user">
                     <option value="" disabled selected hidden>Select Player</option>
-                    <%for(var i=0; i < group_list.length; i++) { %>
-                        <option value="<%= user_list[i].id %>">
-                            <%=user_list[i].name %>
-                        </option>
-                        <% }%>
+                    <option label="" value=""></option>
+                    <%for(var i=0; i < user_list.length; i++) { %>
+                        <% if (user_list[i].role !==2) {%>
+                            <option label="<%=user_list[i].username %>" value="<%= user_list[i].username %>"></option>
+                            <% }}%>
+                </select>
+                <select class="text" name="start_chart-0">
+                    <option label="" value=""></option>
+                    <option value="" disabled selected hidden>Stats Chart 1 (Pie)</option>
+                    <option label="Tiempo total" value="total_time"></option>
+                    <option label="Acciones por minuto" value="player_apm"></option>
+                    <option label="Nivel máximo" value="max_level"></option>
+                    <option label="Máximos intentos" value="max_attempt"></option>
+                    <option label="Figuras generadas" value="fig_generated"></option>
+                    <option label="Movimientos realizados" value="moves"></option>
+                    <option label="Partidas jugadas" value="games_played"></option>
+                </select>
+                <select class="text" name="start_chart-1">
+                    <option label="" value=""></option>
+                    <option value="" disabled selected hidden>Stats Chart 2 (Bar)</option>
+                    <option label="Tiempo total" value="total_time"></option>
+                    <option label="Acciones por minuto" value="player_apm"></option>
+                    <option label="Nivel máximo" value="max_level"></option>
+                    <option label="Máximos intentos" value="max_attempt"></option>
+                    <option label="Figuras generadas" value="fig_generated"></option>
+                    <option label="Movimientos realizados" value="moves"></option>
+                    <option label="Partidas jugadas" value="games_played"></option>
+                </select>
+                <select class="text" name="start_chart-2">
+                    <option label="" value=""></option>
+                    <option value="" disabled selected hidden>Stats Chart 3 (Bar)</option>
+                    <option label="Tiempo total" value="total_time"></option>
+                    <option label="Acciones por minuto" value="player_apm"></option>
+                    <option label="Nivel máximo" value="max_level"></option>
+                    <option label="Máximos intentos" value="max_attempt"></option>
+                    <option label="Figuras generadas" value="fig_generated"></option>
+                    <option label="Movimientos realizados" value="moves"></option>
+                    <option label="Partidas jugadas" value="games_played"></option>
+                </select>
+                <select class="text" name="start_chart-3">
+                    <option label="" value=""></option>    
+                    <option value="" disabled selected hidden>Stats Chart 4 (Bar)</option>
+                    <option label="Tiempo total" value="total_time"></option>
+                    <option label="Acciones por minuto" value="player_apm"></option>
+                    <option label="Nivel máximo" value="max_level"></option>
+                    <option label="Máximos intentos" value="max_attempt"></option>
+                    <option label="Figuras generadas" value="fig_generated"></option>
+                    <option label="Movimientos realizados" value="moves"></option>
+                    <option label="Partidas jugadas" value="games_played"></option>
                 </select>
                 <input class="button" id="select-group-button" type="submit" value="Show" />
             </form>

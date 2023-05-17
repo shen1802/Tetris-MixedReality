@@ -236,3 +236,7 @@ form#board #board-button {
     transform: rotate(360deg);
   }
 }
+
+form#select_group {
+  width: 100%;
+}

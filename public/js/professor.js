@@ -160,7 +160,6 @@ $(document).ready(function () {
         const inputsAndSelects = $(selectedRow).find('input');
         // Serializa los valores de los elementos seleccionados
         const data = inputsAndSelects.serialize();
-        console.log(data);
         // Send POST request to server
         $.ajax({
             url: '/update_group',
@@ -183,7 +182,25 @@ $(document).ready(function () {
         event.preventDefault();
         // Obtener los datos del formulario
         const formData = $(this).serialize();
-        const typeStat = $(this).find('[name="type_stats"]').val();
+        const type_user = $(this).find('[name="type_user"]').val();
+        const chart0 = $(this).find('[name="start_chart-0"]').val();
+        const chart1 = $(this).find('[name="start_chart-1"]').val();
+        const chart2 = $(this).find('[name="start_chart-2"]').val();
+        const chart3 = $(this).find('[name="start_chart-3"]').val();
+        const charts_to_show = [];
+        if (chart0 !== null && chart0 !== '') {
+            charts_to_show.push(chart0);
+        }
+        if (chart1 !== null && chart1 !== '') {
+            charts_to_show.push(chart1);
+        }
+        if (chart2 !== null && chart2 !== '') {
+            charts_to_show.push(chart2)
+        }
+        if (chart3 != null && chart3 !== '') {
+            charts_to_show.push(chart3)
+        }
+        const chartType = ['pie', 'bar', 'bar', 'bar'];
         // Realizar la solicitud Ajax
         $.ajax({
             type: 'POST',
@@ -191,64 +208,119 @@ $(document).ready(function () {
             data: { data: formData },
             success: function (response) {
                 // Manejar la respuesta del servidor
-                if (typeStat === 'tetris_stats') {
-                    const figuras = [];
-                    const title = 'FIGURAS GENERADAS';
-                    const label = 'Figuras';
-                    for (let i in response) {
-                        const traza = JSON.parse(response[i].traza); // recuperamos la traza
-                        const ficha = traza.object.definition.name; // recuperamos la ficha
-                        const valor = Object.values(ficha); // obtenemos el valor de la ficha
-                        if (figuras.some(item => Object.keys(item)[0] === valor[0])) { // si lo encuentra
-                            let figura = figuras.find(objeto => Object.keys(objeto)[0] === valor[0]);
-                            figura[valor[0]]++;
-                        } else if (valor[0].includes('ficha')) {
-                            const figura = {
-                                [valor[0]]: 1
-                            }
-                            figuras.push(figura);
-                        }
-                    }
-                    generateCharts(figuras, 'bar', label, title);
-                } else if (typeStat === 'move_count') {
-                    const title = 'MOVIMIENTOS REALIZADOS'
-                    const label = 'Tipo de movimiento'
-                    for (let i in response) {
-                        const traza = JSON.parse(response[i].traza); // recuperamos la traza
-                        const ficha = traza.object.definition.name; // recuperamos la ficha
-                        const valor = Object.values(ficha); // obtenemos el valor de la ficha
-                        if (figuras.some(item => Object.keys(item)[0] === valor[0])) { // si lo encuentra
-                            let figura = figuras.find(objeto => Object.keys(objeto)[0] === valor[0]);
-                            figura[valor[0]]++;
-                        } else if (valor[0].includes('arrow')) {
-                            const figura = {
-                                [valor[0]]: 1
-                            }
-                            figuras.push(figura);
-                        }
-                    }
-                } else if (typeStat === 'player_stats') {
-                    const figuras = [];
-                    const time_array = [];
-                    const apm_array = [];
-                    const level_array = [];
-                    const attempt_array = [];
-                    const title = ['TEMPO TOTAL POR JUGADOR (s)', 'ACCIONES/MIN POR JUGADOR', 'MÁXIMO NIVEL ALCANZADO', 'MÁXIMOS INTENTOS POR JUGADOR'];
-                    const label = ['Jugador', 'Jugador', 'Jugador', 'Jugador'];
-                    const chartType = ['pie', 'bar', 'bar', 'bar'];
-                    for (let i in response) {
-                        const traza = JSON.parse(response[i].traza); // recuperamos la traza
-                        const valor = Object.values(traza.verb.display); // obtenemos el valor de la ficha
-                        if (valor[0] === "completed") {
+                const options = [{ total_time: { title: 'TEMPO TOTAL POR JUGADOR (s)', label: "Jugador", array: [] } },
+                { player_apm: { title: 'ACCIONES/MIN POR JUGADOR', label: "Jugador", array: [] } },
+                { max_level: { title: 'MÁXIMO NIVEL ALCANZADO', label: "Jugador", array: [] } },
+                { max_attempt: { title: 'MÁXIMOS INTENTOS POR JUGADOR', label: "Jugador", array: [] } },
+                { moves: { title: 'MOVIMIENTOS REALIZADOS', label: "Movimientos", array: [] } },
+                { fig_generated: { title: 'FIGURAS GENERADAS', label: "Figuras", array: [] } },
+                { games_played: { title: 'PARTIDAS JUGADAS', label: "Partidas", array: [] } },
+                ];
+                const time_array = [];
+                const apm_array = [];
+                const level_array = [];
+                const attempt_array = [];
+                const fig_generated_array = [];
+                const moves_array = [];
+                const games_played_array = [];
+
+                //Tratamiento de los datos
+                for (let i in response) {
+                    const traza = JSON.parse(response[i].traza); // recuperamos la traza
+                    const display = Object.values(traza.verb.display); // obtenemos el valor de la ficha
+                    const ficha = Object.values(traza.object.definition.name);
+                    if (type_user !== null && type_user !== '') {
+                        const player_name = traza.actor.name;
+                        if (player_name === type_user) {
+                            const display = Object.values(traza.verb.display); // obtenemos el valor de la ficha
+                            const ficha = Object.values(traza.object.definition.name);
                             const player_name = traza.actor.name;
+                            if (display[0] === "completed") {
+                                const object = Object.values(traza.result);
+                                const time = object[1]["https://www.tetris.com/time"];
+                                const apm = object[1]["https://www.tetris.com/apm"];
+                                const level = object[1]["https://www.tetris.com/level"];
+                                const attempt = object[1]["https://www.tetris.com/attempt"];
+                                if (time_array.some(item => Object.keys(item)[0] === player_name)) {
+                                    let player = time_array.find(objeto => Object.keys(objeto)[0] === player_name);
+                                    player[player_name] += time;
+                                } else {
+                                    const figura = { [player_name]: time }
+                                    time_array.push(figura);
+                                }
+                                if (apm_array.some(item => Object.keys(item)[0] === player_name)) {
+                                    let player = apm_array.find(objeto => Object.keys(objeto)[0] === player_name);
+                                    if (player[player_name] < apm) {
+                                        player[player_name] = apm;
+                                    }
+                                } else {
+                                    const figura = { [player_name]: apm }
+                                    apm_array.push(figura);
+                                }
+                                if (level_array.some(item => Object.keys(item)[0] === player_name)) {
+                                    let player = level_array.find(objeto => Object.keys(objeto)[0] === player_name);
+                                    if (player[player_name] < level) {
+                                        player[player_name] = level;
+                                    }
+                                } else {
+                                    const figura = { [player_name]: level }
+                                    level_array.push(figura);
+                                }
+                                if (attempt_array.some(item => Object.keys(item)[0] === player_name)) {
+                                    let player = attempt_array.find(objeto => Object.keys(objeto)[0] === player_name);
+                                    if (player[player_name] < attempt) {
+                                        player[player_name] = attempt;
+                                    }
+                                } else {
+                                    const figura = { [player_name]: attempt }
+                                    attempt_array.push(figura);
+                                }
+                                if (games_played_array.some(item => Object.keys(item)[0] === player_name)) {
+                                    let player = games_played_array.find(objeto => Object.keys(objeto)[0] === player_name);
+                                    player[player_name] += 1;
+                                } else {
+                                    const figura = { [player_name]: 1 }
+                                    games_played_array.push(figura);
+                                }
+                            } else if (display[0] === "exited") {
+                                if (games_played_array.some(item => Object.keys(item)[0] === player_name)) {
+                                    let player = games_played_array.find(objeto => Object.keys(objeto)[0] === player_name);
+                                    player[player_name] += 1;
+                                } else {
+                                    const figura = { [player_name]: 1 }
+                                    games_played_array.push(figura);
+                                }
+                            }
+                            if (fig_generated_array.some(item => Object.keys(item)[0] === ficha[0])) { // si lo encuentra
+                                let figura = fig_generated_array.find(objeto => Object.keys(objeto)[0] === ficha[0]);
+                                figura[ficha[0]]++;
+                            } else if (ficha[0].includes('ficha')) {
+                                const figura = {
+                                    [ficha[0]]: 1
+                                }
+                                fig_generated_array.push(figura);
+                            }
+                            if (moves_array.some(item => Object.keys(item)[0] === ficha[0])) { // si lo encuentra
+                                let figura = moves_array.find(objeto => Object.keys(objeto)[0] === ficha[0]);
+                                figura[ficha[0]]++;
+                            } else if (ficha[0].includes('arrow')) {
+                                const figura = {
+                                    [ficha[0]]: 1
+                                }
+                                moves_array.push(figura);
+                            }
+                        }
+                    } else {
+                        const player_name = traza.actor.name;
+                        if (display[0] === "completed") {
                             const object = Object.values(traza.result);
                             const time = object[1]["https://www.tetris.com/time"];
                             const apm = object[1]["https://www.tetris.com/apm"];
                             const level = object[1]["https://www.tetris.com/level"];
                             const attempt = object[1]["https://www.tetris.com/attempt"];
-                            console.log("El attempt de " + player_name + " es de: " + attempt);
                             if (time_array.some(item => Object.keys(item)[0] === player_name)) {
-                                time_array[player_name] += time;
+                                let player = time_array.find(objeto => Object.keys(objeto)[0] === player_name);
+                                player[player_name] += time;
                             } else {
                                 const figura = { [player_name]: time }
                                 time_array.push(figura);
@@ -276,20 +348,61 @@ $(document).ready(function () {
                                 if (player[player_name] < attempt) {
                                     player[player_name] = attempt;
                                 }
-                                attempt_array[player_name] += attempt;
                             } else {
                                 const figura = { [player_name]: attempt }
                                 attempt_array.push(figura);
                             }
+                            if (games_played_array.some(item => Object.keys(item)[0] === player_name)) {
+                                let player = games_played_array.find(objeto => Object.keys(objeto)[0] === player_name);
+                                player[player_name] += 1;
+                            } else {
+                                const figura = { [player_name]: 1 }
+                                games_played_array.push(figura);
+                            }
+                        } else if (display[0] === "exited") {
+                            if (games_played_array.some(item => Object.keys(item)[0] === player_name)) {
+                                let player = games_played_array.find(objeto => Object.keys(objeto)[0] === player_name);
+                                player[player_name] += 1;
+                            } else {
+                                const figura = { [player_name]: 1 }
+                                games_played_array.push(figura);
+                            }
+                        }
+                        if (fig_generated_array.some(item => Object.keys(item)[0] === ficha[0])) { // si lo encuentra
+                            let figura = fig_generated_array.find(objeto => Object.keys(objeto)[0] === ficha[0]);
+                            figura[ficha[0]]++;
+                        } else if (ficha[0].includes('ficha')) {
+                            const figura = {
+                                [ficha[0]]: 1
+                            }
+                            fig_generated_array.push(figura);
+                        }
+                        if (moves_array.some(item => Object.keys(item)[0] === ficha[0])) { // si lo encuentra
+                            let figura = moves_array.find(objeto => Object.keys(objeto)[0] === ficha[0]);
+                            figura[ficha[0]]++;
+                        } else if (ficha[0].includes('arrow')) {
+                            const figura = {
+                                [ficha[0]]: 1
+                            }
+                            moves_array.push(figura);
                         }
                     }
-                    figuras.push(time_array);
-                    figuras.push(apm_array);
-                    figuras.push(level_array);
-                    figuras.push(attempt_array);
-                    for (let i in figuras) {
-                        generateCharts(figuras[i], chartType[i], label[i], title[i], i);
-                    }
+
+                }
+
+                //Añadir los graficos al array
+                options[0].total_time.array = time_array;
+                options[1].player_apm.array = apm_array;
+                options[2].max_level.array = level_array;
+                options[3].max_attempt.array = attempt_array;
+                options[4].moves.array = moves_array;
+                options[5].fig_generated.array = fig_generated_array;
+                options[6].games_played.array = games_played_array;
+
+                //generar graficas
+                for (let i in charts_to_show) {
+                    const chart = options.find(objeto => Object.keys(objeto)[0] === charts_to_show[i]);
+                    generateCharts(chart[charts_to_show[i]].array, chartType[i], chart[charts_to_show[i]].label, chart[charts_to_show[i]].title, i);
                 }
             },
             error: function (xhr, status, error) {
