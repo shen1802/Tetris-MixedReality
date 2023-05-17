@@ -59,8 +59,8 @@ setInterval(() => {
   guardarEnTablaXAPI(copyOfTraces);
 
   copyOfTraces = [];
-}, 1 * 60 * 100);
-
+}, 1 * 60 * 1000);
+/*
 function guardarEnTablaXAPI(xapiArray) {
   for (let i = 0; i < xapiArray.length; i++) {
     const { classid, userid, traza } = xapiArray[i];
@@ -69,18 +69,62 @@ function guardarEnTablaXAPI(xapiArray) {
     });
     // Consulta SQL para insertar los valores en la tabla xapi
     const query = 'INSERT INTO xapi (userId, classId, traza) VALUES (?, ?, ?)';
-    const values = [userid, classid, JSON.stringify(traza)];
-
-    // Ejecutar la consulta
+    // Generar los valores a insertar en lote
+    
+    }
+    const values = xapiArray.map(({ userid, classid, traza }) => [
+      userid,
+      classid,
+      JSON.stringify(traza)
+       ]);
+    // Ejecutar la consulta con los valores en lote
     database.query(query, values, (error, result) => {
-      if (error) {
-        console.error('Error al guardar los datos en la tabla xapi:', error);
-      } else {
-        console.log('Datos guardados correctamente en la tabla xapi');
-      }
-    });
+    if (error) {
+      console.error("Error al guardar los datos en la tabla xapi:", error);
+    } else {
+      console.log("Datos guardados correctamente en la tabla xapi");
+    }
+  });
   }
+*/
+
+function guardarEnTablaXAPI(xapiArray) {
+  // Verificar si hay trazas para enviar
+  if (xapiArray.length === 0) {
+    return;
+  }
+
+  const statements = xapiArray.map(({ classid, userid, traza }) => (traza));
+
+  xapi.sendStatement({
+    statement: statements
+  });
+
+ // Consulta SQL para insertar los valores en la tabla xapi
+const query = "INSERT INTO xapi (userId, classId, traza) VALUES ?";
+
+// Tamaño máximo de cada lote
+const batchSize = 50; // Puedes ajustar este valor según tus necesidades
+
+// Dividir los valores en lotes más pequeños
+for (let i = 0; i < xapiArray.length; i += batchSize) {
+  const batchValues = xapiArray.slice(i, i + batchSize).map(({ classid, userid, traza }) => [
+    userid,
+    classid,
+    JSON.stringify(traza)
+  ]);
+
+  // Ejecutar la consulta con el lote actual de valores
+  database.query(query, [batchValues], (error, result) => {
+    if (error) {
+      console.error("Error al guardar los datos en la tabla xapi:", error);
+    } else {
+      console.log("Datos guardados correctamente en la tabla xapi");
+    }
+  });
 }
+}
+
 //----------------------------------------------
 
 const client = mqtt.connect("mqtt://localhost");
@@ -123,7 +167,7 @@ client.on("message", (topic, message) => {
     if (userr != null && userr != undefined) {
       let dtt = cache.get(userr);
       if (dtt.enJuego == "si") {
-        console.log("datos gyroaccel asociados a user");
+        
         let dataAvailable = sensorData;
         if (dataAvailable && !started) {
           console.log("ready");
@@ -155,7 +199,7 @@ client.on("message", (topic, message) => {
 
         });
         // Send your statement
-        //guardarTrazaXAPI(dtt.classId, userr, myStatement);
+        guardarTrazaXAPI(dtt.classId, userr, myStatement);
         //--------------------------
 
 

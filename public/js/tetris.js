@@ -122,6 +122,7 @@
 function Tetris() {
   //socket.io
   let socket = io();
+  socket.io.engine.timeout = 400000;
   //let params = new URLSearchParams(document.location.search);
   const id = document.getElementById("tetris_id").innerHTML;
   const user = document.getElementById("username").innerHTML;
@@ -284,7 +285,7 @@ function Tetris() {
     self.puzzle.stop();
     document.getElementById("tetris-nextpuzzle").style.display = "none";
     document.getElementById("tetris-gameover").style.display = "block";
-    confirm("Game Over!");
+    //confirm("Game over.");
     let game = new Object();
     game.username = user;
     game.score = this.stats.getScore();
