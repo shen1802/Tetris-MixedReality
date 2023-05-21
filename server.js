@@ -36,7 +36,7 @@ const xapi = new XAPI({
 
 function guardarTrazaXAPI(classid, userid, traza) {
   if (isCopying) {
-    console.log("usando array de copia trazas xapi");
+    
     copyOfTraces.push({ classid, userid, traza });
   } else {
     xapiTraces.push({ classid, userid, traza });
@@ -144,7 +144,7 @@ client.on("message", (topic, message) => {
         
         let dataAvailable = sensorData;
         if (dataAvailable && !started) {
-          console.log("ready");
+          console.log("STARTED");
         }
 
         let data = {
@@ -259,13 +259,12 @@ client.on("message", (topic, message) => {
   if (topic === "Scanned") {
     const str = message.toString();
     const list = str.replace(/'/g, "").split(", ");
-    console.log(list);
+   
     let lista = [];
     for (let i = 0; i < list.length; i++) {
       lista.push(extractNumberFromMAC(list[i]));
     }
-    console.log("scanned");
-    console.log(lista);
+    
     let current_array = [];
 
     database.query("SELECT * FROM board", function (SELECTerror, result) {
@@ -293,16 +292,16 @@ client.on("message", (topic, message) => {
 
         for (let i = 0; i < lista.length; i++) {
           let existe = new Boolean(false);
-          console.log(current_array.length);
+          
           for (let j = 0; j < current_array.length; j++) {
             if (current_array[j].id == lista[i]) {
               existe = true;
             }
           }
 
-          console.log(existe);
+          
           if (existe == false) {
-            console.log("no existe y se inserta");
+            
             database.query(
               "INSERT INTO board (id, taken) VALUES (?, 'no')",
               [lista[i]],
@@ -345,8 +344,8 @@ const processSensorData = (id) => {
 };
 
 const predict = (model, newSampleData, id) => {
-  console.log("Dentro de predict");
-  console.log(id);
+  
+  
   tf.tidy(() => {
     const inputData = newSampleData;
 
@@ -361,27 +360,27 @@ const predict = (model, newSampleData, id) => {
     switch (winner) {
       case "izquierda":
         obj.action = "left";
-        console.log("izquierda");
+        
         break;
       case "derecha":
         obj.action = "right";
-        console.log("derecha");
+        
         break;
       case "abajo":
         obj.action = "down";
-        console.log("abajo");
+        
         break;
       case "espacio":
         obj.action = "space";
-        console.log("espacio");
+        
         break;
       case "rotar":
         obj.action = "up";
-        console.log("rotar");
+        
         break;
       default:
         obj.action = "default";
-        console.log("default");
+        
         break;
     }
     //io.to(socket.id)
@@ -453,7 +452,7 @@ io.on("connection", (socket) => {
     let dtt = cache.get(data.user);
     if (dtt != undefined) {
       dtt.enJuego = "si";
-    }
+    
     cache.set(data.user, dtt);
     const myStatement = funciones.iniciaPartida({
       user: data.user,
@@ -464,12 +463,14 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, data.user, myStatement);
+  }
   });
 
 
   socket.on("button-menu", function (data) {
 
     let dtt = cache.get(data.user);
+    if(dtt!=undefined){
     const myStatement = funciones.interfaz({
       user: data.user,
       email: dtt.email,
@@ -480,14 +481,15 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, data.user, myStatement);
+  }
   });
 
   socket.on("game_over", function (game) {
-    console.log("game_over");
+   
     let dtt = cache.get(game.username);
     if (dtt != undefined) {
       dtt.enJuego = "no";
-    }
+    
 
     cache.set(game.username, dtt);
     const myStatement = funciones.finalizaPartida({
@@ -505,6 +507,7 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
+  }
     database.query(
       "INSERT INTO session (id, username, id_board, session_score) VALUES (NULL, ?, ?, ?)",
       [game.username, game.board, game.score]
@@ -519,7 +522,7 @@ io.on("connection", (socket) => {
     let dtt = cache.get(game.username);
     if (dtt != undefined) {
       dtt.enJuego = "no";
-    }
+    
     cache.set(game.username, dtt);
     const myStatement = funciones.pausaPartida({
       user: game.username,
@@ -536,13 +539,13 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-
+  }
   });
   socket.on("reanudado", function (game) {
     let dtt = cache.get(game.username);
     if (dtt != undefined) {
       dtt.enJuego = "si";
-    }
+    
     cache.set(game.username, dtt);
     const myStatement = funciones.resumePartida({
       user: game.username,
@@ -559,11 +562,11 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-
+  }
   });
   socket.on("accessHighscore", function (game) {
     let dtt = cache.get(game.username);
-
+    if(dtt!=undefined){
     const myStatement = funciones.accessHighscore({
       user: game.username,
       email: dtt.email,
@@ -579,11 +582,12 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-
+  }
   });
 
   socket.on("volverAjuego", function (game) {
     let dtt = cache.get(game.username);
+    if(dtt!=undefined){
     const myStatement = funciones.iraJuego({
       user: game.username,
       email: dtt.email,
@@ -599,13 +603,14 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-
+  }
   });
 
 
 
   socket.on("about", function (game) {
     let dtt = cache.get(game.username);
+    if(dtt!=undefined) {
     const myStatement = funciones.accessAbout({
       user: game.username,
       email: dtt.email,
@@ -621,14 +626,14 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-
+  }
   });
 
 
 
   socket.on("key", function (game) {
     let dtt = cache.get(game.username);
-
+    if(dtt!=undefined){
 
     const myStatement = funciones.arrow({
       user: game.username,
@@ -646,7 +651,7 @@ io.on("connection", (socket) => {
     });
     // Send your statement
     guardarTrazaXAPI(dtt.classId, game.username, myStatement);
-
+  }
   });
 
 
@@ -687,6 +692,7 @@ io.on("connection", (socket) => {
 
   });
   function fichasTrazaComun(game, dtt, accionn) {
+    if(dtt!=undefined){
     getHighscore().then((highscore) => {
       const maxPuntos = highscore;
       
@@ -714,8 +720,10 @@ io.on("connection", (socket) => {
       console.error(error);
     });
   }
+  }
   socket.on("removelines", function (game) {
     let dtt = cache.get(game.username);
+    if(dtt!=undefined){
     getHighscore().then((highscore) => {
       const maxPuntos = highscore;
   
@@ -742,7 +750,7 @@ io.on("connection", (socket) => {
     }).catch((error) => {
       console.error(error);
     });
-
+  }
 
   });
 
@@ -1295,10 +1303,13 @@ app.post("/logout", function (req, res) {
           if (error) throw error;
         }
       );
+      if(req.session.board!=undefined){
       userNicla.del(req.session.board);
+      }
     }
+    if(req.session.username!=undefined){
     cache.del(req.session.username);
-
+    }
     req.session.destroy((err) => {
       if (err) {
         res.status(400).send("Unable to log out");
