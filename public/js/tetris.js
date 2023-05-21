@@ -129,7 +129,7 @@ function Tetris() {
 
   socket.on("message", function (obj) {
     if (obj.id == id) {
-      console.log("[Tetris]" + obj.action);
+      
       if (obj.action == "start") {
         self.start();
       } else if (obj.action == "pause") {
@@ -462,7 +462,7 @@ function Tetris() {
     game.lines=self.stats.getLines();
     socket.emit("volverAjuego", game);
     }
-    console.log("closed about");
+    
     helpwindow.close();
   }
   // highscores
@@ -520,7 +520,7 @@ function Tetris() {
     game.lines=self.stats.getLines();
     socket.emit("volverAjuego", game);
     }
-    console.log("closed highscore");
+    
     highscores.close();
   }
   // keyboard - buttons
@@ -532,31 +532,31 @@ function Tetris() {
   // keyboard
   
   this.keyup = function (){
-    console.log("up");
+    
     let game = keyComun();
     game.key="up";
     socket.emit("key",game);
   }
    this.keydown = function (){
-    console.log("down");
+   
     let game = keyComun();
     game.key="down";
     socket.emit("key",game);
   }
   this.keyleft = function (){
-    console.log("left");
+    
     let game = keyComun();
     game.key="left";
     socket.emit("key",game);
   }
   this.keyright  = function (){
-    console.log("right");
+    
     let game = keyComun();
     game.key="right";
     socket.emit("key",game);
   }
   this.keyspace = function(){
-    console.log("space");
+    
     let game = keyComun();
     game.key="space";
     socket.emit("key",game);
@@ -1391,7 +1391,7 @@ function Tetris() {
           game.apm = this.tetris.stats.getApm();
           game.lines = this.tetris.stats.getLines();
           game.ficha = nombresPiezas[this.type];
-          console.log("espacio   " + game);
+        
           socket.emit("fichaEspacioAbajo", game);
 
           // Marcar la emisión como realizada
@@ -1619,7 +1619,7 @@ function Tetris() {
       game.apm=this.tetris.stats.getApm();
       game.lines=this.tetris.stats.getLines();
       game.ficha= nombresPiezas[this.type];
-      console.log(game);
+      
       socket.emit("fichaIzq", game);
       for (var i = 0; i < this.elements.length; i++) {
         this.elements[i].style.left =
