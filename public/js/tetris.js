@@ -151,17 +151,11 @@ function Tetris() {
   });
 
   socket.on("connect", function (obj) {
-    console.log("Client side socket ID: " + socket.id);
     let data = new Object();
     data.user=user;
     data.sockedid=socket.id;
     socket.emit("abrirWeb", data);
   });
-
-  console.log("ID del tetris: " + id);
-  console.log("Nombre del jugador: " + user);
-
-
 
    //-----------
 

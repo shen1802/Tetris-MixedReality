@@ -83,7 +83,6 @@ $(document).ready(function () {
         const inputsAndSelects = $(selectedRow).find('input, select');
         // Serializa los valores de los elementos seleccionados
         const data = inputsAndSelects.serialize();
-        console.log(data);
         // Send POST request to server
         $.ajax({
             url: '/update_user',
@@ -169,7 +168,6 @@ $(document).ready(function () {
             $(this).addClass('selected');
         }
         selected_institution_row = $(this).find('td:eq(1)').text();
-        console.log(selected_institution_row);
     });
 
     $('#institution_delete_button').click(function () {
@@ -195,7 +193,6 @@ $(document).ready(function () {
 
         // Obtener los datos del formulario
         let formData = $(this).serialize();
-        console.log(formData);
 
         // Realizar la solicitud Ajax
         $.ajax({
