@@ -60,33 +60,7 @@ setInterval(() => {
 
   copyOfTraces = [];
 }, 1 * 60 * 1000);
-/*
-function guardarEnTablaXAPI(xapiArray) {
-  for (let i = 0; i < xapiArray.length; i++) {
-    const { classid, userid, traza } = xapiArray[i];
-    xapi.sendStatement({
-      statement: traza
-    });
-    // Consulta SQL para insertar los valores en la tabla xapi
-    const query = 'INSERT INTO xapi (userId, classId, traza) VALUES (?, ?, ?)';
-    // Generar los valores a insertar en lote
-    
-    }
-    const values = xapiArray.map(({ userid, classid, traza }) => [
-      userid,
-      classid,
-      JSON.stringify(traza)
-       ]);
-    // Ejecutar la consulta con los valores en lote
-    database.query(query, values, (error, result) => {
-    if (error) {
-      console.error("Error al guardar los datos en la tabla xapi:", error);
-    } else {
-      console.log("Datos guardados correctamente en la tabla xapi");
-    }
-  });
-  }
-*/
+
 
 function guardarEnTablaXAPI(xapiArray) {
   // Verificar si hay trazas para enviar
@@ -108,7 +82,7 @@ const batchSize = 50; // Puedes ajustar este valor según tus necesidades
 
 // Dividir los valores en lotes más pequeños
 for (let i = 0; i < xapiArray.length; i += batchSize) {
-  const batchValues = xapiArray.slice(i, i + batchSize).map(({ classid, userid, traza }) => [
+  const batchValues = xapiArray.slice(i, Math.min(i + batchSize, xapiArray.length)).map(({ classid, userid, traza }) => [
     userid,
     classid,
     JSON.stringify(traza)
