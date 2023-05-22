@@ -22,6 +22,7 @@ body#register-body {
 
 form#register {
     height: 620px;
+    overflow: auto; /* Add scrollbar */
 }
 
 form#register #href-button {

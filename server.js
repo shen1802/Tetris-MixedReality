@@ -1252,7 +1252,7 @@ app.post("/new", function (req, res) {
         function (error, result) {
           if (error) {
             console.log(error.message);
-            res.status(500).send("El username ya existe");
+            res.status(500).send("El username o el email ya existe");
           }
           else {
             //[Bycript] Ciframos la contraseña con un salt=10
