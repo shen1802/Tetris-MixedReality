@@ -13,6 +13,7 @@ form hr {
 /*register form*/
 body#register-body {
     margin-left: 0;
+    overflow: auto; /* Add scrollbar */
 }
 
 #register-body {
@@ -22,7 +23,6 @@ body#register-body {
 
 form#register {
     height: 620px;
-    overflow: auto; /* Add scrollbar */
 }
 
 form#register #href-button {

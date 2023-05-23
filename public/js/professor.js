@@ -227,7 +227,7 @@ $(document).ready(function () {
                 //Tratamiento de los datos
                 for (let i in response) {
                     const traza = JSON.parse(response[i].traza); // recuperamos la traza
-                    const display = Object.values(traza.verb.display); // obtenemos el valor de la ficha
+                    const display = Object.values(traza.verb.display); // obtenemos el verbo de la ficha
                     const ficha = Object.values(traza.object.definition.name);
                     if (type_user !== null && type_user !== '') {
                         const player_name = traza.actor.name;
@@ -309,6 +309,25 @@ $(document).ready(function () {
                                 }
                                 moves_array.push(figura);
                             }
+                            if (display[0] === "interacted") {
+                                const object = Object.values(traza.result);
+                                if (object[1] !== undefined) {
+                                    if (object[1].hasOwnProperty("https://www.tetris.com/figure/movement")) {
+                                        const move = object[1]["https://www.tetris.com/figure/movement"];
+                                        if (move !== "generated" && move !== "released") {
+                                            if (moves_array.some(item => Object.keys(item)[0] === move)) { // si lo encuentra
+                                                let figura = moves_array.find(objeto => Object.keys(objeto)[0] === move);
+                                                figura[move]++;
+                                            } else {
+                                                const figura = {
+                                                    [move]: 1
+                                                }
+                                                moves_array.push(figura);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     } else {
                         const player_name = traza.actor.name;
@@ -385,6 +404,25 @@ $(document).ready(function () {
                                 [ficha[0]]: 1
                             }
                             moves_array.push(figura);
+                        }
+                        if (display[0] === "interacted") {
+                            const object = Object.values(traza.result);
+                            if (object[1] !== undefined) {
+                                if (object[1].hasOwnProperty("https://www.tetris.com/figure/movement")) {
+                                    const move = object[1]["https://www.tetris.com/figure/movement"];
+                                    if (move !== "generated" && move !== "released") {
+                                        if (moves_array.some(item => Object.keys(item)[0] === move)) { // si lo encuentra
+                                            let figura = moves_array.find(objeto => Object.keys(objeto)[0] === move);
+                                            figura[move]++;
+                                        } else {
+                                            const figura = {
+                                                [move]: 1
+                                            }
+                                            moves_array.push(figura);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
 
