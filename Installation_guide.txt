@@ -1,0 +1,137 @@
+--------------------
+Environment Setup
+--------------------
+1) Have a Linux-based operating system with the latest version or properly updated. In this project, the latest version of Kali Linux virtual machine was used along with VM Ware Workstation 17 Pro.
+
+2) Check if the OS/VM has Bluetooth enabled or integrated. If you are using VM Ware Pro, you need to connect a Bluetooth dongle or use the Bluetooth of the device used to run this project. In both cases, you should select "VM -> removable devices -> the computer's Bluetooth adapter" and click "connect" to connect the host machine's Bluetooth to the VM. If it doesn't appear, it may be due to the PC's lack of compatibility with another OS using Bluetooth.
+
+3) Import or clone the GatewayBLE-MQTT project using the following link: https://github.com/wickedZone/GatewayBLE-MQTT
+
+4) Import or download the Tetris application project using the following link: https://github.com/HaohaoShen/Tetris-MixedReality
+
+-------------------------
+Arduino IDE Installation
+-------------------------
+Download and install the latest version of Arduino IDE to upload Arduino code to the Nicla Sense Me. If you are using a virtual machine, you can download this program on your regular operating system. As for the installation, you should have downloaded the files that Arduino IDE requires until it shows the main interface of the application.
+
+-------------------
+Board Preparation
+-------------------
+Access the GatewayBLE-MQTT/arduino/sensor_device/ directory to locate the code called "sensor_device.ino" and upload it to the board using Arduino IDE following these steps:
+
+1) Open the "sensor_device.ino" file mentioned above.
+
+2) Go to "Tools" and select "Board" and then "Board Manager". Search for Nicla Sense ME and install "Arduino Mbed OS Nicla Boards". Once installed, go to "Tools", "Board", "Arduino Mbed OS Nicla Boards", and select the Nicla Sense ME board.
+
+3) Connect the board to the computer using the USB cable, make sure the cable is capable of data transfer. Once connected, in the "Tools" tab, select the port where the Nicla Sense Me is located in the "Port" option.
+
+4) Download the necessary libraries for the code. In "Tools" and "Manage Libraries", download or update the Arduino_BHY2 and ArduinoBLE libraries.
+
+5) Go to "Sketch" and select "Upload" to upload the code.
+
+6) To know when the code upload is complete, pay attention to the board's LED. When it blinks, it indicates that the code has finished uploading. You can also check the output console (it may take a while to upload), which should display messages like the following:
+
+** Programming Started **
+** Programming Finished **
+Shutdown command invoked
+
+---------------------
+MQTT Code Execution
+---------------------
+1) Open a terminal and run "sudo apt-get update" and "sudo apt-get upgrade" or the equivalent for the Linux operating system you are using to update the system packages.
+
+2) Install the latest version of Python3.
+
+3) Install bluepy to make use of BLE technology. The following commands are for Debian systems, if your OS is a different type of Linux, use the analogous commands.
+$ sudo apt-get install python3-pip
+$ sudo apt-get install python-pip3 libglib2.0-dev
+$ pip3 install --upgrade pip
+$ pip3 install bluepy --no-binary :all:
+$ sudo apt-get install bluez
+
+* If running the above command shows the message "command not found", run:
+$ sudo apt install python-pip
+
+4) Install the library to use the MQTT protocol in Python using the following command:
+$ sudo pip3 install paho-mqtt
+
+5) Install Mosquitto:
+$ sudo apt-add-repository ppa:mosquitto-dev/mosquitto-ppa
+$ sudo apt-get update
+$ sudo apt-get install mosquitto
+$ sudo apt-get install mosquitto-clients
+
+6) Open a console and start Mosquitto by running the following command:
+$ mosquitto
+
+* If you encounter the following error:
+Opening ipv4 listen socket on port 1883.
+Error: Address already in use
+
+Opening ipv6 listen socket on port 1883.
+Error: Address already in use
+
+* Run the following commands:
+$ ps -ef | grep mosquitto
+$ sudo kill (process id)
+Now run the $ mosquitto command again.
+
+7) Run the MQTT code in the terminal. Access the /GatewayBLE-MQTT/python directory and execute the following command:
+$ sudo python2 MQTT_Bluetooth_gateway.py
+
+If, for some reason, it gives an error, make sure you have Bluetooth or the Bluez manager installed previously.
+
+--------------------------
+Tetris Game Installation
+--------------------------
+1) Import the project into a code editor like VSCode or through a Linux terminal, as well as the tetris.sql database (it's important to create a database called "tetris") in the MySQL database manager.
+
+2) Download the npm download manager:
+$ sudo apt install npm
+
+3) Run the following command within the Tetris-MixedReality project:
+$ npm install
+
+4) Download and install XAMPP from their website (give executable permissions to the installer).
+
+5) Run the following command to start the XAMPP server:
+$ sudo /opt/lampp/lampp start
+
+6) Import the included database in the project (by accessing localhost in any browser, creating a database named "tetris," and then importing the "tetris.sql" file into that database).
+
+7) Run the Tetris code using the following command:
+$ nodejs server.js
+
+8) Access the game through localhost:3000
+
+-----------------------
+Steps to Start a Game
+-----------------------
+The tetris.sql database has an admin user registered in the user table to start the game. The roles table contains the default roles defined in the system: student, professor, and admin.
+
+1) Log in as an administrator using "admin" for both the username and password fields. This should redirect you to the admin panel.
+
+2) In the admin panel, create a new educational institution in the "Add new educational institution" section.
+
+3) Add a new professor user by going to the "Add new user" section and filling in the fields, except for the class or study group (which the professor will add later).
+
+4) If everything goes well, the newly added user should appear in the users' table with an empty "Group" field and "Role" set as student. Change the role to professor and select "Update" to update it.
+
+5) Log out of the admin panel and log in as a professor using the username and password defined in step 3.
+
+6) Upon logging in, the admin panel should appear. The first step here is to create a new class, for example, "1st year," and add it. Then, go to the "Add new user" panel and edit the professor's group, selecting the group created earlier. In this section, you can also add a new user if desired.
+
+7) If a new student user has been added, log in with the new student account; otherwise, go to the registration window and register.
+
+8) Log in with the newly created account, and a new screen should appear, indicating that a new board is being searched if the synchronization process is ongoing. If the board appears directly, the synchronization process has finished.
+
+9) Select the board and click "Accept." This should take you to the final Tetris screen, where you can click "New game" to start a new game.
+
+10) To check the collected statistics, log out of the user account and log back in as a professor.
+
+11) Go to the "Stats" section and select the desired group, specific user, and the number of graphs to display.
+
+------------------------
+General Considerations
+------------------------
+You should run Tetris before running the Bluetooth connection manager (Gateway).
